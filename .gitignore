@@ -1,0 +1,12 @@
+# Project exclude paths
+/.gradle/
+/target/
+.apt_generated
+.project
+.settings
+.classpath
+.factorypath
+.idea
+*.iws
+*.iml
+*.ipr
