@@ -1,99 +1,51 @@
 package com.github.kshashov.telegram;
 
+import com.github.kshashov.telegram.api.MessageType;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import com.github.kshashov.telegram.api.MessageType;
+import lombok.Builder;
+import lombok.Getter;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 
 import java.util.*;
 
 /**
- * Описание метода обработки
+ * Utility class to handle path templates for the current bot controller
  */
-class RequestMappingInfo {
-
+@Builder
+public class RequestMappingInfo {
+    @Getter
+    private final PathMatcher pathMatcher = new AntPathMatcher();
+    @Getter
     private final Set<String> patterns;
-    private final PathMatcher pathMatcher;
+    @Getter
     private final Set<MessageType> messageTypes;
 
-    private RequestMappingInfo(Collection<String> patterns, Collection<MessageType> messageTypes) {
+    private RequestMappingInfo(Set<String> patterns, Set<MessageType> messageTypes) {
         this.patterns = Collections.unmodifiableSet(Sets.newLinkedHashSet(patterns));
-        this.pathMatcher = new AntPathMatcher();
         this.messageTypes = ImmutableSet.copyOf(messageTypes);
     }
 
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
-    public static final class Builder {
-        private String[] path;
-        private MessageType[] messageTypes;
-
-        private Builder() {
-        }
-
-        public Builder path(String... val) {
-            path = val;
-            return this;
-        }
-
-        public Builder messageType(MessageType... val) {
-            messageTypes = val;
-            return this;
-        }
-
-        public RequestMappingInfo build() {
-            return new RequestMappingInfo(asList(path), asList(messageTypes));
-        }
-    }
-
-    private static <T> List<T> asList(T... patterns) {
-        return (patterns != null ? Arrays.asList(patterns) : Collections.emptyList());
-    }
-
-    public RequestMappingInfo getMatchingCondition(String requestText) {
+    public List<String> getMatchingPatterns(String requestText) {
         if (this.patterns.isEmpty()) {
-            return this;
+            return new ArrayList<>();
         }
         if (requestText == null) {
             requestText = "";
         }
-        List<String> matches = getMatchingPatterns(requestText);
-
-        return matches.isEmpty() ? null : this;
+        return matchingPatterns(requestText);
     }
 
-    public List<String> getMatchingPatterns(String lookupPath) {
+    private List<String> matchingPatterns(String lookupPath) {
         List<String> matches = new ArrayList<>();
         for (String pattern : this.patterns) {
-            String match = getMatchingPattern(pattern, lookupPath);
-            if (match != null) {
-                matches.add(match);
+            if (this.pathMatcher.match(pattern, lookupPath)) {
+                matches.add(pattern);
             }
         }
         matches.sort(this.pathMatcher.getPatternComparator(lookupPath));
         return matches;
-    }
-
-    private String getMatchingPattern(String pattern, String lookupPath) {
-        if (this.pathMatcher.match(pattern, lookupPath)) {
-            return pattern;
-        }
-        return null;
-    }
-
-    public Set<String> getPatterns() {
-        return patterns;
-    }
-
-    public PathMatcher getPathMatcher() {
-        return pathMatcher;
-    }
-
-    public Set<MessageType> getMessageTypes() {
-        return messageTypes;
     }
 
     @Override

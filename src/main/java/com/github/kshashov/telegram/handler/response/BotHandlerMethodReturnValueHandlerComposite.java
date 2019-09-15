@@ -1,11 +1,16 @@
 package com.github.kshashov.telegram.handler.response;
 
+import com.github.kshashov.telegram.TelegramRequestResult;
 import com.github.kshashov.telegram.api.TelegramRequest;
 import org.springframework.core.MethodParameter;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Resolves method parameters by delegating to a list of registered {@link BotHandlerMethodReturnValueHandler}
+ * handlers.
+ */
 public class BotHandlerMethodReturnValueHandlerComposite implements BotHandlerMethodReturnValueHandler {
 
     private final List<BotHandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<>();
@@ -30,12 +35,12 @@ public class BotHandlerMethodReturnValueHandlerComposite implements BotHandlerMe
      * @throws IllegalStateException if no suitable {@link BotHandlerMethodReturnValueHandler} is found.
      */
     @Override
-    public void handleReturnValue(Object returnValue, MethodParameter returnType, TelegramRequest telegramRequest) throws Exception {
+    public TelegramRequestResult handleReturnValue(Object returnValue, MethodParameter returnType, TelegramRequest telegramRequest) throws Exception {
         BotHandlerMethodReturnValueHandler handler = selectHandler(returnValue, returnType);
         if (handler == null) {
             throw new IllegalArgumentException("Unknown return value type: " + returnType.getParameterType().getName());
         }
-        handler.handleReturnValue(returnValue, returnType, telegramRequest);
+        return handler.handleReturnValue(returnValue, returnType, telegramRequest);
     }
 
     private BotHandlerMethodReturnValueHandler selectHandler(Object value, MethodParameter returnType) {
@@ -49,8 +54,8 @@ public class BotHandlerMethodReturnValueHandlerComposite implements BotHandlerMe
 
     /**
      * Add the given {@link BotHandlerMethodReturnValueHandler}s.
-     * @param handlers Список ресолверов
-     * @return Композитный ресолвер
+     * @param handlers handlers to add
+     * @return this object
      */
     public BotHandlerMethodReturnValueHandlerComposite addHandlers(List<? extends BotHandlerMethodReturnValueHandler> handlers) {
         if (handlers != null) {

@@ -16,7 +16,9 @@ import org.springframework.web.method.HandlerMethod;
 
 import java.io.IOException;
 
-
+/**
+ * Dispatcher which is used to finds the handler for the current telegram request and invokes it
+ */
 public class RequestDispatcher {
     private static final Logger logger = LoggerFactory.getLogger(RequestDispatcher.class);
 
@@ -36,14 +38,14 @@ public class RequestDispatcher {
     }
 
     /**
-     * Находит обработчик запроса пользователя и вызывает его, далее передает в телеграмм ответ обработчика
-     * @param update Запрос пользователя
-     * @param telegramBot какой бот принял запрос
+     * Finds the {@code HandlerMethod} request handler and invokes it, then sends the response to the telegram   
+     * @param update User request      
+     * @param telegramBot which bot accepted the request
      */
     @SuppressWarnings("unchecked")
     public void execute(Update update, TelegramBot telegramBot) {
         taskExecutor.execute(() -> {
-            TelegramRequest telegramRequest = new TelegramRequest(update, telegramBot);
+            TelegramRequest telegramRequest = new TelegramRequest(update);
 
             HandlerMethod handlerMethod = handlerMethodContainer.lookupHandlerMethod(telegramRequest);
             if (handlerMethod == null) {
@@ -51,35 +53,46 @@ public class RequestDispatcher {
                 return;
             }
 
-            TelegramScope.setIdThreadLocal(telegramRequest.chatId());
-            telegramRequest.setSession(telegramSession);
+            TelegramScope.setIdThreadLocal(getSessionIdForRequest(telegramRequest));
 
             BaseRequest baseRequest;
+            TelegramRequestResult requestResult;
             try {
-                baseRequest = handlerAdapter.handle(telegramRequest, handlerMethod);
+                requestResult = handlerAdapter.handle(handlerMethod, telegramRequest, telegramSession);
+                baseRequest = requestResult.getBaseRequest();
                 if (baseRequest != null) {
                     logger.debug("Request {}", baseRequest);
                     telegramBot.execute(baseRequest, new Callback<BaseRequest, BaseResponse>() {
                         @Override
                         public void onResponse(BaseRequest request, BaseResponse response) {
-                            telegramRequest.complete(response);
+                            requestResult.setBaseResponse(response);
                         }
 
                         @Override
                         public void onFailure(BaseRequest request, IOException e) {
-                            logger.error("Send request callback {}", telegramRequest.chatId(), e);
-                            telegramRequest.error(e);
+                            logger.error("Send request callback {}", telegramRequest.getChat().id(), e);
+                            requestResult.setError(e);
                         }
                     });
                     TelegramScope.removeId();
                 } else {
-                    telegramRequest.complete(null);
+                    requestResult.setBaseResponse(null);
                     logger.debug("handlerAdapter return null");
                 }
             } catch (Exception e) {
-                telegramRequest.error(e);
                 logger.info("Execute error handlerAdapter {}", handlerAdapter, e);
             }
         });
+    }
+
+    private Long getSessionIdForRequest(TelegramRequest telegramRequest) {
+        if (telegramRequest.getChat() != null) {
+            return telegramRequest.getChat().id();
+        } else if (telegramRequest.getUser() != null) {
+            return Long.valueOf(telegramRequest.getUser().id());
+        } else {
+            // We are sure that update object could not be null
+            return Long.valueOf(telegramRequest.getUpdate().updateId());
+        }
     }
 }

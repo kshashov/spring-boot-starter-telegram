@@ -1,7 +1,9 @@
 package com.github.kshashov.telegram;
 
-import com.github.kshashov.telegram.api.BotController;
-import com.github.kshashov.telegram.api.BotRequest;
+import com.github.kshashov.telegram.api.bind.annotation.BotController;
+import com.github.kshashov.telegram.api.bind.annotation.BotRequest;
+import com.github.kshashov.telegram.config.TelegramMvcController;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
@@ -11,6 +13,7 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -19,15 +22,15 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Бин пост процессор, ищет классы помеченные анотацией {@link BotController}, далее ищет анотацию  {@link BotRequest}
- * в методах и передает мета информацию в {@link HandlerMethodContainer}
+ * Searches for {@link TelegramMvcController} inheritors marked with {@link
+ * BotController} annotation, then searches for {@link BotRequest} annotations in methods and store the meta information
+ * into {@link HandlerMethodContainer}
  */
 public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, SmartInitializingSingleton {
     private static final Logger logger = LoggerFactory.getLogger(TelegramControllerBeanPostProcessor.class);
-    private HandlerMethodContainer botHandlerMethodContainer;
-
     private final Set<Class<?>> nonAnnotatedClasses =
             Collections.newSetFromMap(new ConcurrentHashMap<>(64));
+    final private HandlerMethodContainer botHandlerMethodContainer;
 
     public TelegramControllerBeanPostProcessor(HandlerMethodContainer botHandlerMethodContainer) {
         this.botHandlerMethodContainer = botHandlerMethodContainer;
@@ -39,6 +42,7 @@ public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, S
     }
 
     @Override
+    @Nullable
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         Class<?> targetClass = AopUtils.getTargetClass(bean);
         if (!nonAnnotatedClasses.contains(targetClass)) {
@@ -70,9 +74,9 @@ public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, S
                     if (requestMapping == null) return null;
 
                     return RequestMappingInfo
-                            .newBuilder()
-                            .path(requestMapping.path())
-                            .messageType(requestMapping.messageType())
+                            .builder()
+                            .messageTypes(Sets.newHashSet(requestMapping.type()))
+                            .patterns(Sets.newHashSet(requestMapping.path()))
                             .build();
 
                 });

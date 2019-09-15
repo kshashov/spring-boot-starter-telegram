@@ -1,57 +1,63 @@
 package com.github.kshashov.telegram;
 
-import com.google.common.collect.Lists;
 import com.github.kshashov.telegram.api.TelegramSession;
-import com.github.kshashov.telegram.config.*;
-import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentResolver;
-import com.github.kshashov.telegram.handler.response.BotHandlerMethodReturnValueHandler;
+import com.github.kshashov.telegram.config.TelegramBotProperty;
+import com.github.kshashov.telegram.config.TelegramConfigurationProperties;
+import com.github.kshashov.telegram.config.TelegramMvcController;
+import com.github.kshashov.telegram.config.TelegramScope;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import com.pengrad.telegrambot.TelegramBot;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ApplicationListener;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
-import org.springframework.context.annotation.ScopedProxyMode;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.annotation.*;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.support.ConversionServiceFactoryBean;
 import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.core.annotation.Order;
-import org.springframework.core.convert.ConversionService;
+import org.springframework.core.env.Environment;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Suppliers.memoize;
 
 /**
- * Конфигурирование бинов
+ * Main configuration for telegram mvc
  */
 @Configuration
-public class TelegramConfiguration implements BeanFactoryPostProcessor {
+@Import(MethodProcessorsConfiguration.class)
+@EnableConfigurationProperties(TelegramConfigurationProperties.class)
+public class TelegramConfiguration implements BeanFactoryPostProcessor, EnvironmentAware {
     private static final Logger logger = LoggerFactory.getLogger(TelegramConfiguration.class);
     private ConfigurableListableBeanFactory beanFactory;
+    private Environment environment;
 
     @Bean
-    RequestDispatcher requestDispatcher(ConversionService conversionService,
-                                        List<TelegramMvcConfiguration> telegramMvcConfigurations,
-                                        final Consumer<OkHttpClient.Builder> okHttpClientBuilderConsumer,
-                                        final TaskExecutor taskExecutor,
-                                        List<BotHandlerMethodArgumentResolver> resolvers,
-                                        List<BotHandlerMethodReturnValueHandler> handlers) {
-        Supplier<OkHttpClient> okHttpClientSupplier = () -> {
+    RequestDispatcher requestDispatcher(
+            final List<TelegramMvcController> telegramMvcControllers,
+            final Consumer<OkHttpClient.Builder> okHttpClientBuilderConsumer,
+            final TaskExecutor taskExecutor,
+            final List<TelegramBotProperty> botProperties,
+            final HandlerAdapter handlerAdapter) {
+
+        Supplier<OkHttpClient> defaultOkHttpClientSupplier = () -> {
             OkHttpClient.Builder builder = new OkHttpClient()
                     .newBuilder()
                     .dispatcher(new Dispatcher(new ExecutorServiceAdapter(taskExecutor)));
@@ -59,33 +65,26 @@ public class TelegramConfiguration implements BeanFactoryPostProcessor {
             return builder.build();
         };
 
-        RequestDispatcher requestDispatcher = new RequestDispatcher(handlerMethodContainer(), new HandlerAdapter(resolvers, handlers), taskExecutor);
-        registerTelegramBotService(requestDispatcher, telegramMvcConfigurations, okHttpClientSupplier);
+        RequestDispatcher requestDispatcher = new RequestDispatcher(handlerMethodContainer(), handlerAdapter, taskExecutor);
+        registerTelegramBotServices(requestDispatcher, telegramMvcControllers, botProperties, defaultOkHttpClientSupplier);
         return requestDispatcher;
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public TaskExecutor getTaskExecutor() {
+    TaskExecutor getTaskExecutor() {
         ThreadPoolTaskExecutor threadPoolTaskExecutor = new ThreadPoolTaskExecutor();
-        threadPoolTaskExecutor.setCorePoolSize(15);
-        threadPoolTaskExecutor.setMaxPoolSize(100);
+        threadPoolTaskExecutor.setCorePoolSize(environment.getProperty("telegram.bot.getCorePoolSize", Integer.class, 15));
+        threadPoolTaskExecutor.setMaxPoolSize(environment.getProperty("telegram.bot.getMaxPoolSize", Integer.class, 200));
         threadPoolTaskExecutor.initialize();
         return threadPoolTaskExecutor;
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public Consumer<OkHttpClient.Builder> getOkHttpClientSupplier() {
+    Consumer<OkHttpClient.Builder> getOkHttpClientSupplier() {
         return (builder) -> {
         };
-    }
-
-    @Bean
-    public ConversionService getConversionService() {
-        ConversionServiceFactoryBean bean = new ConversionServiceFactoryBean();
-        bean.afterPropertiesSet();
-        return bean.getObject();
     }
 
     @Bean
@@ -94,31 +93,35 @@ public class TelegramConfiguration implements BeanFactoryPostProcessor {
         return new TelegramSession();
     }
 
-    private void registerTelegramBotService(RequestDispatcher requestDispatcher, List<TelegramMvcConfiguration> telegramMvcConfigurations, Supplier<OkHttpClient> httpClientSupplier) {
-        TelegramBotProperties telegramBotProperties = getTelegramBotProperties(telegramMvcConfigurations);
-        if (!telegramBotProperties.iterator().hasNext()) {
-            logger.warn("Не найдено не одной настройки бота");
+    private void registerTelegramBotServices(RequestDispatcher requestDispatcher, List<TelegramMvcController> telegramMvcControllers, List<TelegramBotProperty> botProperties, Supplier<OkHttpClient> httpClientSupplier) {
+        List<TelegramBotProperty> mergedBotProperties = getTelegramBotProperties(telegramMvcControllers, botProperties);
+        if (!mergedBotProperties.iterator().hasNext()) {
+            logger.warn("No bot configurations found");
         } else {
-            for (TelegramBotProperty telegramBotProperty : telegramBotProperties) {
-                //Если не задан OkHttpClient создадим свой который будет юзать наш TaskExecutor
-                if (telegramBotProperty.getOkHttpClient() == null) {
-                    telegramBotProperty =
-                            TelegramBotProperty
-                                    .newBuilder(telegramBotProperty)
-                                    .okHttpClient(memoize(httpClientSupplier::get).get())
-                                    .build();
+            List<TelegramService> services = new ArrayList<>();
+            for (TelegramBotProperty property : mergedBotProperties) {
+
+                // If OkHttpClient is not set, create one that will use our TaskExecutor
+                if (property.getOkHttpClient() == null) {
+                    property = TelegramBotProperty
+                            .newBuilder(property)
+                            .okHttpClient(memoize(httpClientSupplier::get).get())
+                            .build();
                 }
 
-                TelegramBot telegramBot = createTelegramBot(telegramBotProperty);
+                TelegramBot telegramBot = createTelegramBot(property);
                 TelegramService telegramService = new TelegramService(telegramBot, requestDispatcher);
-                beanFactory.registerSingleton("telegramService" + telegramBotProperty.getAlias(), telegramService);
+                services.add(telegramService);
             }
+
+            beanFactory.registerSingleton("telegramServices", services);
+            runnerTelegramService(services);
         }
     }
 
     @Bean
     @Order()
-    ApplicationListener<ContextRefreshedEvent> runnerTelegramService(List<TelegramService> telegramServices) {
+    ApplicationListener<ContextRefreshedEvent> runnerTelegramService(@Qualifier("telegramServices") List<TelegramService> telegramServices) {
         return event -> {
             for (TelegramService telegramService : telegramServices) {
                 telegramService.start();
@@ -134,16 +137,32 @@ public class TelegramConfiguration implements BeanFactoryPostProcessor {
                 .build();
     }
 
-    private TelegramBotProperties getTelegramBotProperties(List<TelegramMvcConfiguration> telegramMvcConfigurations) {
-        TelegramBotProperties telegramBotProperties = new TelegramBotProperties();
-        ArrayList<TelegramMvcConfiguration> telegramMvcConfigurationsList = Lists.newArrayList(telegramMvcConfigurations);
+    private List<TelegramBotProperty> getTelegramBotProperties(List<TelegramMvcController> telegramMvcControllers, List<TelegramBotProperty> botProperties) {
+        List<TelegramMvcController> telegramMvcConfigurationsList = Lists.newArrayList(telegramMvcControllers);
         AnnotationAwareOrderComparator.sort(telegramMvcConfigurationsList);
-        for (TelegramMvcConfiguration telegramMvcConfiguration : telegramMvcConfigurationsList) {
-            TelegramBotBuilder telegramBotBuilder = new TelegramBotBuilder();
-            telegramMvcConfiguration.configuration(telegramBotBuilder);
-            telegramBotProperties.addAll(telegramBotBuilder.build());
+
+        List<String> tokens = telegramMvcControllers.stream()
+                .filter(c -> !Strings.isNullOrEmpty(c.getToken()))
+                .map(TelegramMvcController::getToken).distinct()
+                .collect(Collectors.toList());
+        Map<String, List<TelegramBotProperty>> propertiesByToken = botProperties.stream()
+                .filter(p -> !Strings.isNullOrEmpty(p.getToken()))
+                .collect(Collectors.groupingBy(TelegramBotProperty::getToken));
+
+        List<TelegramBotProperty> merged = new ArrayList<>();
+        for (String token : tokens) {
+            List<TelegramBotProperty> properties = propertiesByToken.get(token);
+
+            // Create new property if there is no any
+            // Get first in other case
+            TelegramBotProperty property = (properties == null || properties.isEmpty())
+                    ? TelegramBotProperty.builder().token(token).build()
+                    : properties.get(0);
+
+            merged.add(property);
         }
-        return telegramBotProperties;
+
+        return merged;
     }
 
     @Bean
@@ -156,10 +175,16 @@ public class TelegramConfiguration implements BeanFactoryPostProcessor {
         return new TelegramControllerBeanPostProcessor(handlerMethodContainer());
     }
 
-
     @Override
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
-        beanFactory.registerScope(TelegramScope.SCOPE, new TelegramScope(beanFactory, TimeUnit.HOURS.toMillis(1)));
+        beanFactory.registerScope(TelegramScope.SCOPE,
+                //new TelegramScope(beanFactory, environment.getProperty("telegram.bot.getSessionSeconds", Integer.class, 3600)));
+                new TelegramScope(beanFactory, environment.getProperty("telegram.bot.getSessionSeconds", Integer.class, 3600)));
+    }
+
+    @Override
+    public void setEnvironment(Environment environment) {
+        this.environment = environment;
     }
 }

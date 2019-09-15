@@ -8,6 +8,9 @@ import com.pengrad.telegrambot.request.GetUpdates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Service which is used to start {@link TelegramBot} and subscribe the {@link RequestDispatcher} to its updates
+ */
 public class TelegramService {
     private static final Logger logger = LoggerFactory.getLogger(TelegramService.class);
     private final TelegramBot telegramBot;

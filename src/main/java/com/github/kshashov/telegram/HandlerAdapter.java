@@ -1,17 +1,20 @@
 package com.github.kshashov.telegram;
 
 import com.github.kshashov.telegram.api.TelegramRequest;
+import com.github.kshashov.telegram.api.TelegramSession;
 import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentResolver;
 import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentResolverComposite;
 import com.github.kshashov.telegram.handler.response.BotHandlerMethodReturnValueHandler;
 import com.github.kshashov.telegram.handler.response.BotHandlerMethodReturnValueHandlerComposite;
-import com.pengrad.telegrambot.request.BaseRequest;
 import org.springframework.web.method.HandlerMethod;
 
 import java.util.List;
 
 /**
- * Вызывает обработчик запроса, подготавливает параметры метода для выполнения
+ * Invokes a request handler, prepares method parameters for execution, processes the result object
+ *
+ * @see BotHandlerMethodArgumentResolver
+ * @see BotHandlerMethodReturnValueHandler
  */
 public class HandlerAdapter {
 
@@ -24,18 +27,16 @@ public class HandlerAdapter {
     }
 
     /**
-     * Вызывает медот представленный в handlerMethod
+     * Invokes the method
      *
-     * @param telegramRequest описание сообщение
-     * @param handlerMethod   описание медода который нужно вызвать
-     * @return Возвращает ответ который нужно передать пользователь
-     * @throws Exception пробрасывает все ошибки
+     * @param handlerMethod  method to invoke
+     * @param telegramRequest the current telegram request
+     * @param telegramSession the current session   
+     * @return result of the method invocation
+     * @throws Exception in case of errors with the method invocation
      */
-    public BaseRequest handle(TelegramRequest telegramRequest, HandlerMethod handlerMethod) throws Exception {
-        TelegramInvocableHandlerMethod invocableMethod = new TelegramInvocableHandlerMethod(handlerMethod);
-        invocableMethod.setHandlerMethodArgumentResolvers(this.argumentResolvers);
-        invocableMethod.setHandlerMethodReturnValueHandlers(this.returnValueHandlers);
-        invocableMethod.invokeAndHandle(telegramRequest);
-        return telegramRequest.getBaseRequest();
+    public TelegramRequestResult handle(HandlerMethod handlerMethod, TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
+        TelegramInvocableHandlerMethod invocableMethod = new TelegramInvocableHandlerMethod(handlerMethod, this.argumentResolvers, this.returnValueHandlers);
+        return invocableMethod.invokeAndHandle(telegramRequest, telegramSession);
     }
 }

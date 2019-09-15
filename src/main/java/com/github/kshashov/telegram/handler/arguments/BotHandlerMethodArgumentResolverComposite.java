@@ -1,6 +1,7 @@
 package com.github.kshashov.telegram.handler.arguments;
 
 import com.github.kshashov.telegram.api.TelegramRequest;
+import com.github.kshashov.telegram.api.TelegramSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.MethodParameter;
@@ -11,8 +12,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Композитный ресолвер аргументов метода, ищет поддерживаемый и вызывает взято источник
- * {@link org.springframework.web.method.support.HandlerMethodArgumentResolverComposite}
+ * Resolves method parameters by delegating to a list of registered {@link BotHandlerMethodArgumentResolver} resolvers.
  */
 public class BotHandlerMethodArgumentResolverComposite implements BotHandlerMethodArgumentResolver {
 
@@ -24,8 +24,6 @@ public class BotHandlerMethodArgumentResolverComposite implements BotHandlerMeth
 
     /**
      * Add the given {@link BotHandlerMethodArgumentResolver}s.
-     * @param resolvers список ресолверов параметров
-     * @return Композитный ресолвер
      */
     public BotHandlerMethodArgumentResolverComposite addResolvers(List<? extends BotHandlerMethodArgumentResolver> resolvers) {
         if (resolvers != null) {
@@ -40,12 +38,12 @@ public class BotHandlerMethodArgumentResolverComposite implements BotHandlerMeth
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, TelegramRequest telegramRequest) throws Exception {
+    public Object resolveArgument(MethodParameter parameter, TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
         BotHandlerMethodArgumentResolver resolver = getArgumentResolver(parameter);
         if (resolver == null) {
             throw new IllegalArgumentException("Unknown parameter type [" + parameter.getParameterType().getName() + "]");
         }
-        return resolver.resolveArgument(parameter, telegramRequest);
+        return resolver.resolveArgument(parameter, telegramRequest, telegramSession);
     }
 
     /**

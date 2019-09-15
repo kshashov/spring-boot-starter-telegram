@@ -1,158 +1,140 @@
 package com.github.kshashov.telegram.api;
 
-import com.pengrad.telegrambot.TelegramBot;
+import com.github.kshashov.telegram.api.bind.annotation.BotRequest;
 import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.request.BaseRequest;
-import com.pengrad.telegrambot.response.BaseResponse;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Map;
 
+/**
+ * Accumulates all available parameters from the initial request, the path pattern and path variables.
+ *
+ * @see BaseRequest
+ */
+@Getter
 public class TelegramRequest {
     /**
-     * Оригинальный запрос пользователя
+     * The initial user request which is currently being processed.
      */
     private final Update update;
+
     /**
-     * Сообщение пользователя
+     * The first non-empty object, if any, among:
+     * <ul>
+     *     <li>telegram message</li>
+     *     <li>telegram edited message</li>
+     *     <li>telegram channel post</li>
+     *     <li>telegram edited channel post</li>
+     * </ul>
      */
     private final Message message;
+
     /**
-     * Идентификатор беседы
-     */
-    private final Long chatId;
-    /**
-     * Ссылка на сущьность Chat
+     * Сhat instance if it present in the current telegram request.
      */
     private final Chat chat;
-    /**
-     * Ссылка на сущьность User
-     */
 
-    private final User user;
     /**
-     * строка ввода пользователя
+     * User instance if it present in the current telegram request.
+     */
+    private final User user;
+
+    /**
+     * The first non-empty object, if any, among:
+     * <ul>
+     *     <li>{@code message.text()}</li>
+     *     <li>{@code update.inlineQuery.query()}</li>
+     *     <li>{@code update.chosenInlineResult.query()}</li>
+     *     <li>{@code update.callbackQuery.data()}</li>
+     *     <li>{@code update.shippingQuery.invoicePayload()</li>
+     *     <li>{@code update.preCheckoutQuery.invoicePayload()</li>
+     * </ul>
      */
     private final String text;
-    /**
-     * Сервис бота
-     */
-    private TelegramBot telegramBot;
 
     /**
-     * Сессия диалога
+     * Type of the current telegram request.
      */
-    private TelegramSession session;
-    /**
-     * Тип запроса
-     */
-    private MessageType messageType = MessageType.MESSAGE;
+    private MessageType messageType;
 
     /**
-     * переменные распарсенные из запроса
+     * All path variables parsed from the {@link #basePattern} field.
      */
+    @Setter
     private Map<String, String> templateVariables;
-    /**
-     * Паттрен для поиска запроса
-     */
-    private String basePattern;
-    /**
-     * Запрос который отправим в телеграмм
-     */
-    private BaseRequest baseRequest;
-    private BaseResponse baseResponse;
-    /**
-     * Ответ который ответил телеграмм
-     */
-    private boolean responseOk;
-    private String responseText;
 
-    public TelegramRequest(Update update, TelegramBot telegramBot) {
+    /**
+     * A path pattern from {@link BotRequest} annotation that matches the current request.
+     */
+    @Setter
+    private String basePattern;
+
+    public TelegramRequest(Update update) {
         this.update = update;
         this.message = firstNonNull(update.message(),
                 update.editedMessage(),
                 update.channelPost(),
                 update.editedChannelPost());
 
-        this.telegramBot = telegramBot;
         if (message != null) {
             this.user = firstNonNull(message.from(), message.leftChatMember(), message.forwardFrom());
             this.chat = firstNonNull(message.chat(), message.forwardFromChat());
             this.text = message.text();
-            if (text != null && text.startsWith("/")) {
-                this.messageType = MessageType.COMMAND;
+            if (update.message() != null) {
+                this.messageType = MessageType.MESSAGE;
+            } else if (update.editedMessage() != null) {
+                this.messageType = MessageType.EDITED_MESSAGE;
+            } else if (update.channelPost() != null) {
+                this.messageType = MessageType.CHANNEL_POST;
+            } else if (update.editedChannelPost() != null) {
+                this.messageType = MessageType.EDITED_CHANNEL_POST;
             }
-        } else {
+        } else if (update.inlineQuery() != null) {
             InlineQuery inlineQuery = update.inlineQuery();
-            if (inlineQuery != null) {
-                this.user = inlineQuery.from();
-                this.text = inlineQuery.query();
-                this.chat = null;
-                this.messageType = MessageType.INLINE_QUERY;
-            } else {
-                this.chat = null;
-                ChosenInlineResult chosenInlineResult = update.chosenInlineResult();
-                if (chosenInlineResult != null) {
-                    this.user = chosenInlineResult.from();
-                    this.text = chosenInlineResult.query();
-                    this.messageType = MessageType.INLINE_CHOSEN;
-                } else {
-                    CallbackQuery callbackQuery = update.callbackQuery();
-                    if (callbackQuery != null) {
-                        this.user = callbackQuery.from();
-                        this.text = callbackQuery.data();
-                        this.messageType = MessageType.INLINE_CALLBACK;
-                    } else {
-                        this.messageType = MessageType.MESSAGE;
-                        this.user = null;
-                        this.text = null;
-                    }
-                }
-            }
-        }
-        if (chat != null) {
-            chatId = chat.id();
-        } else if (user != null) {
-            chatId = Long.valueOf(user.id());
+            this.user = inlineQuery.from();
+            this.text = inlineQuery.query();
+            this.chat = null;
+            this.messageType = MessageType.INLINE_QUERY;
+        } else if (update.chosenInlineResult() != null) {
+            ChosenInlineResult chosenInlineResult = update.chosenInlineResult();
+            this.user = chosenInlineResult.from();
+            this.text = chosenInlineResult.query();
+            this.chat = null;
+            this.messageType = MessageType.CHOSEN_INLINE_RESULT;
+        } else if (update.callbackQuery() != null) {
+            CallbackQuery callbackQuery = update.callbackQuery();
+            this.user = callbackQuery.from();
+            this.text = callbackQuery.data();
+            this.chat = callbackQuery.message().chat();
+            this.messageType = MessageType.CALLBACK_QUERY;
+        } else if (update.shippingQuery() != null) {
+            ShippingQuery shippingQuery = update.shippingQuery();
+            this.user = shippingQuery.from();
+            this.text = shippingQuery.invoicePayload();
+            this.chat = null;
+            this.messageType = MessageType.SHIPPING_QUERY;
+        } else if (update.preCheckoutQuery() != null) {
+            PreCheckoutQuery preCheckoutQuery = update.preCheckoutQuery();
+            this.user = preCheckoutQuery.from();
+            this.text = preCheckoutQuery.invoicePayload();
+            this.chat = null;
+            this.messageType = MessageType.PRECHECKOUT_QUERY;
+        } else if (update.poll() != null) {
+            this.user = null;
+            this.text = null;
+            this.chat = null;
+            this.messageType = MessageType.POLL;
         } else {
-            chatId = Long.valueOf(update.updateId());
-        }
-
-    }
-
-    public void setBaseRequest(BaseRequest baseRequest) {
-        this.baseRequest = baseRequest;
-    }
-
-    public void setTemplateVariables(Map<String, String> templateVariables) {
-        this.templateVariables = templateVariables;
-    }
-
-    public void setBasePattern(String basePattern) {
-        this.basePattern = basePattern;
-    }
-
-    public void setSession(TelegramSession session) {
-        this.session = session;
-    }
-
-    public void complete(BaseResponse baseResponse) {
-        if (baseResponse != null) {
-            this.responseOk = baseResponse.isOk();
-            this.baseResponse = baseResponse;
-        } else {
-            this.responseOk = true;
+            this.user = null;
+            this.text = null;
+            this.chat = null;
+            this.messageType = MessageType.UNSUPPORTED;
         }
     }
 
-    public void error(Exception e) {
-        this.responseOk = false;
-        this.responseText = e.getMessage();
-    }
-
-    public long chatId() {
-        return chatId;
-    }
-
+    @SafeVarargs
     private static <T> T firstNonNull(T... messages) {
         for (T message : messages) {
             if (message != null) {
@@ -162,71 +144,10 @@ public class TelegramRequest {
         return null;
     }
 
-    public Update getUpdate() {
-        return update;
-    }
-
-    public Message getMessage() {
-        return message;
-    }
-
-    public Long getChatId() {
-        return chatId;
-    }
-
-    public Chat getChat() {
-        return chat;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public TelegramBot getTelegramBot() {
-        return telegramBot;
-    }
-
-    public TelegramSession getSession() {
-        return session;
-    }
-
-    public MessageType getMessageType() {
-        return messageType;
-    }
-
-    public Map<String, String> getTemplateVariables() {
-        return templateVariables;
-    }
-
-    public String getBasePattern() {
-        return basePattern;
-    }
-
-    public BaseRequest getBaseRequest() {
-        return baseRequest;
-    }
-
-    public BaseResponse getBaseResponse() {
-        return baseResponse;
-    }
-
-    public boolean isResponseOk() {
-        return responseOk;
-    }
-
-    public String getResponseText() {
-        return responseText;
-    }
-
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("TelegramRequest{");
-        sb.append("chatId=").append(chatId);
-        sb.append(", chat=").append(chat);
+        sb.append("chat=").append(chat);
         sb.append(", user=").append(user);
         sb.append(", text='").append(text).append('\'');
         sb.append(", messageType=").append(messageType);
