@@ -9,8 +9,8 @@ import java.lang.annotation.*;
 import static com.github.kshashov.telegram.api.MessageType.INLINE_QUERY;
 
 /**
- * Annotation for mapping inline query requests onto specific handler methods. Specifically, {@code @InlineQueryRequest}
- * is a composed annotation that acts as a shortcut for @BotRequest(method = RequestMethod.INLINE_QUERY).
+ * Annotation for mapping inline query requests onto specific handler methods. Specifically, {@link InlineQueryRequest}
+ * is a composed annotation that acts as a shortcut for {@code BotRequest(method = RequestMethod.INLINE_QUERY)}.
  *
  * @see BotRequest
  * @see MessageRequest

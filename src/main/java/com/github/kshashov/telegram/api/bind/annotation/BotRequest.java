@@ -11,8 +11,8 @@ import java.lang.annotation.*;
  * Annotation for mapping telegram requests onto methods in request-handling classes with flexible method signatures. In
  * most cases, it is preferred to use one of the telegram method specific variants {@link MessageRequest}, {@link
  * EditedMessageRequest}, {@link ChannelPostRequest}, {@link EditedChannelPostRequest}, {@link InlineQueryRequest},
- * {@link CallbackQueryRequest}, {@link ChosenInlineResultRequest}, {@link ShippingQueryRequest}, {@link
- * PreCheckoutQueryRequest}, {@link PollRequest}.</p>.
+ * {@link CallbackQueryRequest}, {@link ChosenInlineResultRequest}, {@link ShippingQueryRequest}, {@link PollRequest},
+ * {@link PreCheckoutQueryRequest}.
  *
  * <p><strong>Note:</strong> works only with methods in the class marked with {@link BotController} annotation</p>.
  * <p><strong>Note:</strong> if the telegram request matched with several patterns at once, the result pattern will be

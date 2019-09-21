@@ -211,6 +211,9 @@
                                 <id>attach-javadocs</id>
                             </execution>
                         </executions>
+                        <configuration>
+                            <additionalJOption>-Xdoclint:none</additionalJOption>
+                        </configuration>
                         <groupId>org.apache.maven.plugins</groupId>
                     </plugin>
                     <plugin>

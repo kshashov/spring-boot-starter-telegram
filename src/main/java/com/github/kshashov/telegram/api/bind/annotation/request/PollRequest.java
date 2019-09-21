@@ -9,8 +9,8 @@ import java.lang.annotation.*;
 import static com.github.kshashov.telegram.api.MessageType.POLL;
 
 /**
- * Annotation for mapping poll requests onto specific handler methods. Specifically, {@code @PollRequest} is a composed
- * annotation that acts as a shortcut for @BotRequest(method = RequestMethod.POLL).
+ * Annotation for mapping poll requests onto specific handler methods. Specifically, {@link PollRequest} is a composed
+ * annotation that acts as a shortcut for {@code BotRequest(method = RequestMethod.POLL)}.
  *
  * @see BotRequest
  * @see MessageRequest

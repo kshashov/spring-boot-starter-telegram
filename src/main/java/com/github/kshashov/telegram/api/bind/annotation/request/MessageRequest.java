@@ -9,8 +9,8 @@ import java.lang.annotation.*;
 import static com.github.kshashov.telegram.api.MessageType.MESSAGE;
 
 /**
- * Annotation for mapping message requests onto specific handler methods. Specifically, {@code @MessageRequest} is a
- * composed annotation that acts as a shortcut for @BotRequest(method = RequestMethod.MESSAGE).
+ * Annotation for mapping message requests onto specific handler methods. Specifically, {@link MessageRequest} is a
+ * composed annotation that acts as a shortcut for {@code BotRequest(method = RequestMethod.MESSAGE)}.
  *
  * @see BotRequest
  * @see EditedMessageRequest

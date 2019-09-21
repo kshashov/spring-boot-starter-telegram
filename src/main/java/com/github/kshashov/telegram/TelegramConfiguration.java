@@ -104,7 +104,10 @@ public class TelegramConfiguration implements BeanFactoryPostProcessor, Environm
                 // If OkHttpClient is not set, create one that will use our TaskExecutor
                 if (property.getOkHttpClient() == null) {
                     property = TelegramBotProperty
-                            .newBuilder(property)
+                            .builder()
+                            .token(property.getToken())
+                            .url(property.getUrl())
+                            .timeOutMillis(property.getTimeOutMillis())
                             .okHttpClient(memoize(httpClientSupplier::get).get())
                             .build();
                 }

@@ -9,8 +9,8 @@ import java.lang.annotation.*;
 import static com.github.kshashov.telegram.api.MessageType.CHANNEL_POST;
 
 /**
- * Annotation for mapping channel post requests onto specific handler methods. Specifically, {@code @ChannelPostRequest}
- * is a composed annotation that acts as a shortcut for {@code @BotRequest(method = RequestMethod.CHANNEL_POST)}.
+ * Annotation for mapping channel post requests onto specific handler methods. Specifically, {@link ChannelPostRequest}
+ * is a composed annotation that acts as a shortcut for {@code BotRequest(method = RequestMethod.CHANNEL_POST)}.
  *
  * @see BotRequest
  * @see MessageRequest

@@ -9,9 +9,9 @@ import java.lang.annotation.*;
 import static com.github.kshashov.telegram.api.MessageType.CHOSEN_INLINE_RESULT;
 
 /**
- * Annotation for mapping chosen inline result requests onto specific handler methods. Specifically, {@code
- * @ChosenInlineResultRequest} is a composed annotation that acts as a shortcut for @BotRequest(method =
- * RequestMethod.CHOSEN_INLINE_RESULT).
+ * Annotation for mapping chosen inline result requests onto specific handler methods. Specifically, {@link
+ * ChosenInlineResultRequest} is a composed annotation that acts as a shortcut for {@code BotRequest(method =
+ * RequestMethod.CHOSEN_INLINE_RESULT)}.
  *
  * @see BotRequest
  * @see MessageRequest

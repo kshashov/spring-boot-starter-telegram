@@ -1,6 +1,5 @@
 package com.github.kshashov.telegram.config;
 
-import com.github.kshashov.telegram.TelegramConfiguration;
 import com.github.kshashov.telegram.api.TelegramSession;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -19,14 +18,13 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Scope store all beans in the cache by chat id (or user id)
- * <p>The bean lifetime after the last call can be redefined using the property {@link
- * TelegramConfigurationProperties#getSessionSeconds()}</p>
+ * <p>The bean lifetime after the last call can be redefined using the property {@code
+ * TelegramConfigurationProperties.getSessionSeconds()}</p>
  *
  * <p><strong>Note: </strong> All {@link TelegramSession} instances have this scope by
  * default
  *
  * @see TelegramScopeException
- * @see TelegramConfiguration#postProcessBeanFactory(ConfigurableListableBeanFactory)
  */
 public class TelegramScope implements Scope {
     public static final String SCOPE = "telegramScope";

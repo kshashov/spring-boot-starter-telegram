@@ -9,9 +9,9 @@ import java.lang.annotation.*;
 import static com.github.kshashov.telegram.api.MessageType.PRECHECKOUT_QUERY;
 
 /**
- * Annotation for mapping pre checkout query requests onto specific handler methods. Specifically, {@code
- * @PreCheckoutQueryRequest} is a composed annotation that acts as a shortcut for @BotRequest(method =
- * RequestMethod.PRECHECKOUT_QUERY).
+ * Annotation for mapping pre checkout query requests onto specific handler methods. Specifically, {@link
+ * PreCheckoutQueryRequest} is a composed annotation that acts as a shortcut for {@code BotRequest(method =
+ * RequestMethod.PRECHECKOUT_QUERY)}.
  *
  * @see BotRequest
  * @see MessageRequest

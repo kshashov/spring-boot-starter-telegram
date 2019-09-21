@@ -9,9 +9,9 @@ import java.lang.annotation.*;
 import static com.github.kshashov.telegram.api.MessageType.SHIPPING_QUERY;
 
 /**
- * Annotation for mapping shipping query requests onto specific handler methods. Specifically, {@code
- * @ShippingQueryRequest} is a composed annotation that acts as a shortcut for @BotRequest(method =
- * RequestMethod.SHIPPING_QUERY).
+ * Annotation for mapping shipping query requests onto specific handler methods. Specifically, {@link
+ * ShippingQueryRequest} is a composed annotation that acts as a shortcut for {@code BotRequest(method =
+ * RequestMethod.SHIPPING_QUERY)}.
  *
  * @see BotRequest
  * @see MessageRequest

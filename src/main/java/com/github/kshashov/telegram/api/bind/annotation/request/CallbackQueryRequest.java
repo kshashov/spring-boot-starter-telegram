@@ -9,9 +9,9 @@ import java.lang.annotation.*;
 import static com.github.kshashov.telegram.api.MessageType.CALLBACK_QUERY;
 
 /**
- * Annotation for mapping callback query requests onto specific handler methods. Specifically, {@code
- * @CallbackQueryRequest} is a composed annotation that acts as a shortcut for @BotRequest(method =
- * RequestMethod.CALLBACK_QUERY).
+ * Annotation for mapping callback query requests onto specific handler methods. Specifically, {@link
+ * CallbackQueryRequest} is a composed annotation that acts as a shortcut for {@code BotRequest(method =
+ * RequestMethod.CALLBACK_QUERY)}.
  *
  * @see BotRequest
  * @see MessageRequest
