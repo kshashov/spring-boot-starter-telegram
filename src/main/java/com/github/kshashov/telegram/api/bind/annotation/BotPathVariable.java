@@ -19,7 +19,7 @@ import java.lang.annotation.*;
 public @interface BotPathVariable {
 
     /**
-     * Name of the template variable that should be bound to a method parameter
+     * @return Name of the template variable that should be bound to a method parameter.
      */
     String value() default "";
 }

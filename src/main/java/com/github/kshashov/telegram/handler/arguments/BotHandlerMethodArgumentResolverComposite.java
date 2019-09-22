@@ -24,6 +24,8 @@ public class BotHandlerMethodArgumentResolverComposite implements BotHandlerMeth
 
     /**
      * Add the given {@link BotHandlerMethodArgumentResolver}s.
+     * @param resolvers to add.
+     * @return current object instance
      */
     public BotHandlerMethodArgumentResolverComposite addResolvers(List<? extends BotHandlerMethodArgumentResolver> resolvers) {
         if (resolvers != null) {
@@ -48,6 +50,7 @@ public class BotHandlerMethodArgumentResolverComposite implements BotHandlerMeth
 
     /**
      * Find a registered {@link BotHandlerMethodArgumentResolver} that supports the given method parameter.
+     * @param parameter for which you need to find the argument resolver
      */
     private BotHandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
         BotHandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);

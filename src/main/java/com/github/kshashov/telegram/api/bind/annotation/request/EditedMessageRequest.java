@@ -32,12 +32,14 @@ public @interface EditedMessageRequest {
 
     /**
      * Alias for {@link BotRequest#value()}.
+     * @return Request mapping templates.
      */
     @AliasFor(annotation = BotRequest.class)
     String[] value() default {};
 
     /**
      * Alias for {@link BotRequest#path()}.
+     * @return Request mapping templates.
      */
     @AliasFor(annotation = BotRequest.class)
     String[] path() default {};

@@ -39,13 +39,14 @@ public @interface BotRequest {
      * The primary mapping expressed by this annotation.
      * <p>This is an alias for {@link #path}. For example
      * {@code @BotRequest("/foo")} is equivalent to {@code @BotRequest(path="/foo")}.
+     * @return Request mapping templates.
      */
     @AliasFor("path")
     String[] value() default {};
 
     /**
-     * The request mapping templates (e.g. "/foo"). Ant-style path patterns are also supported (e.g. "/foo *", "/foo
-     * {param:[0-9]}"). An empty pattern is matched for any request
+     * @return Request mapping templates (e.g. "/foo"). Ant-style path patterns are also supported (e.g. "/foo *", "/foo
+     * {param:[0-9]}"). An empty pattern is matched for any request.
      *
      * @see org.springframework.util.AntPathMatcher
      */
@@ -53,7 +54,7 @@ public @interface BotRequest {
     String[] path() default {};
 
     /**
-     * The telegram request types to map.
+     * @return Telegram request types to map.
      */
     MessageType[] type() default {MessageType.ANY};
 }
