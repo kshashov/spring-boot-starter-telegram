@@ -9,9 +9,9 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
     * [Maven](#Maven)
     * [Gradle](#Gradle)
     * [Jar](#Jar)
-* [Getting Started](#Getting-Started)
-* [@BotController](#@BotController)
-* [@BotRequest](#@BotRequest)
+* [Example](#Example)
+* [@BotController](#BotController)
+* [@BotRequest](#BotRequest)
     * [Request binding](#Request-binding)
     * [Supported arguments](#Supported-arguments)
     * [Supported return values](#Supported-return-values)
@@ -36,7 +36,7 @@ implementation 'com.github.kshashov:spring-boot-starter-telegram:0.15'
 ### Jar
 Check [releases page](https://github.com/kshashov/spring-boot-starter-telegram/releases)
 
-## Getting Started
+## Example
 The only thing you need to do after adding the dependency is to create a bot controller
 ```java
 @SpringBootApplication
@@ -73,11 +73,11 @@ public class MyBot implements TelegramMvcController {
 }
 ```
 The bot will be registered automatically on startup.
-## @BotController
+## BotController
 
 Telegram requests are handled by the controllers that implemented `TelegramMvcController` interface **and** are marked by the `@BotController` annotation.
 It is supposed to use in combination with annotated handler methods based on the `BotRequest` annotation.
-## @BotRequest
+## BotRequest
 ### Request binding
 There are two important parameters here:
 * `value` or `path`: The request mapping templates (e.g. `/foo`). Ant-style path patterns are supported (e.g. `/foo *`, `/foo param:[0-9]`). If the telegram request matched with several patterns at once, the result pattern will be selected randomly. Use `org.springframework.util.AntPathMatcher`. An empty pattern is matched for any request.
