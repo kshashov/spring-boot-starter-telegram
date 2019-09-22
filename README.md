@@ -5,20 +5,20 @@
 
 This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/java-telegram-bot-api/). It's like Spring MVC but for Telegram!
 
-* [Download](#-Download)
-    * [Maven](#-Maven)
-    * [Gradle](#-Gradle)
-    * [Jar](#-Jar)
-* [Getting Started](#-Getting-Started)
-* [@BotController](#-@BotController)
-* [@BotRequest](#-@BotRequest)
-    * [Request binding](#-Request-binding)
-    * [Supported arguments](#-Supported-arguments)
-    * [Supported return values](#-Supported-return-values)
-    * [How to support a new one](#-How-to-support-a-new-one)
-* [Configurations](#-Configurations)
-* [License](#-License)
-* [Thanks](#-Thanks)
+* [Download](#Download)
+    * [Maven](#Maven)
+    * [Gradle](#Gradle)
+    * [Jar](#Jar)
+* [Getting Started](#Getting-Started)
+* [@BotController](#@BotController)
+* [@BotRequest](#@BotRequest)
+    * [Request binding](#Request-binding)
+    * [Supported arguments](#Supported-arguments)
+    * [Supported return values](#Supported-return-values)
+    * [How to support a new one](#How-to-support-a-new-one)
+* [Configurations](#Configurations)
+* [License](#License)
+* [Thanks](#Thanks)
 
 ## Download
 ### Maven
@@ -95,14 +95,12 @@ Some parameters may be nullable because they do not exist for all types of teleg
 * `TelegramRequest` - entity that include all available parameters from the initial request, the path pattern and path variables
 * `TelegramSession` - current session for the current chat (if any) or user
 * (Nullable) `String`/`Integer`/`Long`/`Double`/`Float`/`BigInteger`/`BigDecimal` marked with `BotPathVariable` annotation - value of the template variable from the path pattern
-
-`com.pengrad.telegrambot.model.`
-* `Update` - the initial user request which is currently being processed
+* `com.pengrad.telegrambot.model.Update` - the initial user request which is currently being processed
 * (Nullable) `String` - the first non-empty object, if any, among `message.text()`, `inlineQuery.query()`, `chosenInlineResult.query()`, `callbackQuery.data()`, `shippingQuery.invoicePayload()`, `prepreCheckoutQuery.invoicePayload()`
-* (Nullable) `User`
-* (Nullable) `Chat`
-* (Nullable) `Message` - the first non-empty object, if any, among `update.message()`, `update.editedMessage()`, `update.channelPost()`, `update.editedChannelPost()`
-* (Nullable) `InlineQuery`, `ChosenInlineResult`, `CallbackQuery`, `ShippingQuery`, `PreCheckoutQuery`, `Poll`
+* (Nullable) `com.pengrad.telegrambot.model.User`
+* (Nullable) `com.pengrad.telegrambot.model.Chat`
+* (Nullable) `com.pengrad.telegrambot.model.Message` - the first non-empty object, if any, among `update.message()`, `update.editedMessage()`, `update.channelPost()`, `update.editedChannelPost()`
+* (Nullable) `com.pengrad.telegrambot.model.InlineQuery`, `com.pengrad.telegrambot.model.ChosenInlineResult`, `com.pengrad.telegrambot.model.CallbackQuery`, `com.pengrad.telegrambot.model.ShippingQuery`, `com.pengrad.telegrambot.model.PreCheckoutQuery`, `com.pengrad.telegrambot.model.Poll`
 
 ### Supported return values
 * `String` - automatically converted into `com.pengrad.telegrambot.request.SendMessage`. Use only if the chat value is not null for the current telegram request
