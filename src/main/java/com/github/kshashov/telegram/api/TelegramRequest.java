@@ -1,6 +1,7 @@
 package com.github.kshashov.telegram.api;
 
 import com.github.kshashov.telegram.api.bind.annotation.BotRequest;
+import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.request.BaseRequest;
 import lombok.Getter;
@@ -54,6 +55,8 @@ public class TelegramRequest {
      */
     private final String text;
 
+    private final TelegramBot telegramBot;
+
     /**
      * Type of the current telegram request.
      */
@@ -71,7 +74,8 @@ public class TelegramRequest {
     @Setter
     private String basePattern;
 
-    public TelegramRequest(Update update) {
+    public TelegramRequest(Update update, TelegramBot telegramBot) {
+        this.telegramBot = telegramBot;
         this.update = update;
         this.message = firstNonNull(update.message(),
                 update.editedMessage(),

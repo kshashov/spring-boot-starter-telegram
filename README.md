@@ -1,4 +1,6 @@
 # Spring Boot Starter for Telegram
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.kshashov/spring-boot-starter-telegram.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.kshashov%22%20AND%20a:%22spring-boot-starter-telegram%22)
+[![jitpack](https://jitpack.io/v/kshashov/spring-boot-starter-telegram.svg)](https://jitpack.io/#kshashov/spring-boot-starter-telegram)
 [![Build Status](https://travis-ci.org/kshashov/spring-boot-starter-telegram.svg?branch=master)](https://travis-ci.org/kshashov/spring-boot-starter-telegram)
 [![CircleCI](https://circleci.com/gh/kshashov/spring-boot-starter-telegram.svg?style=svg)](https://circleci.com/gh/kshashov/spring-boot-starter-telegram)
 [![codecov](https://codecov.io/gh/kshashov/spring-boot-starter-telegram/branch/master/graph/badge.svg)](https://codecov.io/gh/kshashov/spring-boot-starter-telegram)
@@ -26,12 +28,12 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
 <dependency>
   <groupId>com.github.kshashov</groupId>
   <artifactId>spring-boot-starter-telegram</artifactId>
-  <version>0.15</version>
+  <version>0.16</version>
 </dependency>
 ```
 ### Gradle
 ```groovy
-implementation 'com.github.kshashov:spring-boot-starter-telegram:0.15'
+implementation 'com.github.kshashov:spring-boot-starter-telegram:0.16'
 ```
 ### Jar
 Check [releases page](https://github.com/kshashov/spring-boot-starter-telegram/releases)
@@ -51,13 +53,11 @@ public class MyBot implements TelegramMvcController {
         return token;
     }
 
-    // Indicate what type of request you want to handle
     @BotRequest(value = "/click", type = {MessageType.CALLBACK_QUERY, MessageType.MESSAGE})
     public BaseRequest divide(User user, Chat chat) {
         return new SendMessage(chat.id(), "Hello, " + user.firstName() + "!");
     }
 
-    // Use useful arguments including variables from the request pattern 
     @MessageRequest(value = "/divide {first:[0-9]} {second:[0-9]}")
     public BaseRequest divide(
         @BotPathVariable("first") Integer first, 
@@ -94,17 +94,19 @@ If you want to handle only one type of telegram request, it is preferred to use 
 Some parameters may be nullable because they do not exist for all types of telegram requests
 * `TelegramRequest` - entity that include all available parameters from the initial request, the path pattern and path variables
 * `TelegramSession` - current session for the current chat (if any) or user
-* (Nullable) `String`/`Integer`/`Long`/`Double`/`Float`/`BigInteger`/`BigDecimal` marked with `BotPathVariable` annotation - value of the template variable from the path pattern
+* `com.pengrad.telegrambot.TelegramBot` - bot instance that received the request
+* **Nullable** `String`, `Integer`, `Long`, `Double`, `Float`, `BigInteger`, `BigDecimal` marked with `BotPathVariable` annotation - value of the template variable from the path pattern
 * `com.pengrad.telegrambot.model.Update` - the initial user request which is currently being processed
-* (Nullable) `String` - the first non-empty object, if any, among `message.text()`, `inlineQuery.query()`, `chosenInlineResult.query()`, `callbackQuery.data()`, `shippingQuery.invoicePayload()`, `prepreCheckoutQuery.invoicePayload()`
-* (Nullable) `com.pengrad.telegrambot.model.User`
-* (Nullable) `com.pengrad.telegrambot.model.Chat`
-* (Nullable) `com.pengrad.telegrambot.model.Message` - the first non-empty object, if any, among `update.message()`, `update.editedMessage()`, `update.channelPost()`, `update.editedChannelPost()`
-* (Nullable) `com.pengrad.telegrambot.model.InlineQuery`, `com.pengrad.telegrambot.model.ChosenInlineResult`, `com.pengrad.telegrambot.model.CallbackQuery`, `com.pengrad.telegrambot.model.ShippingQuery`, `com.pengrad.telegrambot.model.PreCheckoutQuery`, `com.pengrad.telegrambot.model.Poll`
+* **Nullable** `String` - the first non-empty object, if any, among `message.text()`, `inlineQuery.query()`, `chosenInlineResult.query()`, `callbackQuery.data()`, `shippingQuery.invoicePayload()`, `prepreCheckoutQuery.invoicePayload()`
+* **Nullable** `com.pengrad.telegrambot.model.User`
+* **Nullable** `com.pengrad.telegrambot.model.Chat`
+* **Nullable** `com.pengrad.telegrambot.model.Message` - the first non-empty object, if any, among `update.message()`, `update.editedMessage()`, `update.channelPost()`, `update.editedChannelPost()`
+* **Nullable** `com.pengrad.telegrambot.model.InlineQuery`, `com.pengrad.telegrambot.model.ChosenInlineResult`, `com.pengrad.telegrambot.model.CallbackQuery`, `com.pengrad.telegrambot.model.ShippingQuery`, `com.pengrad.telegrambot.model.PreCheckoutQuery`, `com.pengrad.telegrambot.model.Poll`
 
 ### Supported return values
 * `String` - automatically converted into `com.pengrad.telegrambot.request.SendMessage`. Use only if the chat value is not null for the current telegram request
 * `com.pengrad.telegrambot.request.BaseRequest`
+* `void`
 
 ### How to support a new one
 

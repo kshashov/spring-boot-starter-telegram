@@ -3,6 +3,7 @@ package com.github.kshashov.telegram.handler.arguments;
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.github.kshashov.telegram.api.TelegramSession;
 import com.github.kshashov.telegram.api.bind.annotation.BotPathVariable;
+import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.*;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ public class BotRequestMethodArgumentResolver implements BotHandlerMethodArgumen
 
         return TelegramRequest.class.isAssignableFrom(paramType) ||
                 TelegramSession.class.isAssignableFrom(paramType) ||
+                TelegramBot.class.isAssignableFrom(paramType) ||
                 String.class.isAssignableFrom(paramType) ||
                 Update.class.isAssignableFrom(paramType) ||
                 Message.class.isAssignableFrom(paramType) ||
@@ -40,7 +42,9 @@ public class BotRequestMethodArgumentResolver implements BotHandlerMethodArgumen
             return validateValue(paramType, telegramRequest);
         } else if (TelegramSession.class.isAssignableFrom(paramType)) {
             return validateValue(paramType, telegramSession);
-        } else if (Update.class.isAssignableFrom(paramType)) {
+        } else if (TelegramBot.class.isAssignableFrom(paramType)) {
+            return validateValue(paramType, telegramRequest.getTelegramBot());
+        }else if (Update.class.isAssignableFrom(paramType)) {
             return validateValue(paramType, telegramRequest.getUpdate());
         } else if (Message.class.isAssignableFrom(paramType)) {
             return validateValue(paramType, telegramRequest.getMessage());
@@ -55,9 +59,10 @@ public class BotRequestMethodArgumentResolver implements BotHandlerMethodArgumen
             if (update == null) {
                 return null;
             }
-
-            if (InlineQuery.class.isAssignableFrom(paramType)) {
+            if (CallbackQuery.class.isAssignableFrom(paramType)) {
                 return validateValue(paramType, update.callbackQuery());
+            } else if (InlineQuery.class.isAssignableFrom(paramType)) {
+                return validateValue(paramType, update.inlineQuery());
             } else if (ChosenInlineResult.class.isAssignableFrom(paramType)) {
                 return validateValue(paramType, update.chosenInlineResult());
             } else if (ShippingQuery.class.isAssignableFrom(paramType)) {

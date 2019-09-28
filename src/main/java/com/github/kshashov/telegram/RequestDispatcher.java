@@ -45,11 +45,11 @@ public class RequestDispatcher {
     @SuppressWarnings("unchecked")
     public void execute(Update update, TelegramBot telegramBot) {
         taskExecutor.execute(() -> {
-            TelegramRequest telegramRequest = new TelegramRequest(update);
+            TelegramRequest telegramRequest = new TelegramRequest(update, telegramBot);
 
             HandlerMethod handlerMethod = handlerMethodContainer.lookupHandlerMethod(telegramRequest);
             if (handlerMethod == null) {
-                logger.error("Not found controller for {} type {}", telegramRequest.getText(), telegramRequest.getMessageType());
+                logger.debug("Not found controller for {} type {}", telegramRequest.getText(), telegramRequest.getMessageType());
                 return;
             }
 
