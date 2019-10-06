@@ -6,6 +6,7 @@ import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentRe
 import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentResolverComposite;
 import com.github.kshashov.telegram.handler.response.BotHandlerMethodReturnValueHandler;
 import com.github.kshashov.telegram.handler.response.BotHandlerMethodReturnValueHandlerComposite;
+import com.pengrad.telegrambot.request.BaseRequest;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
@@ -16,10 +17,11 @@ import org.springframework.web.method.HandlerMethod;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+
 /**
  * Extension of {@link HandlerMethod} that invokes the underlying method with argument values resolved from the current
- * telegram request through a list of {@link BotHandlerMethodArgumentResolver}
- * and then resolves the return value with a list of {@link BotHandlerMethodReturnValueHandler}.
+ * telegram request through a list of {@link BotHandlerMethodArgumentResolver} and then resolves the return value with a
+ * list of {@link BotHandlerMethodReturnValueHandler}.
  */
 class TelegramInvocableHandlerMethod extends HandlerMethod {
 
@@ -36,14 +38,13 @@ class TelegramInvocableHandlerMethod extends HandlerMethod {
         this.returnValueHandlers = returnValueHandlers;
     }
 
-    public TelegramRequestResult invokeAndHandle(TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
+    public BaseRequest invokeAndHandle(TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
         Object returnValue = invokeForRequest(telegramRequest, telegramSession);
         if (returnValue == null) {
-            return new TelegramRequestResult();
+            return null;
         }
         try {
-            return this.returnValueHandlers.handleReturnValue(
-                    returnValue, getReturnValueType(returnValue), telegramRequest);
+            return this.returnValueHandlers.handleReturnValue(returnValue, getReturnValueType(returnValue), telegramRequest);
         } catch (Exception ex) {
             if (logger.isTraceEnabled()) {
                 logger.trace(getReturnValueHandlingErrorMessage("Error handling return value", returnValue), ex);
@@ -108,13 +109,11 @@ class TelegramInvocableHandlerMethod extends HandlerMethod {
                     if (logger.isDebugEnabled()) {
                         logger.debug(getArgumentResolutionErrorMessage("Failed to resolve", i), ex);
                     }
-                    throw ex;
                 }
             }
             if (args[i] == null) {
-                throw new IllegalStateException("Could not resolve method parameter at index " +
-                        parameter.getParameterIndex() + " in " + parameter.getMethod().toGenericString() +
-                        ": " + getArgumentResolutionErrorMessage("No suitable resolver for", i));
+                logger.error("Could not resolve method parameter at index " + parameter.getParameterIndex() +
+                        " in " + parameter.getMethod().toGenericString() + ": " + getArgumentResolutionErrorMessage("No suitable resolver for", i));
             }
         }
         return args;

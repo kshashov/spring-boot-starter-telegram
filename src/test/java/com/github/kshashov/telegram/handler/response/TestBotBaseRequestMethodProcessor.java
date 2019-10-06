@@ -1,8 +1,6 @@
-package com.telegram.kshashov.telegram.response;
+package com.github.kshashov.telegram.handler.response;
 
-import com.github.kshashov.telegram.TelegramRequestResult;
 import com.github.kshashov.telegram.api.TelegramRequest;
-import com.github.kshashov.telegram.handler.response.BotBaseRequestMethodProcessor;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +30,7 @@ public class TestBotBaseRequestMethodProcessor {
     }
 
     @Test
-    public void testSupportsReturnType() {
+    public void supportsReturnType() {
         assertFalse(processor.supportsReturnType(values[0]));
         assertFalse(processor.supportsReturnType(values[1]));
         assertFalse(processor.supportsReturnType(values[2]));
@@ -42,31 +40,21 @@ public class TestBotBaseRequestMethodProcessor {
     }
 
     @Test
-    public void testIllegalHandleReturnValue() {
-        assertThrows(IllegalStateException.class, () -> processor.handleReturnValue(5, values[4], telegramRequest));
-        assertThrows(IllegalStateException.class, () -> processor.handleReturnValue("", values[4], telegramRequest));
-        assertThrows(IllegalStateException.class, () -> processor.handleReturnValue("", values[4], telegramRequest));
+    public void handleReturnValue_IllegalValues_ReturnNull() {
+        assertNull(processor.handleReturnValue("", values[0], telegramRequest));
+        assertNull(processor.handleReturnValue(5, values[1], telegramRequest));
+        assertNull(processor.handleReturnValue(6, values[2], telegramRequest));
         verifyNoMoreInteractions(telegramRequest);
     }
 
     @Test
-    public void testUnsupportedHandleReturnValue() throws Exception {
-        assertNull(processor.handleReturnValue(5, values[0], telegramRequest).getBaseRequest());
-        assertNull(processor.handleReturnValue("", values[1], telegramRequest).getBaseRequest());
-        assertNull(processor.handleReturnValue("", values[2], telegramRequest).getBaseRequest());
-        verifyNoMoreInteractions(telegramRequest);
-    }
-
-    @Test
-    public void testHandleReturnValue() throws Exception {
-        assertDoesNotThrow(() -> processor.handleReturnValue(new SendMessage(12L, "text"), values[4], telegramRequest));
-        TelegramRequestResult result = processor.handleReturnValue(new SendMessage(12L, "text"), values[4], telegramRequest);
+    public void handleReturnValue_TestSendMessage() {
+        BaseRequest result = processor.handleReturnValue(new SendMessage(12L, "text"), values[4], telegramRequest);
 
         assertNotNull(result);
-        assertNotNull(result.getBaseRequest());
-        assertTrue(result.getBaseRequest() instanceof SendMessage);
+        assertTrue(result instanceof SendMessage);
 
-        SendMessage sendMessage = (SendMessage) result.getBaseRequest();
+        SendMessage sendMessage = (SendMessage) result;
         assertEquals(sendMessage.getParameters().get("chat_id"), 12L);
         assertEquals(sendMessage.getParameters().get("text"), "text");
         verifyNoMoreInteractions(telegramRequest);

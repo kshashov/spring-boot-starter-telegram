@@ -4,8 +4,7 @@ import com.github.kshashov.telegram.api.bind.annotation.BotController;
 import com.github.kshashov.telegram.api.bind.annotation.BotRequest;
 import com.github.kshashov.telegram.config.TelegramMvcController;
 import com.google.common.collect.Sets;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -26,8 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * BotController} annotation, then searches for {@link BotRequest} annotations in methods and store the meta information
  * into {@link HandlerMethodContainer}
  */
+@Slf4j
 public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, SmartInitializingSingleton {
-    private static final Logger logger = LoggerFactory.getLogger(TelegramControllerBeanPostProcessor.class);
     private final Set<Class<?>> nonAnnotatedClasses =
             Collections.newSetFromMap(new ConcurrentHashMap<>(64));
     final private HandlerMethodContainer botHandlerMethodContainer;
@@ -50,8 +49,8 @@ public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, S
                 Map<Method, RequestMappingInfo> annotatedMethods = findAnnotatedMethodsBotRequest(targetClass);
                 if (annotatedMethods.isEmpty()) {
                     nonAnnotatedClasses.add(targetClass);
-                    if (logger.isTraceEnabled()) {
-                        logger.trace("No @BotRequest annotations found on bean class: {}", bean.getClass());
+                    if (log.isTraceEnabled()) {
+                        log.trace("No @BotRequest annotations found on bean class: {}", bean.getClass());
                     }
                 } else {
                     // Non-empty set of methods

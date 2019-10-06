@@ -5,18 +5,18 @@ import com.github.kshashov.telegram.api.TelegramSession;
 import com.github.kshashov.telegram.api.bind.annotation.BotPathVariable;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
-import org.springframework.stereotype.Component;
 
-@Component
+@Slf4j
 public class BotRequestMethodArgumentResolver implements BotHandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        Class<?> paramType = parameter.getParameterType();
         if (parameter.hasParameterAnnotation(BotPathVariable.class)) {
             return false;
         }
 
+        Class<?> paramType = parameter.getParameterType();
         return TelegramRequest.class.isAssignableFrom(paramType) ||
                 TelegramSession.class.isAssignableFrom(paramType) ||
                 TelegramBot.class.isAssignableFrom(paramType) ||
@@ -78,8 +78,7 @@ public class BotRequestMethodArgumentResolver implements BotHandlerMethodArgumen
 
     private Object validateValue(Class<?> paramType, Object value) {
         if (value != null && !paramType.isInstance(value)) {
-            throw new IllegalStateException(
-                    "Current request is not of type [" + paramType.getName() + "]: " + value + "");
+            log.error("Current request is not of type [" + paramType.getName() + "]: " + value + "");
         }
 
         return value;

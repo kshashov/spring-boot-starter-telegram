@@ -1,7 +1,8 @@
 package com.github.kshashov.telegram.handler.response;
 
-import com.github.kshashov.telegram.TelegramRequestResult;
 import com.github.kshashov.telegram.api.TelegramRequest;
+import com.pengrad.telegrambot.request.BaseRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import java.util.List;
  * Resolves method parameters by delegating to a list of registered {@link BotHandlerMethodReturnValueHandler}
  * handlers.
  */
+@Slf4j
 public class BotHandlerMethodReturnValueHandlerComposite implements BotHandlerMethodReturnValueHandler {
 
     private final List<BotHandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<>();
@@ -22,6 +24,9 @@ public class BotHandlerMethodReturnValueHandlerComposite implements BotHandlerMe
 
     private BotHandlerMethodReturnValueHandler getReturnValueHandler(MethodParameter returnType) {
         for (BotHandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
+            if (log.isTraceEnabled()) {
+                log.trace("Testing if response resolver [" + handler + "] supports [" + returnType.getGenericParameterType() + "]");
+            }
             if (handler.supportsReturnType(returnType)) {
                 return handler;
             }
@@ -35,21 +40,13 @@ public class BotHandlerMethodReturnValueHandlerComposite implements BotHandlerMe
      * @throws IllegalStateException if no suitable {@link BotHandlerMethodReturnValueHandler} is found.
      */
     @Override
-    public TelegramRequestResult handleReturnValue(Object returnValue, MethodParameter returnType, TelegramRequest telegramRequest) throws Exception {
-        BotHandlerMethodReturnValueHandler handler = selectHandler(returnValue, returnType);
+    public BaseRequest handleReturnValue(Object returnValue, MethodParameter returnType, TelegramRequest telegramRequest) {
+        BotHandlerMethodReturnValueHandler handler = getReturnValueHandler(returnType);
         if (handler == null) {
-            throw new IllegalArgumentException("Unknown return value type: " + returnType.getParameterType().getName());
+            log.error("Unknown return value type: " + returnType.getParameterType().getName());
+            return null;
         }
         return handler.handleReturnValue(returnValue, returnType, telegramRequest);
-    }
-
-    private BotHandlerMethodReturnValueHandler selectHandler(Object value, MethodParameter returnType) {
-        for (BotHandlerMethodReturnValueHandler handler : this.returnValueHandlers) {
-            if (handler.supportsReturnType(returnType)) {
-                return handler;
-            }
-        }
-        return null;
     }
 
     /**

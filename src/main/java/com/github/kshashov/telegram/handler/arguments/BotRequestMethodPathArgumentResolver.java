@@ -3,8 +3,8 @@ package com.github.kshashov.telegram.handler.arguments;
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.github.kshashov.telegram.api.TelegramSession;
 import com.github.kshashov.telegram.api.bind.annotation.BotPathVariable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
-import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -12,7 +12,7 @@ import java.math.BigInteger;
 /**
  * Add support for {@link String} arguments marked by {@link BotPathVariable} annotation
  */
-@Component
+@Slf4j
 public class BotRequestMethodPathArgumentResolver implements BotHandlerMethodArgumentResolver {
 
     @Override
@@ -42,20 +42,24 @@ public class BotRequestMethodPathArgumentResolver implements BotHandlerMethodArg
             return null;
         }
 
-        if (String.class.isAssignableFrom(paramType)) {
-            return validateValue(paramType, value);
-        } else if (Integer.class.isAssignableFrom(paramType)) {
-            return validateValue(paramType, new Integer(value));
-        } else if (Long.class.isAssignableFrom(paramType)) {
-            return validateValue(paramType, new Long(value));
-        } else if (Double.class.isAssignableFrom(paramType)) {
-            return validateValue(paramType, new Double(value));
-        } else if (Float.class.isAssignableFrom(paramType)) {
-            return validateValue(paramType, new Float(value));
-        } else if (BigInteger.class.isAssignableFrom(paramType)) {
-            return validateValue(paramType, new BigInteger(value));
-        } else if (BigDecimal.class.isAssignableFrom(paramType)) {
-            return validateValue(paramType, new BigDecimal(value));
+        try {
+            if (String.class.isAssignableFrom(paramType)) {
+                return validateValue(paramType, value);
+            } else if (Integer.class.isAssignableFrom(paramType)) {
+                return validateValue(paramType, new Integer(value));
+            } else if (Long.class.isAssignableFrom(paramType)) {
+                return validateValue(paramType, new Long(value));
+            } else if (Double.class.isAssignableFrom(paramType)) {
+                return validateValue(paramType, new Double(value));
+            } else if (Float.class.isAssignableFrom(paramType)) {
+                return validateValue(paramType, new Float(value));
+            } else if (BigInteger.class.isAssignableFrom(paramType)) {
+                return validateValue(paramType, new BigInteger(value));
+            } else if (BigDecimal.class.isAssignableFrom(paramType)) {
+                return validateValue(paramType, new BigDecimal(value));
+            }
+        } catch (NumberFormatException ex) {
+
         }
 
         return null;
@@ -63,8 +67,8 @@ public class BotRequestMethodPathArgumentResolver implements BotHandlerMethodArg
 
     private Object validateValue(Class<?> paramType, Object value) {
         if (value != null && !paramType.isInstance(value)) {
-            throw new IllegalStateException(
-                    "Current request is not of type [" + paramType.getName() + "]: " + value + "");
+            log.error("Current request is not of type [" + paramType.getName() + "]: " + value + "");
+            return null;
         }
 
         return value;

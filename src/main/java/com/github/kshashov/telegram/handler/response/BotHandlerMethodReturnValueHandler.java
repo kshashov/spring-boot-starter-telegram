@@ -1,7 +1,7 @@
 package com.github.kshashov.telegram.handler.response;
 
-import com.github.kshashov.telegram.TelegramRequestResult;
 import com.github.kshashov.telegram.api.TelegramRequest;
+import com.pengrad.telegrambot.request.BaseRequest;
 import org.springframework.core.MethodParameter;
 
 /**
@@ -26,5 +26,5 @@ public interface BotHandlerMethodReturnValueHandler {
      * @return the resolved argument value, or {@code null} if not resolvable
      * @throws Exception in case of errors with the preparation of argument values
      */
-    TelegramRequestResult handleReturnValue(Object returnValue, MethodParameter returnType, TelegramRequest telegramRequest) throws Exception;
+    BaseRequest handleReturnValue(Object returnValue, MethodParameter returnType, TelegramRequest telegramRequest);
 }

@@ -4,8 +4,7 @@ import com.github.kshashov.telegram.api.TelegramSession;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.Scope;
@@ -26,9 +25,9 @@ import java.util.concurrent.TimeUnit;
  *
  * @see TelegramScopeException
  */
+@Slf4j
 public class TelegramScope implements Scope {
     public static final String SCOPE = "telegramScope";
-    private static final Logger logger = LoggerFactory.getLogger(TelegramScope.class);
     private static final ThreadLocal<Long> USER_THREAD_LOCAL = new ThreadLocal<>();
 
     private final ConfigurableListableBeanFactory beanFactory;
@@ -43,7 +42,7 @@ public class TelegramScope implements Scope {
                 .expireAfterAccess(expireSeconds, TimeUnit.SECONDS)
                 .removalListener(notification -> {
                     if (notification.wasEvicted()) {
-                        logger.debug("Evict session for key {}", notification.getKey());
+                        log.debug("Evict session for key {}", notification.getKey());
                         Map<String, Object> userScope = (Map<String, Object>) notification.getValue();
                         if (userScope != null) {
                             userScope.values().forEach(this::removeBean);
@@ -53,7 +52,7 @@ public class TelegramScope implements Scope {
                 .build(new CacheLoader<String, ConcurrentHashMap<String, Object>>() {
                     @Override
                     public ConcurrentHashMap<String, Object> load(@NonNull String key) throws Exception {
-                        logger.debug("Create session for key = {}", key);
+                        log.debug("Create session for key = {}", key);
                         return new ConcurrentHashMap<>();
                     }
                 });

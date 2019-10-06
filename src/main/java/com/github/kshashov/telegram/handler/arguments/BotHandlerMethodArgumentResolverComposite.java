@@ -2,8 +2,7 @@ package com.github.kshashov.telegram.handler.arguments;
 
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.github.kshashov.telegram.api.TelegramSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 
 import java.util.LinkedList;
@@ -14,9 +13,9 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Resolves method parameters by delegating to a list of registered {@link BotHandlerMethodArgumentResolver} resolvers.
  */
+@Slf4j
 public class BotHandlerMethodArgumentResolverComposite implements BotHandlerMethodArgumentResolver {
 
-    private static final Logger logger = LoggerFactory.getLogger(BotHandlerMethodArgumentResolverComposite.class);
     private final List<BotHandlerMethodArgumentResolver> argumentResolvers = new LinkedList<>();
 
     private final Map<MethodParameter, BotHandlerMethodArgumentResolver> argumentResolverCache =
@@ -24,6 +23,7 @@ public class BotHandlerMethodArgumentResolverComposite implements BotHandlerMeth
 
     /**
      * Add the given {@link BotHandlerMethodArgumentResolver}s.
+     *
      * @param resolvers to add.
      * @return current object instance
      */
@@ -40,24 +40,26 @@ public class BotHandlerMethodArgumentResolverComposite implements BotHandlerMeth
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter, TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
+    public Object resolveArgument(MethodParameter parameter, TelegramRequest telegramRequest, TelegramSession telegramSession) {
         BotHandlerMethodArgumentResolver resolver = getArgumentResolver(parameter);
         if (resolver == null) {
-            throw new IllegalArgumentException("Unknown parameter type [" + parameter.getParameterType().getName() + "]");
+            log.error("Unknown parameter type [" + parameter.getParameterType().getName() + "]");
+            return null;
         }
         return resolver.resolveArgument(parameter, telegramRequest, telegramSession);
     }
 
     /**
      * Find a registered {@link BotHandlerMethodArgumentResolver} that supports the given method parameter.
+     *
      * @param parameter for which you need to find the argument resolver
      */
     private BotHandlerMethodArgumentResolver getArgumentResolver(MethodParameter parameter) {
         BotHandlerMethodArgumentResolver result = this.argumentResolverCache.get(parameter);
         if (result == null) {
             for (BotHandlerMethodArgumentResolver methodArgumentResolver : this.argumentResolvers) {
-                if (logger.isTraceEnabled()) {
-                    logger.trace("Testing if argument resolver [" + methodArgumentResolver + "] supports [" +
+                if (log.isTraceEnabled()) {
+                    log.trace("Testing if argument resolver [" + methodArgumentResolver + "] supports [" +
                             parameter.getGenericParameterType() + "]");
                 }
                 if (methodArgumentResolver.supportsParameter(parameter)) {

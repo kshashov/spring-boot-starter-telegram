@@ -8,10 +8,9 @@ import com.github.kshashov.telegram.config.TelegramScope;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pengrad.telegrambot.TelegramBot;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.Dispatcher;
 import okhttp3.OkHttpClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
@@ -41,11 +40,11 @@ import static com.google.common.base.Suppliers.memoize;
 /**
  * Main configuration for telegram mvc
  */
+@Slf4j
 @Configuration
 @Import(MethodProcessorsConfiguration.class)
 @EnableConfigurationProperties(TelegramConfigurationProperties.class)
 public class TelegramConfiguration implements BeanFactoryPostProcessor, EnvironmentAware {
-    private static final Logger logger = LoggerFactory.getLogger(TelegramConfiguration.class);
     private ConfigurableListableBeanFactory beanFactory;
     private Environment environment;
 
@@ -96,7 +95,7 @@ public class TelegramConfiguration implements BeanFactoryPostProcessor, Environm
     private void registerTelegramBotServices(RequestDispatcher requestDispatcher, List<TelegramMvcController> telegramMvcControllers, List<TelegramBotProperty> botProperties, Supplier<OkHttpClient> httpClientSupplier) {
         List<TelegramBotProperty> mergedBotProperties = getTelegramBotProperties(telegramMvcControllers, botProperties);
         if (!mergedBotProperties.iterator().hasNext()) {
-            logger.warn("No bot configurations found");
+            log.warn("No bot configurations found");
         } else {
             List<TelegramService> services = new ArrayList<>();
             for (TelegramBotProperty property : mergedBotProperties) {
@@ -182,7 +181,6 @@ public class TelegramConfiguration implements BeanFactoryPostProcessor, Environm
     public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
         this.beanFactory = beanFactory;
         beanFactory.registerScope(TelegramScope.SCOPE,
-                //new TelegramScope(beanFactory, environment.getProperty("telegram.bot.getSessionSeconds", Integer.class, 3600)));
                 new TelegramScope(beanFactory, environment.getProperty("telegram.bot.getSessionSeconds", Integer.class, 3600)));
     }
 

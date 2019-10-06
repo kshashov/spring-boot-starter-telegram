@@ -1,16 +1,18 @@
 package com.github.kshashov.telegram.handler.response;
 
-import com.github.kshashov.telegram.TelegramRequestResult;
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.pengrad.telegrambot.request.BaseRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 
 /**
  * Add support for {@link BaseRequest} return type
  */
+@Slf4j
 @Component
 public class BotBaseRequestMethodProcessor implements BotHandlerMethodReturnValueHandler {
+
 
     @Override
     public boolean supportsReturnType(MethodParameter returnType) {
@@ -19,17 +21,16 @@ public class BotBaseRequestMethodProcessor implements BotHandlerMethodReturnValu
     }
 
     @Override
-    public TelegramRequestResult handleReturnValue(Object returnValue, MethodParameter returnType, TelegramRequest telegramRequest) throws Exception {
+    public BaseRequest handleReturnValue(Object returnValue, MethodParameter returnType, TelegramRequest telegramRequest) {
         Class<?> paramType = returnType.getParameterType();
-        TelegramRequestResult result = new TelegramRequestResult();
         if (BaseRequest.class.isAssignableFrom(paramType)) {
-            if (!paramType.isInstance(returnValue)) {
-                throw new IllegalStateException(
-                        "Current request is not of type [" + paramType.getName() + "]: " + telegramRequest);
+            if (paramType.isInstance(returnValue)) {
+                return (BaseRequest) returnValue;
+            } else {
+                log.error("Current request is not of type [" + paramType.getName() + "]: " + telegramRequest);
             }
-            result.setBaseRequest((BaseRequest) returnValue);
         }
 
-        return result;
+        return null;
     }
 }

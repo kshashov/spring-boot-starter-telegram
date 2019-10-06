@@ -29,5 +29,5 @@ public interface BotHandlerMethodArgumentResolver {
      * @return the resolved argument value, or {@code null} if not resolvable
      * @throws Exception in case of errors with the preparation of argument values
      */
-    Object resolveArgument(MethodParameter parameter, TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception;
+    Object resolveArgument(MethodParameter parameter, TelegramRequest telegramRequest, TelegramSession telegramSession);
 }

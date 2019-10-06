@@ -138,6 +138,11 @@
             <groupId>org.projectlombok</groupId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <artifactId>junit</artifactId>
+            <groupId>junit</groupId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <description>Spring-boot starter for telegram bots</description>
     <distributionManagement>

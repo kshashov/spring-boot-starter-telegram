@@ -6,6 +6,7 @@ import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentRe
 import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentResolverComposite;
 import com.github.kshashov.telegram.handler.response.BotHandlerMethodReturnValueHandler;
 import com.github.kshashov.telegram.handler.response.BotHandlerMethodReturnValueHandlerComposite;
+import com.pengrad.telegrambot.request.BaseRequest;
 import org.springframework.web.method.HandlerMethod;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class HandlerAdapter {
      * @return result of the method invocation
      * @throws Exception in case of errors with the method invocation
      */
-    public TelegramRequestResult handle(HandlerMethod handlerMethod, TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
+    public BaseRequest handle(HandlerMethod handlerMethod, TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
         TelegramInvocableHandlerMethod invocableMethod = new TelegramInvocableHandlerMethod(handlerMethod, this.argumentResolvers, this.returnValueHandlers);
         return invocableMethod.invokeAndHandle(telegramRequest, telegramSession);
     }
