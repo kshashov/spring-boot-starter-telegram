@@ -14,9 +14,11 @@ import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
 import org.springframework.web.method.HandlerMethod;
 
+import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Extension of {@link HandlerMethod} that invokes the underlying method with argument values resolved from the current
@@ -32,12 +34,10 @@ class TelegramInvocableHandlerMethod extends HandlerMethod {
     /**
      * Create an instance from a bean instance and a method.
      */
-    public TelegramInvocableHandlerMethod(HandlerMethod handlerMethod, ResolversContainer resolversContainer) {
+    public TelegramInvocableHandlerMethod(@NotNull HandlerMethod handlerMethod, @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers, @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers) {
         super(handlerMethod);
-        this.argumentResolvers = new BotHandlerMethodArgumentResolverComposite()
-                .addResolvers(resolversContainer.getArgumentResolvers());
-        this.returnValueHandlers = new BotHandlerMethodReturnValueHandlerComposite()
-                .addHandlers(resolversContainer.getReturnValueHandlers());
+        this.argumentResolvers = new BotHandlerMethodArgumentResolverComposite(argumentResolvers);
+        this.returnValueHandlers = new BotHandlerMethodReturnValueHandlerComposite(returnValueHandlers);
     }
 
     public BaseRequest invokeAndHandle(TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {

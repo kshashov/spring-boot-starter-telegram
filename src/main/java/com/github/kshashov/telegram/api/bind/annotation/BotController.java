@@ -1,7 +1,7 @@
 package com.github.kshashov.telegram.api.bind.annotation;
 
 
-import com.github.kshashov.telegram.config.TelegramBotProperty;
+import com.github.kshashov.telegram.config.TelegramBotProperties;
 import com.github.kshashov.telegram.config.TelegramControllerBeanPostProcessor;
 import com.github.kshashov.telegram.config.TelegramMvcController;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ import java.lang.annotation.*;
  * @see BotRequest
  * @see TelegramMvcController
  * @see TelegramControllerBeanPostProcessor
- * @see TelegramBotProperty
+ * @see TelegramBotProperties
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)

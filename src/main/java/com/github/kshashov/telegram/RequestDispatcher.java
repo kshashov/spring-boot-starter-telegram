@@ -2,6 +2,7 @@ package com.github.kshashov.telegram;
 
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.github.kshashov.telegram.api.TelegramSession;
+import com.github.kshashov.telegram.config.TelegramBotGlobalProperties;
 import com.github.kshashov.telegram.config.TelegramScope;
 import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.TelegramBot;
@@ -11,9 +12,9 @@ import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.method.HandlerMethod;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 /**
@@ -22,28 +23,25 @@ import java.io.IOException;
 @Slf4j
 public class RequestDispatcher {
     private final HandlerMethodContainer handlerMethodContainer;
-    private final ResolversContainer resolversContainer;
-    private final TaskExecutor taskExecutor;
+    private final TelegramBotGlobalProperties botGlobalProperties;
 
     @Autowired
     private ApplicationContext context;
 
-    public RequestDispatcher(HandlerMethodContainer handlerMethodContainer,
-                             ResolversContainer resolversContainer,
-                             TaskExecutor taskExecutor) {
+    public RequestDispatcher(@NotNull HandlerMethodContainer handlerMethodContainer, @NotNull TelegramBotGlobalProperties botGlobalProperties) {
         this.handlerMethodContainer = handlerMethodContainer;
-        this.resolversContainer = resolversContainer;
-        this.taskExecutor = taskExecutor;
+        this.botGlobalProperties = botGlobalProperties;
     }
 
     /**
      * Finds the {@code HandlerMethod} request handler and invokes it, then sends the response to the telegram   
-     * @param update User request      
+     *
+     * @param update      User request      
      * @param telegramBot which bot accepted the request
      */
     @SuppressWarnings("unchecked")
-    public void execute(Update update, TelegramBot telegramBot) {
-        taskExecutor.execute(() -> {
+    public void execute(@NotNull Update update, @NotNull TelegramBot telegramBot) {
+        botGlobalProperties.getTaskExecutor().execute(() -> {
             TelegramRequest telegramRequest = new TelegramRequest(update, telegramBot);
 
             HandlerMethod handlerMethod = handlerMethodContainer.lookupHandlerMethod(telegramRequest);
@@ -56,7 +54,7 @@ public class RequestDispatcher {
 
             TelegramRequestResult requestResult = new TelegramRequestResult();
             try {
-                BaseRequest baseRequest = new TelegramInvocableHandlerMethod(handlerMethod, resolversContainer)
+                BaseRequest baseRequest = new TelegramInvocableHandlerMethod(handlerMethod, botGlobalProperties.getArgumentResolvers(), botGlobalProperties.getReturnValueHandlers())
                         .invokeAndHandle(telegramRequest, context.getBean(TelegramSession.class));
                 requestResult.setBaseRequest(baseRequest);
                 if (baseRequest != null) {
@@ -78,7 +76,7 @@ public class RequestDispatcher {
                     log.warn("handlerAdapter return null");
                 }
             } catch (Exception e) {
-                log.error("Execute error handlerAdapter {}", resolversContainer, e);
+                log.error("Execute error", e);
             }
         });
     }

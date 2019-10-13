@@ -113,7 +113,7 @@ Some parameters may be nullable because they do not exist for all types of teleg
 If you want to add additional arguments or result values types for your controller methods, you should declare a new component:
 * `BotHandlerMethodArgumentResolver` to support an additional type of method argument 
 * `BotHandlerMethodReturnValueHandler` to support an additional type of method result
-* `ResolversContainer` to manually configure all enabled argument resolvers and result value handlers
+* `TelegramBotGlobalPropertiesConfiguration` to manually configure all enabled argument resolvers and result value handlers
 
 
 ## Configurations
@@ -126,16 +126,15 @@ By default, you can configure only these properties:
 | telegram.bot.session-seconds | Cache expiration time for the all beans inside session scope |
 
 If it isn’t enough, you can declare the following components with your implementations:
-* `org.springframework.core.task.TaskExecutor` to configure default TaskExecutor instance
-* `java.util.function.Consumer<okhttp3.OkHttpClient.Builder>` to configure default OkHttpClient instance
-* `TelegramBotProperty` to manage the bot specific settings:
+* `TelegramBotGlobalPropertiesConfiguration` to configure global setting
+* `TelegramBotProperties` to configure bot specific settings:
     ```java    
            @Bean
-           public TelegramBotProperty botProperty2() {
+           public TelegramBotProperties botProperty2() {
                // Do not forget about token!
                // Other fields are optional
                
-               return TelegramBotProperty
+               return TelegramBotProperties
                        .builder()
                        .token(token)
                        .okHttpClient(new OkHttpClient.Builder()

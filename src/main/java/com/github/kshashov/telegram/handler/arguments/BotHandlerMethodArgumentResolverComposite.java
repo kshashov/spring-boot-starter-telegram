@@ -5,6 +5,7 @@ import com.github.kshashov.telegram.api.TelegramSession;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 
+import javax.validation.constraints.NotNull;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -22,16 +23,12 @@ public class BotHandlerMethodArgumentResolverComposite implements BotHandlerMeth
             new ConcurrentHashMap<>(256);
 
     /**
-     * Add the given {@link BotHandlerMethodArgumentResolver}s.
+     * Create the given {@link BotHandlerMethodArgumentResolver}s.
      *
      * @param resolvers to add.
-     * @return current object instance
      */
-    public BotHandlerMethodArgumentResolverComposite addResolvers(List<? extends BotHandlerMethodArgumentResolver> resolvers) {
-        if (resolvers != null) {
-            this.argumentResolvers.addAll(resolvers);
-        }
-        return this;
+    public BotHandlerMethodArgumentResolverComposite(@NotNull List<BotHandlerMethodArgumentResolver> resolvers) {
+        argumentResolvers.addAll(resolvers);
     }
 
     @Override

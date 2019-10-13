@@ -23,9 +23,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Searches for {@link TelegramMvcController} inheritors marked with {@link
- * BotController} annotation, then searches for {@link BotRequest} annotations in methods and store the meta information
- * into {@link HandlerMethodContainer}
+ * Searches for {@link com.github.kshashov.telegram.config.TelegramMvcController} inheritors marked with {@link
+ * BotController} annotation, then searches for {@link com.github.kshashov.telegram.api.bind.annotation.BotRequest} annotations in methods and store the meta information
+ * into {@link com.github.kshashov.telegram.HandlerMethodContainer}
  */
 @Slf4j
 public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, SmartInitializingSingleton {

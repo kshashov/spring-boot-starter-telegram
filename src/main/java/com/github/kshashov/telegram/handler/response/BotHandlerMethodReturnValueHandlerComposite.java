@@ -5,6 +5,7 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 
+import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,15 @@ import java.util.List;
 public class BotHandlerMethodReturnValueHandlerComposite implements BotHandlerMethodReturnValueHandler {
 
     private final List<BotHandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<>();
+
+    /**
+     * Create with the given {@link BotHandlerMethodReturnValueHandler}s.
+     *
+     * @param handlers handlers to add
+     */
+    public BotHandlerMethodReturnValueHandlerComposite(@NotNull List<BotHandlerMethodReturnValueHandler> handlers) {
+        returnValueHandlers.addAll(handlers);
+    }
 
     @Override
     public boolean supportsReturnType(MethodParameter returnType) {
@@ -48,17 +58,4 @@ public class BotHandlerMethodReturnValueHandlerComposite implements BotHandlerMe
         }
         return handler.handleReturnValue(returnValue, returnType, telegramRequest);
     }
-
-    /**
-     * Add the given {@link BotHandlerMethodReturnValueHandler}s.
-     * @param handlers handlers to add
-     * @return this object
-     */
-    public BotHandlerMethodReturnValueHandlerComposite addHandlers(List<? extends BotHandlerMethodReturnValueHandler> handlers) {
-        if (handlers != null) {
-            this.returnValueHandlers.addAll(handlers);
-        }
-        return this;
-    }
-
 }
