@@ -79,6 +79,7 @@ public class BotRequestMethodArgumentResolver implements BotHandlerMethodArgumen
     private Object validateValue(Class<?> paramType, Object value) {
         if (value != null && !paramType.isInstance(value)) {
             log.error("Current request is not of type [" + paramType.getName() + "]: " + value + "");
+            return null;
         }
 
         return value;

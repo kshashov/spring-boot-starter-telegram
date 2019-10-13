@@ -1,5 +1,6 @@
-package com.github.kshashov.telegram;
+package com.github.kshashov.telegram.config;
 
+import com.github.kshashov.telegram.ResolversContainer;
 import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentResolver;
 import com.github.kshashov.telegram.handler.arguments.BotRequestMethodArgumentResolver;
 import com.github.kshashov.telegram.handler.arguments.BotRequestMethodPathArgumentResolver;
@@ -18,9 +19,9 @@ import java.util.List;
 public class MethodProcessorsConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
-    public HandlerAdapter handlerAdapter(List<BotHandlerMethodArgumentResolver> resolvers, List<BotHandlerMethodReturnValueHandler> handlers) {
-        return new HandlerAdapter(resolvers, handlers);
+    @ConditionalOnMissingBean(ResolversContainer.class)
+    public ResolversContainer resolversContainer(List<BotHandlerMethodArgumentResolver> resolvers, List<BotHandlerMethodReturnValueHandler> handlers) {
+        return new ResolversContainerImpl(resolvers, handlers);
     }
 
     @Bean
@@ -48,5 +49,24 @@ public class MethodProcessorsConfiguration {
         ConversionServiceFactoryBean bean = new ConversionServiceFactoryBean();
         bean.afterPropertiesSet();
         return bean.getObject();
+    }
+
+    static final class ResolversContainerImpl implements ResolversContainer {
+
+        private final List<BotHandlerMethodArgumentResolver> argumentResolvers;
+        private final List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
+
+        ResolversContainerImpl(List<BotHandlerMethodArgumentResolver> resolvers, List<BotHandlerMethodReturnValueHandler> handlers) {
+            this.argumentResolvers = resolvers;
+            this.returnValueHandlers = handlers;
+        }
+
+        public List<BotHandlerMethodArgumentResolver> getArgumentResolvers() {
+            return argumentResolvers;
+        }
+
+        public List<BotHandlerMethodReturnValueHandler> getReturnValueHandlers() {
+            return returnValueHandlers;
+        }
     }
 }

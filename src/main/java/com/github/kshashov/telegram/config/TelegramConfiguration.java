@@ -1,10 +1,10 @@
-package com.github.kshashov.telegram;
+package com.github.kshashov.telegram.config;
 
+import com.github.kshashov.telegram.HandlerMethodContainer;
+import com.github.kshashov.telegram.RequestDispatcher;
+import com.github.kshashov.telegram.ResolversContainer;
+import com.github.kshashov.telegram.TelegramService;
 import com.github.kshashov.telegram.api.TelegramSession;
-import com.github.kshashov.telegram.config.TelegramBotProperty;
-import com.github.kshashov.telegram.config.TelegramConfigurationProperties;
-import com.github.kshashov.telegram.config.TelegramMvcController;
-import com.github.kshashov.telegram.config.TelegramScope;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.pengrad.telegrambot.TelegramBot;
@@ -54,7 +54,7 @@ public class TelegramConfiguration implements BeanFactoryPostProcessor, Environm
             final Consumer<OkHttpClient.Builder> okHttpClientBuilderConsumer,
             final TaskExecutor taskExecutor,
             final List<TelegramBotProperty> botProperties,
-            final HandlerAdapter handlerAdapter) {
+            final ResolversContainer resolversContainer) {
 
         Supplier<OkHttpClient> defaultOkHttpClientSupplier = () -> {
             OkHttpClient.Builder builder = new OkHttpClient()
@@ -64,7 +64,7 @@ public class TelegramConfiguration implements BeanFactoryPostProcessor, Environm
             return builder.build();
         };
 
-        RequestDispatcher requestDispatcher = new RequestDispatcher(handlerMethodContainer(), handlerAdapter, taskExecutor);
+        RequestDispatcher requestDispatcher = new RequestDispatcher(handlerMethodContainer(), resolversContainer, taskExecutor);
         registerTelegramBotServices(requestDispatcher, telegramMvcControllers, botProperties, defaultOkHttpClientSupplier);
         return requestDispatcher;
     }

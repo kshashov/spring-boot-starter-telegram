@@ -1,8 +1,8 @@
 package com.github.kshashov.telegram.api.bind.annotation;
 
 
-import com.github.kshashov.telegram.TelegramControllerBeanPostProcessor;
 import com.github.kshashov.telegram.config.TelegramBotProperty;
+import com.github.kshashov.telegram.config.TelegramControllerBeanPostProcessor;
 import com.github.kshashov.telegram.config.TelegramMvcController;
 import org.springframework.stereotype.Component;
 

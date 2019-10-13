@@ -4,6 +4,9 @@ import com.github.kshashov.telegram.api.TelegramRequest;
 import com.github.kshashov.telegram.api.TelegramSession;
 import org.springframework.core.MethodParameter;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
+
 /**
  * The implementation of the interface should be able to handle the arguments of the method that processes the telegram
  * request.
@@ -17,7 +20,7 @@ public interface BotHandlerMethodArgumentResolver {
      * @return {@code true} if this resolver supports the supplied parameter;
      * {@code false} otherwise
      */
-    boolean supportsParameter(MethodParameter methodParameter);
+    boolean supportsParameter(@NotNull MethodParameter methodParameter);
 
     /**
      * Resolve the current method parameter Resolves a method parameter into an argument value from a given request.
@@ -27,7 +30,7 @@ public interface BotHandlerMethodArgumentResolver {
      * @param telegramRequest the current telegram request
      * @param telegramSession the current session   
      * @return the resolved argument value, or {@code null} if not resolvable
-     * @throws Exception in case of errors with the preparation of argument values
      */
-    Object resolveArgument(MethodParameter parameter, TelegramRequest telegramRequest, TelegramSession telegramSession);
+    @Nullable
+    Object resolveArgument(@NotNull MethodParameter parameter, @NotNull TelegramRequest telegramRequest, @NotNull TelegramSession telegramSession);
 }

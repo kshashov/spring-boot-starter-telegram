@@ -91,6 +91,11 @@ public class TestBotRequestMethodPathArgumentResolver {
     }
 
     @Test
+    public void resolveArgument_MissedAnnotation_ReturnNull() {
+        assertNull(processor.resolveArgument(values[1], telegramRequest, telegramSession));
+    }
+
+    @Test
     public void resolveArgument_MissedName_ReturnNull() {
         assertNull(processor.resolveArgument(values[3], telegramRequest, telegramSession));
     }

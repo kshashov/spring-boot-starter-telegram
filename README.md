@@ -113,7 +113,7 @@ Some parameters may be nullable because they do not exist for all types of teleg
 If you want to add additional arguments or result values types for your controller methods, you should declare a new component:
 * `BotHandlerMethodArgumentResolver` to support an additional type of method argument 
 * `BotHandlerMethodReturnValueHandler` to support an additional type of method result
-* `HandlerAdapter` to manually configure all enabled argument resolvers and result value handlers
+* `ResolversContainer` to manually configure all enabled argument resolvers and result value handlers
 
 
 ## Configurations
@@ -121,9 +121,9 @@ By default, you can configure only these properties:
 
 | property | description |
 | -------- | ----------- |
-| telegram.bot.corePoolSize | Core pool size for default pool executor |
-| telegram.bot.maxPoolSize | Max pool size for default pool executor |
-| telegram.bot.sessionSeconds | Cache expiration time for the all beans inside session scope |
+| telegram.bot.core-pool-size | Core pool size for default pool executor |
+| telegram.bot.max-pool-size | Max pool size for default pool executor |
+| telegram.bot.session-seconds | Cache expiration time for the all beans inside session scope |
 
 If it isn’t enough, you can declare the following components with your implementations:
 * `org.springframework.core.task.TaskExecutor` to configure default TaskExecutor instance

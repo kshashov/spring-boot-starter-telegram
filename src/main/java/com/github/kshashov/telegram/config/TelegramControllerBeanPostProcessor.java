@@ -1,10 +1,12 @@
-package com.github.kshashov.telegram;
+package com.github.kshashov.telegram.config;
 
+import com.github.kshashov.telegram.HandlerMethodContainer;
+import com.github.kshashov.telegram.RequestMappingInfo;
 import com.github.kshashov.telegram.api.bind.annotation.BotController;
 import com.github.kshashov.telegram.api.bind.annotation.BotRequest;
-import com.github.kshashov.telegram.config.TelegramMvcController;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -36,13 +38,13 @@ public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, S
     }
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(@NotNull Object bean, @NotNull String beanName) throws BeansException {
         return bean;
     }
 
     @Override
     @Nullable
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(@NotNull Object bean, @NotNull String beanName) throws BeansException {
         Class<?> targetClass = AopUtils.getTargetClass(bean);
         if (!nonAnnotatedClasses.contains(targetClass)) {
             if (AnnotationUtils.findAnnotation(targetClass, BotController.class) != null) {
@@ -72,12 +74,7 @@ public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, S
                     BotRequest requestMapping = AnnotatedElementUtils.findMergedAnnotation(method, BotRequest.class);
                     if (requestMapping == null) return null;
 
-                    return RequestMappingInfo
-                            .builder()
-                            .messageTypes(Sets.newHashSet(requestMapping.type()))
-                            .patterns(Sets.newHashSet(requestMapping.path()))
-                            .build();
-
+                    return new RequestMappingInfo(Sets.newHashSet(requestMapping.path()), Sets.newHashSet(requestMapping.type()));
                 });
     }
 

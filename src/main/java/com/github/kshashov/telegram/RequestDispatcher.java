@@ -10,6 +10,7 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.web.method.HandlerMethod;
 
@@ -21,17 +22,17 @@ import java.io.IOException;
 @Slf4j
 public class RequestDispatcher {
     private final HandlerMethodContainer handlerMethodContainer;
-    private final HandlerAdapter handlerAdapter;
+    private final ResolversContainer resolversContainer;
     private final TaskExecutor taskExecutor;
 
     @Autowired
-    private TelegramSession telegramSession;
+    private ApplicationContext context;
 
     public RequestDispatcher(HandlerMethodContainer handlerMethodContainer,
-                             HandlerAdapter handlerAdapter,
+                             ResolversContainer resolversContainer,
                              TaskExecutor taskExecutor) {
         this.handlerMethodContainer = handlerMethodContainer;
-        this.handlerAdapter = handlerAdapter;
+        this.resolversContainer = resolversContainer;
         this.taskExecutor = taskExecutor;
     }
 
@@ -47,16 +48,16 @@ public class RequestDispatcher {
 
             HandlerMethod handlerMethod = handlerMethodContainer.lookupHandlerMethod(telegramRequest);
             if (handlerMethod == null) {
-                log.debug("Not found controller for {} type {}", telegramRequest.getText(), telegramRequest.getMessageType());
+                log.warn("Not found controller for {} type {}", telegramRequest.getText(), telegramRequest.getMessageType());
                 return;
             }
 
             TelegramScope.setIdThreadLocal(getSessionIdForRequest(telegramRequest));
 
-            BaseRequest baseRequest;
             TelegramRequestResult requestResult = new TelegramRequestResult();
             try {
-                baseRequest = handlerAdapter.handle(handlerMethod, telegramRequest, telegramSession);
+                BaseRequest baseRequest = new TelegramInvocableHandlerMethod(handlerMethod, resolversContainer)
+                        .invokeAndHandle(telegramRequest, context.getBean(TelegramSession.class));
                 requestResult.setBaseRequest(baseRequest);
                 if (baseRequest != null) {
                     log.debug("Request {}", baseRequest);
@@ -74,10 +75,10 @@ public class RequestDispatcher {
                     });
                     TelegramScope.removeId();
                 } else {
-                    log.debug("handlerAdapter return null");
+                    log.warn("handlerAdapter return null");
                 }
             } catch (Exception e) {
-                log.info("Execute error handlerAdapter {}", handlerAdapter, e);
+                log.error("Execute error handlerAdapter {}", resolversContainer, e);
             }
         });
     }

@@ -5,6 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.Scope;
@@ -36,7 +37,6 @@ public class TelegramScope implements Scope {
     @SuppressWarnings("unchecked")
     public TelegramScope(ConfigurableListableBeanFactory beanFactory, long expireSeconds) {
         this.beanFactory = beanFactory;
-        // По истечению 1 часа пользовательские бины удаляются
         conversations = CacheBuilder
                 .newBuilder()
                 .expireAfterAccess(expireSeconds, TimeUnit.SECONDS)
@@ -70,8 +70,9 @@ public class TelegramScope implements Scope {
         beanFactory.destroyBean(bean);
     }
 
+    @NotNull
     @Override
-    public Object get(String name, ObjectFactory<?> objectFactory) throws TelegramScopeException {
+    public Object get(@NotNull String name, @NotNull ObjectFactory<?> objectFactory) throws TelegramScopeException {
         final String sessionId = getConversationId();
         if (sessionId == null) {
             throw new TelegramScopeException("There is no current session");
@@ -86,7 +87,7 @@ public class TelegramScope implements Scope {
     }
 
     @Override
-    public Object remove(String name) {
+    public Object remove(@NotNull String name) {
         final String sessionId = getConversationId();
         if (sessionId != null) {
             final Map<String, Object> userBeans = conversations.getIfPresent(sessionId);

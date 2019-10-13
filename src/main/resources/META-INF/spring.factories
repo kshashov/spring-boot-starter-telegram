@@ -1,2 +1,2 @@
 # Auto Configure
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.github.kshashov.telegram.TelegramConfiguration
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=com.github.kshashov.telegram.config.TelegramConfiguration

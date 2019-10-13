@@ -32,10 +32,12 @@ class TelegramInvocableHandlerMethod extends HandlerMethod {
     /**
      * Create an instance from a bean instance and a method.
      */
-    public TelegramInvocableHandlerMethod(HandlerMethod handlerMethod, BotHandlerMethodArgumentResolverComposite argumentResolvers, BotHandlerMethodReturnValueHandlerComposite returnValueHandlers) {
+    public TelegramInvocableHandlerMethod(HandlerMethod handlerMethod, ResolversContainer resolversContainer) {
         super(handlerMethod);
-        this.argumentResolvers = argumentResolvers;
-        this.returnValueHandlers = returnValueHandlers;
+        this.argumentResolvers = new BotHandlerMethodArgumentResolverComposite()
+                .addResolvers(resolversContainer.getArgumentResolvers());
+        this.returnValueHandlers = new BotHandlerMethodReturnValueHandlerComposite()
+                .addHandlers(resolversContainer.getReturnValueHandlers());
     }
 
     public BaseRequest invokeAndHandle(TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
@@ -46,9 +48,6 @@ class TelegramInvocableHandlerMethod extends HandlerMethod {
         try {
             return this.returnValueHandlers.handleReturnValue(returnValue, getReturnValueType(returnValue), telegramRequest);
         } catch (Exception ex) {
-            if (logger.isTraceEnabled()) {
-                logger.trace(getReturnValueHandlingErrorMessage("Error handling return value", returnValue), ex);
-            }
             throw ex;
         }
     }
