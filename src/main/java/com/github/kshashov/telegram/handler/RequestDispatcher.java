@@ -1,9 +1,9 @@
-package com.github.kshashov.telegram;
+package com.github.kshashov.telegram.handler;
 
+import com.github.kshashov.telegram.TelegramScope;
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.github.kshashov.telegram.api.TelegramSession;
 import com.github.kshashov.telegram.config.TelegramBotGlobalProperties;
-import com.github.kshashov.telegram.config.TelegramScope;
 import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
@@ -39,7 +39,6 @@ public class RequestDispatcher {
      * @param update      User request      
      * @param telegramBot which bot accepted the request
      */
-    @SuppressWarnings("unchecked")
     public void execute(@NotNull Update update, @NotNull TelegramBot telegramBot) {
         botGlobalProperties.getTaskExecutor().execute(() -> {
             TelegramRequest telegramRequest = new TelegramRequest(update, telegramBot);
@@ -52,25 +51,12 @@ public class RequestDispatcher {
 
             TelegramScope.setIdThreadLocal(getSessionIdForRequest(telegramRequest));
 
-            TelegramRequestResult requestResult = new TelegramRequestResult();
             try {
                 BaseRequest baseRequest = new TelegramInvocableHandlerMethod(handlerMethod, botGlobalProperties.getArgumentResolvers(), botGlobalProperties.getReturnValueHandlers())
                         .invokeAndHandle(telegramRequest, context.getBean(TelegramSession.class));
-                requestResult.setBaseRequest(baseRequest);
                 if (baseRequest != null) {
                     log.debug("Request {}", baseRequest);
-                    telegramBot.execute(baseRequest, new Callback<BaseRequest, BaseResponse>() {
-                        @Override
-                        public void onResponse(BaseRequest request, BaseResponse response) {
-                            requestResult.setBaseResponse(response);
-                        }
-
-                        @Override
-                        public void onFailure(BaseRequest request, IOException e) {
-                            log.error("Send request callback {}", telegramRequest.getChat().id(), e);
-                            requestResult.setError(e);
-                        }
-                    });
+                    postExecute(baseRequest, telegramBot);
                     TelegramScope.removeId();
                 } else {
                     log.warn("handlerAdapter return null");
@@ -80,6 +66,24 @@ public class RequestDispatcher {
             }
         });
     }
+
+    @SuppressWarnings("unchecked")
+    private void postExecute(@NotNull BaseRequest baseRequest, @NotNull TelegramBot telegramBot) {
+        telegramBot.execute(baseRequest, new Callback<BaseRequest, BaseResponse>() {
+            @Override
+            public void onResponse(BaseRequest request, BaseResponse response) {
+                botGlobalProperties.getResponseCallback().onResponse(request, response);
+                log.debug("Request was successfully executed");
+            }
+
+            @Override
+            public void onFailure(BaseRequest request, IOException e) {
+                botGlobalProperties.getResponseCallback().onFailure(request, e);
+                log.error("Request was failed", e);
+            }
+        });
+    }
+
 
     private Long getSessionIdForRequest(TelegramRequest telegramRequest) {
         if (telegramRequest.getChat() != null) {

@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram.config;
+package com.github.kshashov.telegram;
 
 /**
  * Unchecked exception thrown when an attempt is made to get a bean from a nonexistent session.

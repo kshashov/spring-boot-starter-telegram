@@ -1,9 +1,10 @@
-package com.github.kshashov.telegram.config;
+package com.github.kshashov.telegram;
 
-import com.github.kshashov.telegram.HandlerMethodContainer;
-import com.github.kshashov.telegram.RequestMappingInfo;
+import com.github.kshashov.telegram.api.TelegramMvcController;
 import com.github.kshashov.telegram.api.bind.annotation.BotController;
 import com.github.kshashov.telegram.api.bind.annotation.BotRequest;
+import com.github.kshashov.telegram.handler.HandlerMethodContainer;
+import com.github.kshashov.telegram.handler.RequestMappingInfo;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
@@ -23,9 +24,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Searches for {@link com.github.kshashov.telegram.config.TelegramMvcController} inheritors marked with {@link
+ * Searches for {@link TelegramMvcController} inheritors marked with {@link
  * BotController} annotation, then searches for {@link com.github.kshashov.telegram.api.bind.annotation.BotRequest} annotations in methods and store the meta information
- * into {@link com.github.kshashov.telegram.HandlerMethodContainer}
+ * into {@link HandlerMethodContainer}
  */
 @Slf4j
 public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, SmartInitializingSingleton {

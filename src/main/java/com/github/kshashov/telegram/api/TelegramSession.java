@@ -1,6 +1,6 @@
 package com.github.kshashov.telegram.api;
 
-import com.github.kshashov.telegram.config.TelegramScope;
+import com.github.kshashov.telegram.TelegramScope;
 import lombok.Getter;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,6 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @see TelegramScope
  */
 public class TelegramSession {
-    @Getter
-    private ConcurrentHashMap<String, Object> attribute;
+    private @Getter
+    ConcurrentHashMap<String, Object> attribute;
 }

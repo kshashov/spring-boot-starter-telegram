@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram;
+package com.github.kshashov.telegram.handler;
 
 
 import com.pengrad.telegrambot.TelegramBot;

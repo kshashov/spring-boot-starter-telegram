@@ -65,14 +65,14 @@ public class TelegramRequest {
     /**
      * All path variables parsed from the {@link #basePattern} field.
      */
-    @Setter
-    private Map<String, String> templateVariables;
+    private @Setter
+    Map<String, String> templateVariables;
 
     /**
      * A path pattern from {@link BotRequest} annotation that matches the current request.
      */
-    @Setter
-    private String basePattern;
+    private @Setter
+    String basePattern;
 
     public TelegramRequest(Update update, TelegramBot telegramBot) {
         this.telegramBot = telegramBot;

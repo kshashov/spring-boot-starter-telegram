@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram.config;
+package com.github.kshashov.telegram;
 
 import com.github.kshashov.telegram.api.TelegramSession;
 import com.google.common.cache.CacheBuilder;

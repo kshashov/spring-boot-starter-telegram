@@ -1,5 +1,6 @@
-package com.github.kshashov.telegram.config;
+package com.github.kshashov.telegram.api;
 
+import com.github.kshashov.telegram.TelegramControllerBeanPostProcessor;
 import com.github.kshashov.telegram.api.bind.annotation.BotRequest;
 
 /**

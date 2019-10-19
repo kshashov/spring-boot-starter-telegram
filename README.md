@@ -54,17 +54,17 @@ public class MyBot implements TelegramMvcController {
     }
 
     @BotRequest(value = "/click", type = {MessageType.CALLBACK_QUERY, MessageType.MESSAGE})
-    public BaseRequest divide(User user, Chat chat) {
+    public BaseRequest hello(User user, Chat chat) {
         return new SendMessage(chat.id(), "Hello, " + user.firstName() + "!");
     }
 
     @MessageRequest(value = "/divide {first:[0-9]} {second:[0-9]}")
     public BaseRequest divide(
-        @BotPathVariable("first") Integer first, 
-        @BotPathVariable("second") Integer second
+        @BotPathVariable("first") Double first, 
+        @BotPathVariable("second") Double second
     ) {
         // Return a string if you need to reply with a simple message
-        return String.valueOf(first / ((double) second));
+        return String.valueOf(first / second);
     }
 
     public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram.config;
+package com.github.kshashov.telegram;
 
 import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentResolver;
 import com.github.kshashov.telegram.handler.arguments.BotRequestMethodArgumentResolver;

@@ -1,9 +1,9 @@
-package com.github.kshashov.telegram;
+package com.github.kshashov.telegram.handler;
 
 
+import com.github.kshashov.telegram.TelegramControllerBeanPostProcessor;
 import com.github.kshashov.telegram.api.MessageType;
 import com.github.kshashov.telegram.api.TelegramRequest;
-import com.github.kshashov.telegram.config.TelegramControllerBeanPostProcessor;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.PathMatcher;
 import org.springframework.web.method.HandlerMethod;

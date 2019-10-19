@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram.config;
+package com.github.kshashov.telegram;
 
 import lombok.Getter;
 import lombok.Setter;

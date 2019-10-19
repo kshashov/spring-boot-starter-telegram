@@ -2,6 +2,9 @@ package com.github.kshashov.telegram.config;
 
 import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentResolver;
 import com.github.kshashov.telegram.handler.response.BotHandlerMethodReturnValueHandler;
+import com.pengrad.telegrambot.Callback;
+import com.pengrad.telegrambot.request.BaseRequest;
+import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.core.task.TaskExecutor;
@@ -16,6 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 public class TelegramBotGlobalProperties {
     private @NotNull TaskExecutor taskExecutor;
+    private @NotNull Callback<BaseRequest, BaseResponse> responseCallback;
     private @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers;
     private @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
 
@@ -25,6 +29,7 @@ public class TelegramBotGlobalProperties {
 
     public static class Builder {
         private @NotNull TaskExecutor taskExecutor;
+        private @NotNull Callback<BaseRequest, BaseResponse> responseCallback;
         private @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers;
         private @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
 
@@ -33,6 +38,11 @@ public class TelegramBotGlobalProperties {
 
         public Builder taskExecutor(@NotNull TaskExecutor taskExecutor) {
             this.taskExecutor = taskExecutor;
+            return this;
+        }
+
+        public Builder responseCallback(@NotNull Callback<BaseRequest, BaseResponse> responseCallback) {
+            this.responseCallback = responseCallback;
             return this;
         }
 
@@ -47,7 +57,7 @@ public class TelegramBotGlobalProperties {
         }
 
         public TelegramBotGlobalProperties build() {
-            return new TelegramBotGlobalProperties(taskExecutor, argumentResolvers, returnValueHandlers);
+            return new TelegramBotGlobalProperties(taskExecutor, responseCallback, argumentResolvers, returnValueHandlers);
         }
     }
 }

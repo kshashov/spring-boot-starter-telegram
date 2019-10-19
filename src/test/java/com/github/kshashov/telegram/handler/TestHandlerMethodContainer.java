@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram;
+package com.github.kshashov.telegram.handler;
 
 import com.github.kshashov.telegram.api.MessageType;
 import com.github.kshashov.telegram.api.TelegramRequest;
