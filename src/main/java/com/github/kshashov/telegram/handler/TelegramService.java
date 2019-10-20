@@ -8,7 +8,7 @@ import com.pengrad.telegrambot.request.GetUpdates;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Service which is used to start {@link TelegramBot} and subscribe the {@link RequestDispatcher} to its updates
+ * Service used to process the telegram events with {@link RequestDispatcher} instance
  */
 @Slf4j
 public class TelegramService {
@@ -20,6 +20,9 @@ public class TelegramService {
         this.botRequestDispatcher = botRequestDispatcher;
     }
 
+    /**
+     * Subscribe on {@link TelegramBot} events instance and process them with {@link RequestDispatcher}.
+     */
     public void start() {
         telegramBot.setUpdatesListener(updates -> {
             for (Update update : updates) {

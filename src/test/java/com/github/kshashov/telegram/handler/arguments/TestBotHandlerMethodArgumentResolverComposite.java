@@ -18,7 +18,6 @@ import static org.mockito.Mockito.*;
 
 public class TestBotHandlerMethodArgumentResolverComposite {
 
-    private BotHandlerMethodArgumentResolverComposite processor;
     private MethodParameter[] values;
     private List<BotHandlerMethodArgumentResolver> resolvers = new ArrayList<>();
     private TelegramRequest telegramRequest;
@@ -36,13 +35,15 @@ public class TestBotHandlerMethodArgumentResolverComposite {
             resolvers.add(handler);
         }
 
-        this.processor = new BotHandlerMethodArgumentResolverComposite();
         this.telegramSession = mock(TelegramSession.class);
         this.telegramRequest = mock(TelegramRequest.class);
     }
 
     @Test
     public void supportsParameter_WithoutResolvers_ReturnFalse() {
+        BotHandlerMethodArgumentResolverComposite processor =
+                new BotHandlerMethodArgumentResolverComposite(new ArrayList<>());
+
         assertFalse(processor.supportsParameter(values[0]));
         assertFalse(processor.supportsParameter(values[1]));
         assertFalse(processor.supportsParameter(values[2]));
@@ -52,7 +53,9 @@ public class TestBotHandlerMethodArgumentResolverComposite {
 
     @Test
     public void supportsParameter_UnsupportedArguments_ReturnFalse() {
-        processor.addResolvers(resolvers);
+        BotHandlerMethodArgumentResolverComposite processor =
+                new BotHandlerMethodArgumentResolverComposite(resolvers);
+
         assertFalse(processor.supportsParameter(values[0]));
         assertFalse(processor.supportsParameter(values[1]));
         assertFalse(processor.supportsParameter(values[2]));
@@ -71,7 +74,9 @@ public class TestBotHandlerMethodArgumentResolverComposite {
         when(handler.supportsParameter(any(MethodParameter.class))).thenAnswer(any ->
                 SendMessage.class.isAssignableFrom(any.<MethodParameter>getArgument(0).getParameterType()));
         resolvers.add(4, handler);
-        this.processor.addResolvers(resolvers);
+
+        BotHandlerMethodArgumentResolverComposite processor =
+                new BotHandlerMethodArgumentResolverComposite(resolvers);
 
         assertTrue(processor.supportsParameter(values[4]));
 
@@ -89,12 +94,17 @@ public class TestBotHandlerMethodArgumentResolverComposite {
 
     @Test
     public void resolveArgument_WithoutResolvers_ReturnNull() {
+        BotHandlerMethodArgumentResolverComposite processor =
+                new BotHandlerMethodArgumentResolverComposite(new ArrayList<>());
+
         assertNull(processor.resolveArgument(values[4], telegramRequest, telegramSession));
     }
 
     @Test
     public void resolveArgument_UnsupportedArgument_ReturnNull() {
-        processor.addResolvers(resolvers);
+        BotHandlerMethodArgumentResolverComposite processor =
+                new BotHandlerMethodArgumentResolverComposite(resolvers);
+
         assertNull(processor.resolveArgument(values[4], telegramRequest, telegramSession));
     }
 
@@ -105,7 +115,9 @@ public class TestBotHandlerMethodArgumentResolverComposite {
         when(handler.resolveArgument(any(), any(), any())).thenReturn(new SendMessage(12L, "text"));
 
         resolvers.add(4, handler);
-        processor.addResolvers(resolvers);
+
+        BotHandlerMethodArgumentResolverComposite processor =
+                new BotHandlerMethodArgumentResolverComposite(resolvers);
 
         Object result = processor.resolveArgument(values[4], telegramRequest, telegramSession);
         assertNotNull(result);

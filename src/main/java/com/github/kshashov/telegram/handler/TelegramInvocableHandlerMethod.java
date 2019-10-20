@@ -42,14 +42,7 @@ class TelegramInvocableHandlerMethod extends HandlerMethod {
 
     public BaseRequest invokeAndHandle(TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
         Object returnValue = invokeForRequest(telegramRequest, telegramSession);
-        if (returnValue == null) {
-            return null;
-        }
-        try {
-            return this.returnValueHandlers.handleReturnValue(returnValue, getReturnValueType(returnValue), telegramRequest);
-        } catch (Exception ex) {
-            throw ex;
-        }
+        return returnValueHandlers.handleReturnValue(returnValue, getReturnValueType(returnValue), telegramRequest);
     }
 
     private Object invokeForRequest(TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {

@@ -2,10 +2,13 @@ package com.github.kshashov.telegram.api;
 
 import com.github.kshashov.telegram.api.bind.annotation.BotRequest;
 import com.pengrad.telegrambot.TelegramBot;
-import com.pengrad.telegrambot.model.*;
+import com.pengrad.telegrambot.model.Chat;
+import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.request.BaseRequest;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.util.Map;
 
@@ -15,11 +18,32 @@ import java.util.Map;
  * @see BaseRequest
  */
 @Getter
+@AllArgsConstructor
 public class TelegramRequest {
+    /**
+     * Bot instance that received the current telegram event
+     */
+    private final TelegramBot telegramBot;
+
     /**
      * The initial user request which is currently being processed.
      */
     private final Update update;
+
+    /**
+     * Type of the current telegram request.
+     */
+    private final MessageType messageType;
+
+    /**
+     * A path pattern from {@link BotRequest} annotation that matches the current request.
+     */
+    private final String basePattern;
+
+    /**
+     * All path variables parsed from the {@link #basePattern} field.
+     */
+    private final Map<String, String> templateVariables;
 
     /**
      * The first non-empty object, if any, among:
@@ -31,16 +55,6 @@ public class TelegramRequest {
      * </ul>
      */
     private final Message message;
-
-    /**
-     * Сhat instance if it present in the current telegram request.
-     */
-    private final Chat chat;
-
-    /**
-     * User instance if it present in the current telegram request.
-     */
-    private final User user;
 
     /**
      * The first non-empty object, if any, among:
@@ -55,98 +69,15 @@ public class TelegramRequest {
      */
     private final String text;
 
-    private final TelegramBot telegramBot;
+    /**
+     * Сhat instance if it present in the current telegram request.
+     */
+    private final Chat chat;
 
     /**
-     * Type of the current telegram request.
+     * User instance if it present in the current telegram request.
      */
-    private MessageType messageType;
-
-    /**
-     * All path variables parsed from the {@link #basePattern} field.
-     */
-    private @Setter
-    Map<String, String> templateVariables;
-
-    /**
-     * A path pattern from {@link BotRequest} annotation that matches the current request.
-     */
-    private @Setter
-    String basePattern;
-
-    public TelegramRequest(Update update, TelegramBot telegramBot) {
-        this.telegramBot = telegramBot;
-        this.update = update;
-        this.message = firstNonNull(update.message(),
-                update.editedMessage(),
-                update.channelPost(),
-                update.editedChannelPost());
-
-        if (message != null) {
-            this.user = firstNonNull(message.from(), message.leftChatMember(), message.forwardFrom());
-            this.chat = firstNonNull(message.chat(), message.forwardFromChat());
-            this.text = message.text();
-            if (update.message() != null) {
-                this.messageType = MessageType.MESSAGE;
-            } else if (update.editedMessage() != null) {
-                this.messageType = MessageType.EDITED_MESSAGE;
-            } else if (update.channelPost() != null) {
-                this.messageType = MessageType.CHANNEL_POST;
-            } else if (update.editedChannelPost() != null) {
-                this.messageType = MessageType.EDITED_CHANNEL_POST;
-            }
-        } else if (update.inlineQuery() != null) {
-            InlineQuery inlineQuery = update.inlineQuery();
-            this.user = inlineQuery.from();
-            this.text = inlineQuery.query();
-            this.chat = null;
-            this.messageType = MessageType.INLINE_QUERY;
-        } else if (update.chosenInlineResult() != null) {
-            ChosenInlineResult chosenInlineResult = update.chosenInlineResult();
-            this.user = chosenInlineResult.from();
-            this.text = chosenInlineResult.query();
-            this.chat = null;
-            this.messageType = MessageType.CHOSEN_INLINE_RESULT;
-        } else if (update.callbackQuery() != null) {
-            CallbackQuery callbackQuery = update.callbackQuery();
-            this.user = callbackQuery.from();
-            this.text = callbackQuery.data();
-            this.chat = callbackQuery.message().chat();
-            this.messageType = MessageType.CALLBACK_QUERY;
-        } else if (update.shippingQuery() != null) {
-            ShippingQuery shippingQuery = update.shippingQuery();
-            this.user = shippingQuery.from();
-            this.text = shippingQuery.invoicePayload();
-            this.chat = null;
-            this.messageType = MessageType.SHIPPING_QUERY;
-        } else if (update.preCheckoutQuery() != null) {
-            PreCheckoutQuery preCheckoutQuery = update.preCheckoutQuery();
-            this.user = preCheckoutQuery.from();
-            this.text = preCheckoutQuery.invoicePayload();
-            this.chat = null;
-            this.messageType = MessageType.PRECHECKOUT_QUERY;
-        } else if (update.poll() != null) {
-            this.user = null;
-            this.text = null;
-            this.chat = null;
-            this.messageType = MessageType.POLL;
-        } else {
-            this.user = null;
-            this.text = null;
-            this.chat = null;
-            this.messageType = MessageType.UNSUPPORTED;
-        }
-    }
-
-    @SafeVarargs
-    private static <T> T firstNonNull(T... messages) {
-        for (T message : messages) {
-            if (message != null) {
-                return message;
-            }
-        }
-        return null;
-    }
+    private final User user;
 
     @Override
     public String toString() {

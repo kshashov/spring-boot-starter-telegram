@@ -12,7 +12,6 @@ import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.method.HandlerMethod;
 
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
@@ -41,18 +40,19 @@ public class RequestDispatcher {
      */
     public void execute(@NotNull Update update, @NotNull TelegramBot telegramBot) {
         botGlobalProperties.getTaskExecutor().execute(() -> {
-            TelegramRequest telegramRequest = new TelegramRequest(update, telegramBot);
-
-            HandlerMethod handlerMethod = handlerMethodContainer.lookupHandlerMethod(telegramRequest);
-            if (handlerMethod == null) {
-                log.warn("Not found controller for {} type {}", telegramRequest.getText(), telegramRequest.getMessageType());
+            TelegramEvent event = new TelegramEvent(update, telegramBot);
+            HandlerMethodContainer.HandlerLookupResult lookupResult = handlerMethodContainer.lookupHandlerMethod(event);
+            if (lookupResult.getHandlerMethod() == null) {
+                log.warn("Not found controller for {} type {}", event.getText(), event.getMessageType());
                 return;
             }
 
-            TelegramScope.setIdThreadLocal(getSessionIdForRequest(telegramRequest));
+            TelegramScope.setIdThreadLocal(getSessionIdForRequest(event));
+            TelegramRequest telegramRequest = new TelegramRequest(
+                    event.getTelegramBot(), event.getUpdate(), event.getMessageType(), lookupResult.getBasePattern(), lookupResult.getTemplateVariables(), event.getMessage(), event.getText(), event.getChat(), event.getUser());
 
             try {
-                BaseRequest baseRequest = new TelegramInvocableHandlerMethod(handlerMethod, botGlobalProperties.getArgumentResolvers(), botGlobalProperties.getReturnValueHandlers())
+                BaseRequest baseRequest = new TelegramInvocableHandlerMethod(lookupResult.getHandlerMethod(), botGlobalProperties.getArgumentResolvers(), botGlobalProperties.getReturnValueHandlers())
                         .invokeAndHandle(telegramRequest, context.getBean(TelegramSession.class));
                 if (baseRequest != null) {
                     log.debug("Request {}", baseRequest);
@@ -84,15 +84,14 @@ public class RequestDispatcher {
         });
     }
 
-
-    private Long getSessionIdForRequest(TelegramRequest telegramRequest) {
-        if (telegramRequest.getChat() != null) {
-            return telegramRequest.getChat().id();
-        } else if (telegramRequest.getUser() != null) {
-            return Long.valueOf(telegramRequest.getUser().id());
+    private Long getSessionIdForRequest(TelegramEvent telegramEvent) {
+        if (telegramEvent.getChat() != null) {
+            return telegramEvent.getChat().id();
+        } else if (telegramEvent.getUser() != null) {
+            return Long.valueOf(telegramEvent.getUser().id());
         } else {
             // We are sure that update object could not be null
-            return Long.valueOf(telegramRequest.getUpdate().updateId());
+            return Long.valueOf(telegramEvent.getUpdate().updateId());
         }
     }
 }
