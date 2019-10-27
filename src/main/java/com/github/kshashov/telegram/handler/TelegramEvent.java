@@ -115,7 +115,7 @@ class TelegramEvent {
             this.messageType = MessageType.PRECHECKOUT_QUERY;
         } else if (update.poll() != null) {
             this.user = null;
-            this.text = null;
+            this.text = update.poll().question();
             this.chat = null;
             this.messageType = MessageType.POLL;
         } else {

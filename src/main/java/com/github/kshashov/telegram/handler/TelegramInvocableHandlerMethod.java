@@ -16,7 +16,6 @@ import org.springframework.web.method.HandlerMethod;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
@@ -25,127 +24,75 @@ import java.util.List;
  * telegram request through a list of {@link BotHandlerMethodArgumentResolver} and then resolves the return value with a
  * list of {@link BotHandlerMethodReturnValueHandler}.
  */
-class TelegramInvocableHandlerMethod extends HandlerMethod {
+public class TelegramInvocableHandlerMethod extends HandlerMethod {
 
-    final private ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-    final private BotHandlerMethodArgumentResolverComposite argumentResolvers;
-    final private BotHandlerMethodReturnValueHandlerComposite returnValueHandlers;
+    private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+    private final BotHandlerMethodArgumentResolverComposite argumentResolver;
+    private final BotHandlerMethodReturnValueHandlerComposite returnValueHandler;
 
     /**
-     * Create an instance from a bean instance and a method.
+     * Create an instance from a bean instance and a method
+     *
+     * @param handlerMethod method to invoke
+     * @param argumentResolvers resolvers list to resolve arguments
+     * @param returnValueHandlers handlers list to handle return value
      */
     public TelegramInvocableHandlerMethod(@NotNull HandlerMethod handlerMethod, @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers, @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers) {
         super(handlerMethod);
-        this.argumentResolvers = new BotHandlerMethodArgumentResolverComposite(argumentResolvers);
-        this.returnValueHandlers = new BotHandlerMethodReturnValueHandlerComposite(returnValueHandlers);
+        this.argumentResolver = new BotHandlerMethodArgumentResolverComposite(argumentResolvers);
+        this.returnValueHandler = new BotHandlerMethodReturnValueHandlerComposite(returnValueHandlers);
     }
 
     public BaseRequest invokeAndHandle(TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
-        Object returnValue = invokeForRequest(telegramRequest, telegramSession);
-        return returnValueHandlers.handleReturnValue(returnValue, getReturnValueType(returnValue), telegramRequest);
-    }
-
-    private Object invokeForRequest(TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
         Object[] args = getMethodArgumentValues(telegramRequest, telegramSession);
         if (logger.isTraceEnabled()) {
-            logger.trace("Invoking '" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) +
-                    "' with arguments " + Arrays.toString(args));
+            logger.trace("Invoking '" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) + "' with arguments " + Arrays.toString(args));
         }
         Object returnValue = doInvoke(args);
         if (logger.isTraceEnabled()) {
-            logger.trace("Method [" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) +
-                    "] returned [" + returnValue + "]");
+            logger.trace("Method [" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) + "] returned [" + returnValue + "]");
         }
-        return returnValue;
+        return returnValueHandler.handleReturnValue(returnValue, getReturnValueType(returnValue), telegramRequest);
     }
 
     private Object doInvoke(Object[] args) throws Exception {
         ReflectionUtils.makeAccessible(getBridgedMethod());
         try {
             return getBridgedMethod().invoke(getBean(), args);
-        } catch (IllegalArgumentException ex) {
-            assertTargetBean(getBridgedMethod(), getBean(), args);
-            String text = (ex.getMessage() != null ? ex.getMessage() : "Illegal argument");
-            throw new IllegalStateException(getInvocationErrorMessage(text, args), ex);
         } catch (InvocationTargetException ex) {
             // Unwrap for HandlerExceptionResolvers ...
             Throwable targetException = ex.getTargetException();
-            if (targetException instanceof RuntimeException) {
-                throw (RuntimeException) targetException;
-            } else if (targetException instanceof Error) {
-                throw (Error) targetException;
-            } else if (targetException instanceof Exception) {
-                throw (Exception) targetException;
-            } else {
-                String text = getInvocationErrorMessage("Failed to invoke handler method", args);
-                throw new IllegalStateException(text, targetException);
-            }
+            String text = getInvocationErrorMessage("Failed to invoke handler method", args);
+            throw new IllegalStateException(text, targetException);
+        } catch (Exception ex) {
+            String text = ex.getMessage() != null ? ex.getMessage() : "";
+            throw new IllegalStateException(getInvocationErrorMessage(text, args), ex);
         }
     }
 
-    private Object[] getMethodArgumentValues(TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
+    private Object[] getMethodArgumentValues(TelegramRequest telegramRequest, TelegramSession telegramSession) {
         MethodParameter[] parameters = getMethodParameters();
         Object[] args = new Object[parameters.length];
         for (int i = 0; i < parameters.length; i++) {
             MethodParameter parameter = parameters[i];
             parameter.initParameterNameDiscovery(this.parameterNameDiscoverer);
-            args[i] = resolveProvidedArgument(parameter);
-            if (args[i] != null) {
-                continue;
-            }
-            if (this.argumentResolvers.supportsParameter(parameter)) {
-                try {
-                    args[i] = this.argumentResolvers.resolveArgument(parameter, telegramRequest, telegramSession);
-                    continue;
-                } catch (Exception ex) {
-                    if (logger.isDebugEnabled()) {
-                        logger.debug(getArgumentResolutionErrorMessage("Failed to resolve", i), ex);
-                    }
-                }
-            }
-            if (args[i] == null) {
-                logger.error("Could not resolve method parameter at index " + parameter.getParameterIndex() +
-                        " in " + parameter.getMethod().toGenericString() + ": " + getArgumentResolutionErrorMessage("No suitable resolver for", i));
-            }
+            args[i] = this.argumentResolver.resolveArgument(parameter, telegramRequest, telegramSession);
         }
         return args;
     }
 
-    private String getArgumentResolutionErrorMessage(String text, int index) {
-        Class<?> paramType = getMethodParameters()[index].getParameterType();
-        return text + " argument " + index + " of type '" + paramType.getName() + "'";
-    }
-
-
     /**
-     * Attempt to resolve a method parameter from the list of provided argument values.
+     * Generate detailed information about method invocation
+     *
+     * @param text         initial exception message
+     * @param resolvedArgs input arguments for method invocation
+     * @return detailed information about method invocation
      */
-    private Object resolveProvidedArgument(MethodParameter parameter, Object... providedArgs) {
-        if (providedArgs == null) {
-            return null;
-        }
-        for (Object providedArg : providedArgs) {
-            if (parameter.getParameterType().isInstance(providedArg)) {
-                return providedArg;
-            }
-        }
-        return null;
-    }
-
-    protected void assertTargetBean(Method method, Object targetBean, Object[] args) {
-        Class<?> methodDeclaringClass = method.getDeclaringClass();
-        Class<?> targetBeanClass = targetBean.getClass();
-        if (!methodDeclaringClass.isAssignableFrom(targetBeanClass)) {
-            String text = "The mapped handler method class '" + methodDeclaringClass.getName() +
-                    "' is not an instance of the actual controller bean class '" +
-                    targetBeanClass.getName() + "'. If the controller requires proxying " +
-                    "(e.g. due to @Transactional), please use class-based proxying.";
-            throw new IllegalStateException(getInvocationErrorMessage(text, args));
-        }
-    }
-
     private String getInvocationErrorMessage(String text, Object[] resolvedArgs) {
-        StringBuilder sb = new StringBuilder(getDetailedErrorMessage(text));
+        StringBuilder sb = new StringBuilder(text).append("\n");
+        sb.append("HandlerMethod details: \n");
+        sb.append("Controller [").append(getBeanType().getName()).append("]\n");
+        sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
         sb.append("Resolved arguments: \n");
         for (int i = 0; i < resolvedArgs.length; i++) {
             sb.append("[").append(i).append("] ");
@@ -157,27 +104,5 @@ class TelegramInvocableHandlerMethod extends HandlerMethod {
             }
         }
         return sb.toString();
-    }
-
-    /**
-     * Adds HandlerMethod details such as the bean type and method signature to the message.
-     *
-     * @param text error message to append the HandlerMethod details to
-     */
-    protected String getDetailedErrorMessage(String text) {
-        StringBuilder sb = new StringBuilder(text).append("\n");
-        sb.append("HandlerMethod details: \n");
-        sb.append("Controller [").append(getBeanType().getName()).append("]\n");
-        sb.append("Method [").append(getBridgedMethod().toGenericString()).append("]\n");
-        return sb.toString();
-    }
-
-    private String getReturnValueHandlingErrorMessage(String message, Object returnValue) {
-        StringBuilder sb = new StringBuilder(message);
-        if (returnValue != null) {
-            sb.append(" [type=").append(returnValue.getClass().getName()).append("]");
-        }
-        sb.append(" [value=").append(returnValue).append("]");
-        return getDetailedErrorMessage(sb.toString());
     }
 }

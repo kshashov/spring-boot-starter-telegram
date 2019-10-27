@@ -31,11 +31,12 @@ public class BotResponseBodyMethodProcessor implements BotHandlerMethodReturnVal
         if (returnValue instanceof CharSequence) {
             outputValue = returnValue.toString();
         } else {
-            valueType = getReturnValueType(returnValue, returnType);
+            valueType = returnValue != null
+                    ? returnValue.getClass()
+                    : returnType.getParameterType();
+
             if (conversionService.canConvert(valueType, String.class)) {
                 outputValue = conversionService.convert(returnValue, String.class);
-            } else if (conversionService.canConvert(returnType.getParameterType(), String.class)) {
-                outputValue = conversionService.convert(returnType.getParameterType(), String.class);
             }
         }
 
@@ -47,9 +48,4 @@ public class BotResponseBodyMethodProcessor implements BotHandlerMethodReturnVal
 
         return null;
     }
-
-    private Class<?> getReturnValueType(Object value, MethodParameter returnType) {
-        return (value != null ? value.getClass() : returnType.getParameterType());
-    }
-
 }

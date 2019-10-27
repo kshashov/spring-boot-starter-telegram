@@ -1,5 +1,6 @@
 package com.github.kshashov.telegram.handler.response;
 
+import com.github.kshashov.telegram.TestUtils;
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.request.BaseRequest;
@@ -23,10 +24,10 @@ public class TestBotResponseBodyMethodProcessor {
     private ConversionService conversionService;
 
     @BeforeEach
-    public void prepare() throws NoSuchMethodException {
+    public void prepare() {
         this.conversionService = mock(ConversionService.class);
         this.processor = new BotResponseBodyMethodProcessor(conversionService);
-        this.values = Stream.of(this.getClass().getMethod("method", String.class, int.class, Integer.class, BaseRequest.class, SendMessage.class).getParameters())
+        this.values = Stream.of(TestUtils.findMethod(this, "method").getParameters())
                 .map(MethodParameter::forParameter)
                 .toArray(MethodParameter[]::new);
 
@@ -73,9 +74,10 @@ public class TestBotResponseBodyMethodProcessor {
         assertEquals(sendMessage.getParameters().get("text"), "text");
     }
 
+    @Test
     public void handleReturnValue_CanConvertToString_ReturnConverted() {
-        when(conversionService.canConvert(SendMessage.class, String.class)).thenReturn(true);
-        when(conversionService.convert(any(SendMessage.class), String.class)).thenReturn("converted");
+        when(conversionService.canConvert(eq(SendMessage.class), eq(String.class))).thenReturn(true);
+        when(conversionService.convert(any(SendMessage.class), eq(String.class))).thenReturn("converted");
 
         BaseRequest result = processor.handleReturnValue(new SendMessage(1L, ""), values[4], telegramRequest);
         assertNotNull(result);
@@ -85,25 +87,8 @@ public class TestBotResponseBodyMethodProcessor {
         assertEquals(sendMessage.getParameters().get("chat_id"), 12L);
         assertEquals(sendMessage.getParameters().get("text"), "converted");
 
-        verify(conversionService).canConvert(any(), String.class);
-        verify(conversionService).convert(any(), String.class);
-    }
-
-    public void handleReturnValue_CanConvertTypeToString_ReturnConvertedType() {
-        when(conversionService.canConvert(SendMessage.class, String.class)).thenReturn(false);
-        when(conversionService.canConvert(BaseRequest.class, String.class)).thenReturn(false);
-        when(conversionService.convert(BaseRequest.class, String.class)).thenReturn("convertedType");
-
-        BaseRequest result = processor.handleReturnValue(new SendMessage(1L, ""), values[3], telegramRequest);
-        assertNotNull(result);
-        assertTrue(result instanceof SendMessage);
-
-        SendMessage sendMessage = (SendMessage) result;
-        assertEquals(sendMessage.getParameters().get("chat_id"), 12L);
-        assertEquals(sendMessage.getParameters().get("text"), "convertedType");
-
-        verify(conversionService, times(2)).canConvert(any(), String.class);
-        verify(conversionService, times(1)).convert(any(), String.class);
+        verify(conversionService).canConvert(any(), eq(String.class));
+        verify(conversionService).convert(any(), eq(String.class));
     }
 
     public void method(String unsupported, int unSupported1Primitive, Integer unSupportedClass, BaseRequest supported, SendMessage supportedInherit) {

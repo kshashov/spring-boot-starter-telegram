@@ -1,5 +1,6 @@
 package com.github.kshashov.telegram.handler.response;
 
+import com.github.kshashov.telegram.TestUtils;
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
@@ -22,8 +23,8 @@ public class TestBotHandlerMethodReturnValueHandlerComposite {
     private TelegramRequest telegramRequest;
 
     @BeforeEach
-    public void prepare() throws NoSuchMethodException {
-        this.values = Stream.of(this.getClass().getMethod("method", String.class, int.class, Integer.class, BaseRequest.class, SendMessage.class).getParameters())
+    public void prepare() {
+        this.values = Stream.of(TestUtils.findMethod(this, "method").getParameters())
                 .map(MethodParameter::forParameter)
                 .toArray(MethodParameter[]::new);
 

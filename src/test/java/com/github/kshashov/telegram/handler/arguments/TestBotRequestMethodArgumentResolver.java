@@ -1,5 +1,6 @@
 package com.github.kshashov.telegram.handler.arguments;
 
+import com.github.kshashov.telegram.TestUtils;
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.github.kshashov.telegram.api.TelegramSession;
 import com.github.kshashov.telegram.api.bind.annotation.BotPathVariable;
@@ -24,11 +25,9 @@ public class TestBotRequestMethodArgumentResolver {
     private Update update;
 
     @BeforeEach
-    public void prepare() throws NoSuchMethodException {
+    public void prepare() {
         this.processor = new BotRequestMethodArgumentResolver();
-        this.values = Stream.of(this.getClass().getMethod("method", Integer.class, String.class, TelegramRequest.class, TelegramSession.class, TelegramBot.class, String.class, Update.class,
-                Message.class, InlineQuery.class, ChosenInlineResult.class, CallbackQuery.class, ShippingQuery.class,
-                PreCheckoutQuery.class, Poll.class, Chat.class, User.class).getParameters())
+        this.values = Stream.of(TestUtils.findMethod(this, "method").getParameters())
                 .map(MethodParameter::forParameter)
                 .toArray(MethodParameter[]::new);
 

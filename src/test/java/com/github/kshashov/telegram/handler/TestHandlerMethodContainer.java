@@ -1,5 +1,6 @@
 package com.github.kshashov.telegram.handler;
 
+import com.github.kshashov.telegram.TestUtils;
 import com.github.kshashov.telegram.api.MessageType;
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +21,7 @@ public class TestHandlerMethodContainer {
 
     @BeforeEach
     public void init() throws NoSuchMethodException {
-        method = getClass().getMethod("method");
+        method = TestUtils.findMethod(this, "method");
     }
 
     @Test
