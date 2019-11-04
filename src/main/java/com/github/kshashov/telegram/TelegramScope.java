@@ -35,7 +35,7 @@ public class TelegramScope implements Scope {
     private final LoadingCache<String, ConcurrentHashMap<String, Object>> conversations;
 
     @SuppressWarnings("unchecked")
-    public TelegramScope(ConfigurableListableBeanFactory beanFactory, long expireSeconds) {
+    public TelegramScope(@NotNull ConfigurableListableBeanFactory beanFactory, long expireSeconds) {
         this.beanFactory = beanFactory;
         conversations = CacheBuilder
                 .newBuilder()
@@ -51,18 +51,18 @@ public class TelegramScope implements Scope {
                 })
                 .build(new CacheLoader<String, ConcurrentHashMap<String, Object>>() {
                     @Override
-                    public ConcurrentHashMap<String, Object> load(@NonNull String key) throws Exception {
+                    public ConcurrentHashMap<String, Object> load(@NonNull String key) {
                         log.debug("Create session for key = {}", key);
                         return new ConcurrentHashMap<>();
                     }
                 });
     }
 
-    public static void setIdThreadLocal(Long chatId) {
+    static void setIdThreadLocal(Long chatId) {
         USER_THREAD_LOCAL.set(chatId);
     }
 
-    public static void removeId() {
+    static void removeId() {
         USER_THREAD_LOCAL.remove();
     }
 

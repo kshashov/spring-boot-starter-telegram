@@ -4,6 +4,7 @@ package com.github.kshashov.telegram.config;
 /**
  * Designed to support code-based configuration of the telegram mvc.
  */
+@FunctionalInterface
 public interface TelegramBotGlobalPropertiesConfiguration {
 
     /**

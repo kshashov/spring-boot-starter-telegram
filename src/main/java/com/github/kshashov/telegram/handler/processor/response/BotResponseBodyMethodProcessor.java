@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram.handler.response;
+package com.github.kshashov.telegram.handler.processor.response;
 
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.pengrad.telegrambot.request.BaseRequest;

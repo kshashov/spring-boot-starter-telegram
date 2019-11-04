@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram.handler.arguments;
+package com.github.kshashov.telegram.handler.processor.arguments;
 
 import com.github.kshashov.telegram.TestUtils;
 import com.github.kshashov.telegram.api.TelegramRequest;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TestBotRequestMethodArgumentResolver {
+public class BotRequestMethodArgumentResolverTest {
 
     private BotRequestMethodArgumentResolver processor;
     private MethodParameter[] values;

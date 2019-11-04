@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @see TelegramScope
  */
+@Getter
 public class TelegramSession {
-    private @Getter
-    ConcurrentHashMap<String, Object> attribute;
+    private final ConcurrentHashMap<String, Object> items = new ConcurrentHashMap<>();
 }

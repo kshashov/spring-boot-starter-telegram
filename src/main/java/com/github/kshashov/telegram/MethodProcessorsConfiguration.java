@@ -1,11 +1,11 @@
 package com.github.kshashov.telegram;
 
-import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentResolver;
-import com.github.kshashov.telegram.handler.arguments.BotRequestMethodArgumentResolver;
-import com.github.kshashov.telegram.handler.arguments.BotRequestMethodPathArgumentResolver;
-import com.github.kshashov.telegram.handler.response.BotBaseRequestMethodProcessor;
-import com.github.kshashov.telegram.handler.response.BotHandlerMethodReturnValueHandler;
-import com.github.kshashov.telegram.handler.response.BotResponseBodyMethodProcessor;
+import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolver;
+import com.github.kshashov.telegram.handler.processor.arguments.BotRequestMethodArgumentResolver;
+import com.github.kshashov.telegram.handler.processor.arguments.BotRequestMethodPathArgumentResolver;
+import com.github.kshashov.telegram.handler.processor.response.BotBaseRequestMethodProcessor;
+import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandler;
+import com.github.kshashov.telegram.handler.processor.response.BotResponseBodyMethodProcessor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ConversionServiceFactoryBean;

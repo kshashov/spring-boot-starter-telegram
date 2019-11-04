@@ -24,9 +24,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Searches for {@link TelegramMvcController} inheritors marked with {@link
- * BotController} annotation, then searches for {@link com.github.kshashov.telegram.api.bind.annotation.BotRequest} annotations in methods and store the meta information
- * into {@link HandlerMethodContainer}
+ * Searches for {@link TelegramMvcController} inheritors marked with {@link BotController} annotation, then searches for
+ * {@link com.github.kshashov.telegram.api.bind.annotation.BotRequest} annotations in methods and store the meta
+ * information into {@link HandlerMethodContainer}
  */
 @Slf4j
 public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, SmartInitializingSingleton {
@@ -34,7 +34,7 @@ public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, S
             Collections.newSetFromMap(new ConcurrentHashMap<>(64));
     final private HandlerMethodContainer botHandlerMethodContainer;
 
-    public TelegramControllerBeanPostProcessor(HandlerMethodContainer botHandlerMethodContainer) {
+    public TelegramControllerBeanPostProcessor(@NotNull HandlerMethodContainer botHandlerMethodContainer) {
         this.botHandlerMethodContainer = botHandlerMethodContainer;
     }
 
@@ -48,12 +48,14 @@ public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, S
     public Object postProcessAfterInitialization(@NotNull Object bean, @NotNull String beanName) throws BeansException {
         Class<?> targetClass = AopUtils.getTargetClass(bean);
         if (!nonAnnotatedClasses.contains(targetClass)) {
-            if (AnnotationUtils.findAnnotation(targetClass, BotController.class) != null) {
-                Map<Method, RequestMappingInfo> annotatedMethods = findAnnotatedMethodsBotRequest(targetClass);
+            if ((TelegramMvcController.class.isAssignableFrom(targetClass))
+                    && (AnnotationUtils.findAnnotation(targetClass, BotController.class) != null)) {
+                TelegramMvcController controller = (TelegramMvcController) bean;
+                Map<Method, RequestMappingInfo> annotatedMethods = findAnnotatedMethodsBotRequest(controller.getToken(), targetClass);
                 if (annotatedMethods.isEmpty()) {
                     nonAnnotatedClasses.add(targetClass);
                     if (log.isTraceEnabled()) {
-                        log.trace("No @BotRequest annotations found on bean class: {}", bean.getClass());
+                        log.warn("No @BotRequest annotations found on bean class: {}", bean.getClass());
                     }
                 } else {
                     // Non-empty set of methods
@@ -69,13 +71,13 @@ public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, S
         return bean;
     }
 
-    private Map<Method, RequestMappingInfo> findAnnotatedMethodsBotRequest(Class<?> targetClass) {
+    private Map<Method, RequestMappingInfo> findAnnotatedMethodsBotRequest(String token, Class<?> targetClass) {
         return MethodIntrospector.selectMethods(targetClass,
                 (MethodIntrospector.MetadataLookup<RequestMappingInfo>) method -> {
                     BotRequest requestMapping = AnnotatedElementUtils.findMergedAnnotation(method, BotRequest.class);
                     if (requestMapping == null) return null;
 
-                    return new RequestMappingInfo(Sets.newHashSet(requestMapping.path()), Sets.newHashSet(requestMapping.type()));
+                    return new RequestMappingInfo(token, Sets.newHashSet(requestMapping.path()), Sets.newHashSet(requestMapping.type()));
                 });
     }
 

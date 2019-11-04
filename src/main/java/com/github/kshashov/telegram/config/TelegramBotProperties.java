@@ -4,48 +4,50 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import okhttp3.OkHttpClient;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Helper entity used for initialization of the new {@link com.pengrad.telegrambot.TelegramBot} instances.
  */
 @Getter
 @AllArgsConstructor
 public class TelegramBotProperties {
-    private final String token;
-    private final OkHttpClient okHttpClient;
-    private final String url;
-    private long timeOutMillis = 100L;
+    private final @NotNull String token;
+    private final @NotNull OkHttpClient okHttpClient;
+    private final @NotNull String url;
+    private final @NotNull long listenerSleep;
 
     public static Builder builder(String token) {
         return new Builder(token);
     }
 
     public static class Builder {
-        private String token;
+        private final String token;
         private OkHttpClient okHttpClient;
         private String url;
-        private long timeOutMillis;
+        private long listenerSleep;
 
-        Builder(String token) {
+        Builder(@NotNull String token) {
             this.token = token;
         }
 
-        public Builder okHttpClient(OkHttpClient okHttpClient) {
+        public Builder okHttpClient(@NotNull OkHttpClient okHttpClient) {
             this.okHttpClient = okHttpClient;
             return this;
         }
 
-        public Builder url(String url) {
+        public Builder url(@NotNull String url) {
             this.url = url;
             return this;
         }
 
-        public Builder timeOutMillis(long timeOutMillis) {
-            this.timeOutMillis = timeOutMillis;
+        public Builder listenerSleepMilliseconds(long listenerSleep) {
+            this.listenerSleep = listenerSleep;
             return this;
         }
 
         public TelegramBotProperties build() {
-            return new TelegramBotProperties(token, okHttpClient, url, timeOutMillis);
+            return new TelegramBotProperties(token, okHttpClient, url, listenerSleep);
         }
     }
 }

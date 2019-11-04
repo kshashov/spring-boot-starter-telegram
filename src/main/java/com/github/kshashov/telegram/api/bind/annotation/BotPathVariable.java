@@ -1,6 +1,6 @@
 package com.github.kshashov.telegram.api.bind.annotation;
 
-import com.github.kshashov.telegram.handler.arguments.BotRequestMethodPathArgumentResolver;
+import com.github.kshashov.telegram.handler.processor.arguments.BotRequestMethodPathArgumentResolver;
 
 import java.lang.annotation.*;
 

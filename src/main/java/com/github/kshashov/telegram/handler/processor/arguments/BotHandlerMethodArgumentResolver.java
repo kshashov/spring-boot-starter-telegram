@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram.handler.arguments;
+package com.github.kshashov.telegram.handler.processor.arguments;
 
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.github.kshashov.telegram.api.TelegramSession;

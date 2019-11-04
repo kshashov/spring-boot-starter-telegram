@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram.handler.arguments;
+package com.github.kshashov.telegram.handler.processor.arguments;
 
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.github.kshashov.telegram.api.TelegramSession;
@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 
 import javax.validation.constraints.NotNull;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class BotHandlerMethodArgumentResolverComposite implements BotHandlerMethodArgumentResolver {
 
-    private final List<BotHandlerMethodArgumentResolver> argumentResolvers = new LinkedList<>();
+    private final List<BotHandlerMethodArgumentResolver> argumentResolvers;
 
     private final Map<MethodParameter, BotHandlerMethodArgumentResolver> argumentResolverCache =
             new ConcurrentHashMap<>(256);
@@ -28,7 +27,7 @@ public class BotHandlerMethodArgumentResolverComposite implements BotHandlerMeth
      * @param resolvers to add.
      */
     public BotHandlerMethodArgumentResolverComposite(@NotNull List<BotHandlerMethodArgumentResolver> resolvers) {
-        argumentResolvers.addAll(resolvers);
+        argumentResolvers = resolvers;
     }
 
     @Override

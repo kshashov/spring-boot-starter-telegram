@@ -10,7 +10,6 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
 * [Download](#Download)
     * [Maven](#Maven)
     * [Gradle](#Gradle)
-    * [Jar](#Jar)
 * [Example](#Example)
 * [@BotController](#BotController)
 * [@BotRequest](#BotRequest)
@@ -35,8 +34,6 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
 ```groovy
 implementation 'com.github.kshashov:spring-boot-starter-telegram:0.16'
 ```
-### Jar
-Check [releases page](https://github.com/kshashov/spring-boot-starter-telegram/releases)
 
 ## Example
 The only thing you need to do after adding the dependency is to create a bot controller
@@ -126,22 +123,26 @@ By default, you can configure only these properties:
 | telegram.bot.session-seconds | Cache expiration time for the all beans inside session scope |
 
 If it isn’t enough, you can declare the following components with your implementations:
-* `TelegramBotGlobalPropertiesConfiguration` to configure global setting
-* `TelegramBotProperties` to configure bot specific settings:
+* `TelegramBotGlobalPropertiesConfiguration` to configure global setting or bot specific settings:
     ```java    
-           @Bean
-           public TelegramBotProperties botProperty2() {
-               // Do not forget about token!
-               // Other fields are optional
-               
-               return TelegramBotProperties
-                       .builder()
-                       .token(token)
-                       .okHttpClient(new OkHttpClient.Builder()
-                               .connectTimeout(30, TimeUnit.SECONDS)
-                               .build())
-                       .build();
-           }
+    @Component
+    public class MyBotConfiguration implements TelegramBotGlobalPropertiesConfiguration {
+        ...
+        
+        @Override
+        public void configure(TelegramBotGlobalProperties.Builder builder) {
+            builder
+                    .argumentResolvers(Lists.newArrayList(new BotRequestMethodArgumentResolver()))
+                    .configureBot(token, botBuilder -> {
+                        botBuilder.okHttpClient(new OkHttpClient.Builder()
+                                .connectTimeout(12, TimeUnit.SECONDS)
+                                .build());
+                    })
+                    .configureBot(token2, botBuilder -> {
+                        botBuilder.listenerSleepMilliseconds(123L);
+                    });
+        }
+    }
     ```
 
 ## License

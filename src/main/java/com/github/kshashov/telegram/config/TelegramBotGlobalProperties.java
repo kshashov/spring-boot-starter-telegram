@@ -1,16 +1,19 @@
 package com.github.kshashov.telegram.config;
 
-import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentResolver;
-import com.github.kshashov.telegram.handler.response.BotHandlerMethodReturnValueHandler;
+import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolver;
+import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandler;
 import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import org.springframework.core.task.TaskExecutor;
 
 import javax.validation.constraints.NotNull;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.Consumer;
 
 /**
  * Provides global configurations for all telegram bots.
@@ -18,25 +21,24 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 public class TelegramBotGlobalProperties {
-    private @NotNull TaskExecutor taskExecutor;
-    private @NotNull Callback<BaseRequest, BaseResponse> responseCallback;
-    private @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers;
-    private @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
+    private final @NotNull ThreadPoolExecutor taskExecutor;
+    private final @NotNull Callback<BaseRequest, BaseResponse> responseCallback;
+    private final @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers;
+    private final @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
+    private final @NotNull Map<String, Consumer<TelegramBotProperties.Builder>> botProperties;
 
     public static Builder builder() {
         return new Builder();
     }
 
     public static class Builder {
-        private @NotNull TaskExecutor taskExecutor;
-        private @NotNull Callback<BaseRequest, BaseResponse> responseCallback;
-        private @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers;
-        private @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
+        private ThreadPoolExecutor taskExecutor;
+        private Callback<BaseRequest, BaseResponse> responseCallback;
+        private List<BotHandlerMethodArgumentResolver> argumentResolvers;
+        private List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
+        private Map<String, Consumer<TelegramBotProperties.Builder>> botProperties = new HashMap<>();
 
-        Builder() {
-        }
-
-        public Builder taskExecutor(@NotNull TaskExecutor taskExecutor) {
+        public Builder taskExecutor(@NotNull ThreadPoolExecutor taskExecutor) {
             this.taskExecutor = taskExecutor;
             return this;
         }
@@ -56,8 +58,13 @@ public class TelegramBotGlobalProperties {
             return this;
         }
 
+        public Builder configureBot(@NotNull String token, @NotNull Consumer<TelegramBotProperties.Builder> propertiesConsumer) {
+            botProperties.put(token, propertiesConsumer);
+            return this;
+        }
+
         public TelegramBotGlobalProperties build() {
-            return new TelegramBotGlobalProperties(taskExecutor, responseCallback, argumentResolvers, returnValueHandlers);
+            return new TelegramBotGlobalProperties(taskExecutor, responseCallback, argumentResolvers, returnValueHandlers, botProperties);
         }
     }
 }

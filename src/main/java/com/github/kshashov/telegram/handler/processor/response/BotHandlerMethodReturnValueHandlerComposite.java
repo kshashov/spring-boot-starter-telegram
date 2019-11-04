@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram.handler.response;
+package com.github.kshashov.telegram.handler.processor.response;
 
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.pengrad.telegrambot.request.BaseRequest;
@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,7 +15,7 @@ import java.util.List;
 @Slf4j
 public class BotHandlerMethodReturnValueHandlerComposite implements BotHandlerMethodReturnValueHandler {
 
-    private final List<BotHandlerMethodReturnValueHandler> returnValueHandlers = new ArrayList<>();
+    private final List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
 
     /**
      * Create with the given {@link BotHandlerMethodReturnValueHandler}s.
@@ -24,7 +23,7 @@ public class BotHandlerMethodReturnValueHandlerComposite implements BotHandlerMe
      * @param handlers handlers to add
      */
     public BotHandlerMethodReturnValueHandlerComposite(@NotNull List<BotHandlerMethodReturnValueHandler> handlers) {
-        returnValueHandlers.addAll(handlers);
+        returnValueHandlers = handlers;
     }
 
     @Override

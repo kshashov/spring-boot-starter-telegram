@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram.handler.response;
+package com.github.kshashov.telegram.handler.processor.response;
 
 import com.github.kshashov.telegram.TestUtils;
 import com.github.kshashov.telegram.api.TelegramRequest;
@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-public class TestBotResponseBodyMethodProcessor {
+public class BotResponseBodyMethodProcessorTest {
 
     private BotResponseBodyMethodProcessor processor;
     private MethodParameter[] values;

@@ -1,11 +1,11 @@
-package com.github.kshashov.telegram.handler;
+package com.github.kshashov.telegram.handler.processor;
 
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.github.kshashov.telegram.api.TelegramSession;
-import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentResolver;
-import com.github.kshashov.telegram.handler.arguments.BotHandlerMethodArgumentResolverComposite;
-import com.github.kshashov.telegram.handler.response.BotHandlerMethodReturnValueHandler;
-import com.github.kshashov.telegram.handler.response.BotHandlerMethodReturnValueHandlerComposite;
+import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolver;
+import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolverComposite;
+import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandler;
+import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandlerComposite;
 import com.pengrad.telegrambot.request.BaseRequest;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
@@ -33,8 +33,8 @@ public class TelegramInvocableHandlerMethod extends HandlerMethod {
     /**
      * Create an instance from a bean instance and a method
      *
-     * @param handlerMethod method to invoke
-     * @param argumentResolvers resolvers list to resolve arguments
+     * @param handlerMethod       method to invoke
+     * @param argumentResolvers   resolvers list to resolve arguments
      * @param returnValueHandlers handlers list to handle return value
      */
     public TelegramInvocableHandlerMethod(@NotNull HandlerMethod handlerMethod, @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers, @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers) {
@@ -43,7 +43,7 @@ public class TelegramInvocableHandlerMethod extends HandlerMethod {
         this.returnValueHandler = new BotHandlerMethodReturnValueHandlerComposite(returnValueHandlers);
     }
 
-    public BaseRequest invokeAndHandle(TelegramRequest telegramRequest, TelegramSession telegramSession) throws Exception {
+    public BaseRequest invokeAndHandle(@NotNull TelegramRequest telegramRequest, @NotNull TelegramSession telegramSession) throws Exception {
         Object[] args = getMethodArgumentValues(telegramRequest, telegramSession);
         if (logger.isTraceEnabled()) {
             logger.trace("Invoking '" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) + "' with arguments " + Arrays.toString(args));
@@ -70,7 +70,7 @@ public class TelegramInvocableHandlerMethod extends HandlerMethod {
         }
     }
 
-    private Object[] getMethodArgumentValues(TelegramRequest telegramRequest, TelegramSession telegramSession) {
+    private Object[] getMethodArgumentValues(@NotNull TelegramRequest telegramRequest, @NotNull TelegramSession telegramSession) {
         MethodParameter[] parameters = getMethodParameters();
         Object[] args = new Object[parameters.length];
         for (int i = 0; i < parameters.length; i++) {

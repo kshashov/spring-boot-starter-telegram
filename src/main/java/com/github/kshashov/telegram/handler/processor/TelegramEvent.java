@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram.handler;
+package com.github.kshashov.telegram.handler.processor;
 
 import com.github.kshashov.telegram.api.MessageType;
 import com.pengrad.telegrambot.TelegramBot;
@@ -6,17 +6,20 @@ import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.request.BaseRequest;
 import lombok.Getter;
 
+import javax.annotation.Nullable;
+import javax.validation.constraints.NotNull;
+
 /**
  * Accumulates all available parameters from the initial telegram request
  *
  * @see BaseRequest
  */
 @Getter
-class TelegramEvent {
+public class TelegramEvent {
     /**
      * The initial user request which is currently being processed.
      */
-    private final Update update;
+    private final @NotNull Update update;
 
     /**
      * The first non-empty object, if any, among:
@@ -27,16 +30,19 @@ class TelegramEvent {
      *     <li>telegram edited channel post</li>
      * </ul>
      */
+    @Nullable
     private final Message message;
 
     /**
      * Сhat instance if it present in the current telegram request.
      */
+    @Nullable
     private final Chat chat;
 
     /**
      * User instance if it present in the current telegram request.
      */
+    @Nullable
     private final User user;
 
     /**
@@ -50,19 +56,24 @@ class TelegramEvent {
      *     <li>{@code update.preCheckoutQuery.invoicePayload()</li>
      * </ul>
      */
+    @Nullable
     private final String text;
 
     /**
      * Bot instance that received the current telegram event
      */
-    private final TelegramBot telegramBot;
+
+    private final @NotNull TelegramBot telegramBot;
 
     /**
      * Type of the current telegram request.
      */
-    private final MessageType messageType;
+    private final @NotNull MessageType messageType;
 
-    public TelegramEvent(Update update, TelegramBot telegramBot) {
+    private final String token;
+
+    TelegramEvent(@NotNull String token, @NotNull Update update, @NotNull TelegramBot telegramBot) {
+        this.token = token;
         this.telegramBot = telegramBot;
         this.update = update;
         this.message = firstNonNull(update.message(),

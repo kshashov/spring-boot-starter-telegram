@@ -1,4 +1,4 @@
-package com.github.kshashov.telegram.handler;
+package com.github.kshashov.telegram.handler.processor;
 
 import com.github.kshashov.telegram.api.MessageType;
 import com.pengrad.telegrambot.TelegramBot;
@@ -11,11 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class TestTelegramEvent {
+public class TelegramEventTest {
     private Update update;
     private TelegramBot bot;
     private User user;
     private Chat chat;
+    private String token = "";
 
     @BeforeEach
     public void init() {
@@ -27,7 +28,7 @@ public class TestTelegramEvent {
 
     @Test
     public void unsupported() {
-        TelegramEvent event = new TelegramEvent(update, bot);
+        TelegramEvent event = new TelegramEvent(token, update, bot);
 
         assertEquals(update, event.getUpdate());
         assertEquals(bot, event.getTelegramBot());
@@ -46,7 +47,7 @@ public class TestTelegramEvent {
         when(message.text()).thenReturn("test");
 
         when(update.message()).thenReturn(message);
-        TelegramEvent event = new TelegramEvent(update, bot);
+        TelegramEvent event = new TelegramEvent(token, update, bot);
 
         assertEquals(update, event.getUpdate());
         assertEquals(bot, event.getTelegramBot());
@@ -65,7 +66,7 @@ public class TestTelegramEvent {
         when(message.text()).thenReturn("test");
 
         when(update.editedMessage()).thenReturn(message);
-        TelegramEvent event = new TelegramEvent(update, bot);
+        TelegramEvent event = new TelegramEvent(token, update, bot);
 
         assertEquals(update, event.getUpdate());
         assertEquals(bot, event.getTelegramBot());
@@ -84,7 +85,7 @@ public class TestTelegramEvent {
         when(message.text()).thenReturn("test");
 
         when(update.channelPost()).thenReturn(message);
-        TelegramEvent event = new TelegramEvent(update, bot);
+        TelegramEvent event = new TelegramEvent(token, update, bot);
 
         assertEquals(update, event.getUpdate());
         assertEquals(bot, event.getTelegramBot());
@@ -103,7 +104,7 @@ public class TestTelegramEvent {
         when(message.text()).thenReturn("test");
 
         when(update.editedChannelPost()).thenReturn(message);
-        TelegramEvent event = new TelegramEvent(update, bot);
+        TelegramEvent event = new TelegramEvent(token, update, bot);
 
         assertEquals(update, event.getUpdate());
         assertEquals(bot, event.getTelegramBot());
@@ -124,7 +125,7 @@ public class TestTelegramEvent {
         when(callbackQuery.data()).thenReturn("test");
 
         when(update.callbackQuery()).thenReturn(callbackQuery);
-        TelegramEvent event = new TelegramEvent(update, bot);
+        TelegramEvent event = new TelegramEvent(token, update, bot);
 
         assertEquals(update, event.getUpdate());
         assertEquals(bot, event.getTelegramBot());
@@ -141,7 +142,7 @@ public class TestTelegramEvent {
         when(inlineQuery.from()).thenReturn(user);
 
         when(update.inlineQuery()).thenReturn(inlineQuery);
-        TelegramEvent event = new TelegramEvent(update, bot);
+        TelegramEvent event = new TelegramEvent(token, update, bot);
 
         assertEquals(update, event.getUpdate());
         assertEquals(bot, event.getTelegramBot());
@@ -158,7 +159,7 @@ public class TestTelegramEvent {
         when(chosenInlineResult.from()).thenReturn(user);
 
         when(update.chosenInlineResult()).thenReturn(chosenInlineResult);
-        TelegramEvent event = new TelegramEvent(update, bot);
+        TelegramEvent event = new TelegramEvent(token, update, bot);
 
         assertEquals(update, event.getUpdate());
         assertEquals(bot, event.getTelegramBot());
@@ -175,7 +176,7 @@ public class TestTelegramEvent {
         when(shippingQuery.from()).thenReturn(user);
 
         when(update.shippingQuery()).thenReturn(shippingQuery);
-        TelegramEvent event = new TelegramEvent(update, bot);
+        TelegramEvent event = new TelegramEvent(token, update, bot);
 
         assertEquals(update, event.getUpdate());
         assertEquals(bot, event.getTelegramBot());
@@ -192,7 +193,7 @@ public class TestTelegramEvent {
         when(preCheckoutQuery.from()).thenReturn(user);
 
         when(update.preCheckoutQuery()).thenReturn(preCheckoutQuery);
-        TelegramEvent event = new TelegramEvent(update, bot);
+        TelegramEvent event = new TelegramEvent(token, update, bot);
 
         assertEquals(update, event.getUpdate());
         assertEquals(bot, event.getTelegramBot());
@@ -207,7 +208,7 @@ public class TestTelegramEvent {
         Poll poll = mock(Poll.class);
 
         when(update.poll()).thenReturn(poll);
-        TelegramEvent event = new TelegramEvent(update, bot);
+        TelegramEvent event = new TelegramEvent(token, update, bot);
 
         assertEquals(update, event.getUpdate());
         assertEquals(bot, event.getTelegramBot());
