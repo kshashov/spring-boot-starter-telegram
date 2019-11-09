@@ -252,8 +252,8 @@
     <scm>
         <connection>scm:git:git://github.com/kshashov/spring-boot-starter-telegram.git</connection>
         <developerConnection>scm:git:git@github.com:kshashov/spring-boot-starter-telegram.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>spring-boot-starter-telegram-0.17</tag>
         <url>https://github.com/kshashov/spring-boot-starter-telegram</url>
     </scm>
-    <version>0.17-SNAPSHOT</version>
+    <version>0.17</version>
 </project>
