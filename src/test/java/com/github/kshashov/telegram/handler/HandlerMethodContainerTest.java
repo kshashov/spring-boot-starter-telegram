@@ -23,12 +23,12 @@ public class HandlerMethodContainerTest {
     private String token = "token";
 
     @BeforeEach
-    public void init() throws NoSuchMethodException {
-        method = TestUtils.findMethod(this, "method");
+    void init() {
+        method = TestUtils.findMethodByTitle(this, "method");
     }
 
     @Test
-    public void lookupHandlerMethod_MappingHasEmptyPatterns_ReturnMethodWithEmptyPattern() {
+    void lookupHandlerMethod_MappingHasEmptyPatterns_ReturnMethodWithEmptyPattern() {
         container.registerController(1, method, new RequestMappingInfo(token, Sets.newHashSet(), Sets.newHashSet(MessageType.MESSAGE)));
         HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test", MessageType.MESSAGE));
 
@@ -44,16 +44,7 @@ public class HandlerMethodContainerTest {
     }
 
     @Test
-    public void lookupHandlerMethod_MappingHasWrongToken_ReturnNull() {
-        container.registerController(1, method, new RequestMappingInfo("incorrect", Sets.newHashSet(), Sets.newHashSet(MessageType.MESSAGE)));
-        HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test", MessageType.MESSAGE));
-
-        assertNotNull(result);
-        assertNull(result.getHandlerMethod());
-    }
-
-    @Test
-    public void lookupHandlerMethod_MappingHasAnyMessageType_ReturnMethod() {
+    void lookupHandlerMethod_MappingHasAnyMessageType_ReturnMethod() {
         container.registerController(1, method, new RequestMappingInfo(token, Sets.newHashSet("test"), Sets.newHashSet(MessageType.MESSAGE, MessageType.ANY)));
         HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test", MessageType.CALLBACK_QUERY));
 
@@ -68,7 +59,16 @@ public class HandlerMethodContainerTest {
     }
 
     @Test
-    public void lookupHandlerMethod_WrongMessageType_ReturnNullMethod() {
+    void lookupHandlerMethod_WrongToken_ReturnNullMethod() {
+        container.registerController(1, method, new RequestMappingInfo("incorrect", Sets.newHashSet(), Sets.newHashSet(MessageType.MESSAGE)));
+        HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test", MessageType.MESSAGE));
+
+        assertNotNull(result);
+        assertNull(result.getHandlerMethod());
+    }
+
+    @Test
+    void lookupHandlerMethod_WrongMessageType_ReturnNullMethod() {
         container.registerController(1, method, new RequestMappingInfo(token, Sets.newHashSet("test"), Sets.newHashSet(MessageType.MESSAGE)));
         HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test", MessageType.CALLBACK_QUERY));
 
@@ -77,7 +77,7 @@ public class HandlerMethodContainerTest {
     }
 
     @Test
-    public void lookupHandlerMethod_WrongPattern_ReturnNull() {
+    void lookupHandlerMethod_WrongPattern_ReturnNull() {
         container.registerController(1, method, new RequestMappingInfo(token, Sets.newHashSet("test"), Sets.newHashSet(MessageType.MESSAGE)));
         HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test1", MessageType.MESSAGE));
 
@@ -86,7 +86,7 @@ public class HandlerMethodContainerTest {
     }
 
     @Test
-    public void lookupHandlerMethod_NullPattern_WorksAsEmptyString() {
+    void lookupHandlerMethod_NullPattern_WorksAsEmptyString() {
         container.registerController(1, method, new RequestMappingInfo(token, Sets.newHashSet("test"), Sets.newHashSet(MessageType.MESSAGE)));
         HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request(null, MessageType.MESSAGE));
 
@@ -107,7 +107,7 @@ public class HandlerMethodContainerTest {
     }
 
     @Test
-    public void lookupHandlerMethod() {
+    void lookupHandlerMethod() {
         // check without  registered handler
         HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test 1", MessageType.CALLBACK_QUERY));
         assertNotNull(result);

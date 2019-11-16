@@ -8,7 +8,7 @@ package com.github.kshashov.telegram.config;
 public interface TelegramBotGlobalPropertiesConfiguration {
 
     /**
-     * Add custom settings to preconfigured builder
+     * Add custom settings to preconfigured builder.
      *
      * @param builder is preconfigured builder
      */

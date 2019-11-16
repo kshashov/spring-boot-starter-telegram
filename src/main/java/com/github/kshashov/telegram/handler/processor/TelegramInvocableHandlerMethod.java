@@ -3,59 +3,65 @@ package com.github.kshashov.telegram.handler.processor;
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.github.kshashov.telegram.api.TelegramSession;
 import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolver;
-import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolverComposite;
 import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandler;
-import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandlerComposite;
 import com.pengrad.telegrambot.request.BaseRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.ParameterNameDiscoverer;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.ReflectionUtils;
-import org.springframework.web.method.HandlerMethod;
 
 import javax.validation.constraints.NotNull;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Extension of {@link HandlerMethod} that invokes the underlying method with argument values resolved from the current
  * telegram request through a list of {@link BotHandlerMethodArgumentResolver} and then resolves the return value with a
  * list of {@link BotHandlerMethodReturnValueHandler}.
  */
+@Slf4j
 public class TelegramInvocableHandlerMethod extends HandlerMethod {
 
     private final ParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
-    private final BotHandlerMethodArgumentResolverComposite argumentResolver;
-    private final BotHandlerMethodReturnValueHandlerComposite returnValueHandler;
+    private final BotHandlerMethodArgumentResolver argumentResolver;
+    private final BotHandlerMethodReturnValueHandler returnValueHandler;
 
     /**
-     * Create an instance from a bean instance and a method
+     * Create an instance from a bean instance and a method.
      *
      * @param handlerMethod       method to invoke
-     * @param argumentResolvers   resolvers list to resolve arguments
-     * @param returnValueHandlers handlers list to handle return value
+     * @param argumentResolver   resolvers list to resolve arguments
+     * @param returnValueHandler handlers list to handle return value
      */
-    public TelegramInvocableHandlerMethod(@NotNull HandlerMethod handlerMethod, @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers, @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers) {
+    public TelegramInvocableHandlerMethod(@NotNull HandlerMethod handlerMethod, @NotNull BotHandlerMethodArgumentResolver argumentResolver, @NotNull BotHandlerMethodReturnValueHandler returnValueHandler) {
         super(handlerMethod);
-        this.argumentResolver = new BotHandlerMethodArgumentResolverComposite(argumentResolvers);
-        this.returnValueHandler = new BotHandlerMethodReturnValueHandlerComposite(returnValueHandlers);
+        this.argumentResolver = argumentResolver;
+        this.returnValueHandler = returnValueHandler;
     }
 
-    public BaseRequest invokeAndHandle(@NotNull TelegramRequest telegramRequest, @NotNull TelegramSession telegramSession) throws Exception {
+    /**
+     * Invoke {@code TelegramInvocableHandlerMethod} with given arguments and return result.
+     *
+     * @param telegramRequest request
+     * @param telegramSession current session
+     * @return result of invocation
+     * @throws IllegalStateException when it failed to execute the handler method correctly
+     */
+    public BaseRequest invokeAndHandle(@NotNull TelegramRequest telegramRequest, @NotNull TelegramSession telegramSession) throws IllegalStateException {
         Object[] args = getMethodArgumentValues(telegramRequest, telegramSession);
-        if (logger.isTraceEnabled()) {
-            logger.trace("Invoking '" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) + "' with arguments " + Arrays.toString(args));
+        if (log.isTraceEnabled()) {
+            log.trace("Invoking '" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) + "' with arguments " + Arrays.toString(args));
         }
-        Object returnValue = doInvoke(args);
-        if (logger.isTraceEnabled()) {
-            logger.trace("Method [" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) + "] returned [" + returnValue + "]");
+        Object returnValue = doSafeInvoke(args);
+        if (log.isTraceEnabled()) {
+            log.trace("Method [" + ClassUtils.getQualifiedMethodName(getMethod(), getBeanType()) + "] returned [" + returnValue + "]");
         }
-        return returnValueHandler.handleReturnValue(returnValue, getReturnValueType(returnValue), telegramRequest);
+        return returnValueHandler.handleReturnValue(returnValue, getReturnValue(returnValue), telegramRequest);
     }
 
-    private Object doInvoke(Object[] args) throws Exception {
+    private Object doSafeInvoke(Object[] args) throws IllegalStateException {
         ReflectionUtils.makeAccessible(getBridgedMethod());
         try {
             return getBridgedMethod().invoke(getBean(), args);
@@ -82,7 +88,7 @@ public class TelegramInvocableHandlerMethod extends HandlerMethod {
     }
 
     /**
-     * Generate detailed information about method invocation
+     * Generate detailed information about method invocation.
      *
      * @param text         initial exception message
      * @param resolvedArgs input arguments for method invocation

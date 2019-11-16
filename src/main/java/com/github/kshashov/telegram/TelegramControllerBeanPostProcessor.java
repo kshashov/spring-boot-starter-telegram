@@ -7,7 +7,6 @@ import com.github.kshashov.telegram.handler.HandlerMethodContainer;
 import com.github.kshashov.telegram.handler.RequestMappingInfo;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.SmartInitializingSingleton;
@@ -15,8 +14,10 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.core.MethodIntrospector;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
+import javax.validation.constraints.NotNull;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.Map;
@@ -26,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Searches for {@link TelegramMvcController} inheritors marked with {@link BotController} annotation, then searches for
  * {@link com.github.kshashov.telegram.api.bind.annotation.BotRequest} annotations in methods and store the meta
- * information into {@link HandlerMethodContainer}
+ * information into {@link HandlerMethodContainer}.
  */
 @Slf4j
 public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, SmartInitializingSingleton {
@@ -39,13 +40,13 @@ public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, S
     }
 
     @Override
-    public Object postProcessBeforeInitialization(@NotNull Object bean, @NotNull String beanName) throws BeansException {
+    public Object postProcessBeforeInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
         return bean;
     }
 
     @Override
     @Nullable
-    public Object postProcessAfterInitialization(@NotNull Object bean, @NotNull String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(@NonNull Object bean, @NonNull String beanName) throws BeansException {
         Class<?> targetClass = AopUtils.getTargetClass(bean);
         if (!nonAnnotatedClasses.contains(targetClass)) {
             if ((TelegramMvcController.class.isAssignableFrom(targetClass))

@@ -4,19 +4,18 @@ import com.github.kshashov.telegram.TestUtils;
 import com.github.kshashov.telegram.api.TelegramRequest;
 import com.github.kshashov.telegram.api.TelegramSession;
 import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolver;
+import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolverComposite;
 import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandler;
+import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandlerComposite;
 import com.pengrad.telegrambot.request.BaseRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.method.HandlerMethod;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,7 +38,7 @@ public class TelegramInvocableHandlerMethodTest {
     void invokeAndHandle_ExceptionInHandler_ThrowException() {
         HandlerMethod handlerMethod = handlerMethod("testExceptionResponseMethod");
 
-        TelegramInvocableHandlerMethod invocable = new TelegramInvocableHandlerMethod(handlerMethod, argumentResolvers, returnValueHandlers);
+        TelegramInvocableHandlerMethod invocable = invocable(handlerMethod, argumentResolvers, returnValueHandlers);
         assertThrows(IllegalStateException.class, () -> invocable.invokeAndHandle(telegramRequest, telegramSession));
     }
 
@@ -52,7 +51,7 @@ public class TelegramInvocableHandlerMethodTest {
         when(resolver.resolveArgument(any(), any(), any())).thenThrow(IllegalArgumentException.class);
         argumentResolvers.add(resolver);
 
-        TelegramInvocableHandlerMethod invocable = new TelegramInvocableHandlerMethod(handlerMethod, argumentResolvers, returnValueHandlers);
+        TelegramInvocableHandlerMethod invocable = invocable(handlerMethod, argumentResolvers, returnValueHandlers);
 
         assertThrows(IllegalArgumentException.class, () -> invocable.invokeAndHandle(telegramRequest, telegramSession));
     }
@@ -66,7 +65,7 @@ public class TelegramInvocableHandlerMethodTest {
         when(resolver.resolveArgument(any(), any(), any())).thenReturn("test");
         argumentResolvers.add(resolver);
 
-        TelegramInvocableHandlerMethod invocable = new TelegramInvocableHandlerMethod(handlerMethod, argumentResolvers, returnValueHandlers);
+        TelegramInvocableHandlerMethod invocable = invocable(handlerMethod, argumentResolvers, returnValueHandlers);
 
         assertThrows(NullPointerException.class, () -> invocable.invokeAndHandle(telegramRequest, telegramSession));
     }
@@ -80,7 +79,7 @@ public class TelegramInvocableHandlerMethodTest {
         when(handler.handleReturnValue(any(), any(), any())).thenThrow(IllegalArgumentException.class);
         returnValueHandlers.add(handler);
 
-        TelegramInvocableHandlerMethod invocable = new TelegramInvocableHandlerMethod(handlerMethod, argumentResolvers, returnValueHandlers);
+        TelegramInvocableHandlerMethod invocable = invocable(handlerMethod, argumentResolvers, returnValueHandlers);
 
         assertThrows(IllegalArgumentException.class, () -> invocable.invokeAndHandle(telegramRequest, telegramSession));
     }
@@ -94,7 +93,7 @@ public class TelegramInvocableHandlerMethodTest {
         when(handler.handleReturnValue(any(), any(), any())).thenReturn(null);
         returnValueHandlers.add(handler);
 
-        TelegramInvocableHandlerMethod invocable = new TelegramInvocableHandlerMethod(handlerMethod, argumentResolvers, returnValueHandlers);
+        TelegramInvocableHandlerMethod invocable = invocable(handlerMethod, argumentResolvers, returnValueHandlers);
 
         assertThrows(NullPointerException.class, () -> invocable.invokeAndHandle(telegramRequest, telegramSession));
     }
@@ -102,7 +101,7 @@ public class TelegramInvocableHandlerMethodTest {
     @Test
     void invokeAndHandle_UnsupportedParameter_NullParameter() throws Exception {
         HandlerMethod handlerMethod = handlerMethod("testNullParameterMethod");
-        TelegramInvocableHandlerMethod invocable = new TelegramInvocableHandlerMethod(handlerMethod, argumentResolvers, returnValueHandlers);
+        TelegramInvocableHandlerMethod invocable = invocable(handlerMethod, argumentResolvers, returnValueHandlers);
 
         invocable.invokeAndHandle(telegramRequest, telegramSession);
     }
@@ -110,7 +109,7 @@ public class TelegramInvocableHandlerMethodTest {
     @Test
     void invokeAndHandle_NullParameter_NullParameter() throws Exception {
         HandlerMethod handlerMethod = handlerMethod("testNullParameterMethod");
-        TelegramInvocableHandlerMethod invocable = new TelegramInvocableHandlerMethod(handlerMethod, argumentResolvers, returnValueHandlers);
+        TelegramInvocableHandlerMethod invocable = invocable(handlerMethod, argumentResolvers, returnValueHandlers);
 
         BotHandlerMethodArgumentResolver resolver = mock(BotHandlerMethodArgumentResolver.class);
         when(resolver.supportsParameter(any())).thenReturn(true);
@@ -123,7 +122,7 @@ public class TelegramInvocableHandlerMethodTest {
     @Test
     void invokeAndHandle_UnsupportedReturnValue_ReturnNull() throws Exception {
         HandlerMethod handlerMethod = handlerMethod("testWithoutArgumentsMethod");
-        TelegramInvocableHandlerMethod invocable = new TelegramInvocableHandlerMethod(handlerMethod, argumentResolvers, returnValueHandlers);
+        TelegramInvocableHandlerMethod invocable = invocable(handlerMethod, argumentResolvers, returnValueHandlers);
 
         assertNull(invocable.invokeAndHandle(telegramRequest, telegramSession));
     }
@@ -137,7 +136,7 @@ public class TelegramInvocableHandlerMethodTest {
         when(handler.handleReturnValue(any(), any(), any())).thenReturn(null);
         returnValueHandlers.add(handler);
 
-        TelegramInvocableHandlerMethod invocable = new TelegramInvocableHandlerMethod(handlerMethod, argumentResolvers, returnValueHandlers);
+        TelegramInvocableHandlerMethod invocable = invocable(handlerMethod, argumentResolvers, returnValueHandlers);
 
         assertNull(invocable.invokeAndHandle(telegramRequest, telegramSession));
     }
@@ -161,7 +160,7 @@ public class TelegramInvocableHandlerMethodTest {
         });
         returnValueHandlers.add(handler);
 
-        TelegramInvocableHandlerMethod invocable = new TelegramInvocableHandlerMethod(handlerMethod, argumentResolvers, returnValueHandlers);
+        TelegramInvocableHandlerMethod invocable = invocable(handlerMethod, argumentResolvers, returnValueHandlers);
 
         assertEquals(handled, invocable.invokeAndHandle(telegramRequest, telegramSession));
     }
@@ -189,7 +188,14 @@ public class TelegramInvocableHandlerMethodTest {
     }
 
     HandlerMethod handlerMethod(String methodName) {
-        Method method = TestUtils.findMethod(this, methodName);
+        Method method = TestUtils.findMethodByTitle(this, methodName);
         return new HandlerMethod(this, method);
+    }
+
+    TelegramInvocableHandlerMethod invocable(HandlerMethod handlerMethod, List<BotHandlerMethodArgumentResolver> argumentResolver, List<BotHandlerMethodReturnValueHandler> returnValueHandler) {
+        return new TelegramInvocableHandlerMethod(
+                handlerMethod,
+                new BotHandlerMethodArgumentResolverComposite(argumentResolvers),
+                new BotHandlerMethodReturnValueHandlerComposite(returnValueHandlers));
     }
 }

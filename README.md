@@ -27,12 +27,12 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
 <dependency>
   <groupId>com.github.kshashov</groupId>
   <artifactId>spring-boot-starter-telegram</artifactId>
-  <version>0.16</version>
+  <version>0.18</version>
 </dependency>
 ```
 ### Gradle
 ```groovy
-implementation 'com.github.kshashov:spring-boot-starter-telegram:0.16'
+implementation 'com.github.kshashov:spring-boot-starter-telegram:0.18'
 ```
 
 ## Example
@@ -122,8 +122,8 @@ By default, you can configure only these properties:
 | telegram.bot.max-pool-size | Max pool size for default pool executor |
 | telegram.bot.session-seconds | Cache expiration time for the all beans inside session scope |
 
-If it isn’t enough, you can declare the following components with your implementations:
-* `TelegramBotGlobalPropertiesConfiguration` to configure global setting or bot specific settings:
+If it isn’t enough, you can use Java-based confirations:
+* `TelegramBotGlobalPropertiesConfiguration` to configure global and bot specific settings:
     ```java    
     @Component
     public class MyBotConfiguration implements TelegramBotGlobalPropertiesConfiguration {
@@ -139,7 +139,7 @@ If it isn’t enough, you can declare the following components with your impleme
                                 .build());
                     })
                     .configureBot(token2, botBuilder -> {
-                        botBuilder.listenerSleepMilliseconds(123L);
+                        botBuilder.sleepTimeoutMilliseconds(123L);
                     });
         }
     }

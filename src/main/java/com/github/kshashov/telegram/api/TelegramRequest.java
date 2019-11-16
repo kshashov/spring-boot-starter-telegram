@@ -21,7 +21,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class TelegramRequest {
     /**
-     * Bot instance that received the current telegram event
+     * Bot instance that received the current telegram event.
      */
     private final TelegramBot telegramBot;
 

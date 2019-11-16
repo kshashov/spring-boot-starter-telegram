@@ -31,17 +31,35 @@ public class TelegramBotProperties {
             this.token = token;
         }
 
+        /**
+         * Specify @{@link OkHttpClient} client to be used by the Telegram bot.
+         *
+         * @param okHttpClient client
+         * @return current instance
+         */
         public Builder okHttpClient(@NotNull OkHttpClient okHttpClient) {
             this.okHttpClient = okHttpClient;
             return this;
         }
 
+        /**
+         * Specify endpoint url for Telegram bot.
+         *
+         * @param url url path
+         * @return current instance
+         */
         public Builder url(@NotNull String url) {
             this.url = url;
             return this;
         }
 
-        public Builder listenerSleepMilliseconds(long listenerSleep) {
+        /**
+         * Specify timeout between requests to Telegrams API.
+         *
+         * @param listenerSleep sleep interval in milliseconds
+         * @return current instance
+         */
+        public Builder sleepTimeoutMilliseconds(long listenerSleep) {
             this.listenerSleep = listenerSleep;
             return this;
         }

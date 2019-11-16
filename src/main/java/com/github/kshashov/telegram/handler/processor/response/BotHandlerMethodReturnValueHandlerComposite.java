@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,12 +19,12 @@ public class BotHandlerMethodReturnValueHandlerComposite implements BotHandlerMe
     private final List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
 
     /**
-     * Create with the given {@link BotHandlerMethodReturnValueHandler}s.
+     * Create a composite handler for the given {@link BotHandlerMethodReturnValueHandler}s.
      *
      * @param handlers handlers to add
      */
     public BotHandlerMethodReturnValueHandlerComposite(@NotNull List<BotHandlerMethodReturnValueHandler> handlers) {
-        returnValueHandlers = handlers;
+        returnValueHandlers = new ArrayList<>(handlers);
     }
 
     @Override
@@ -45,8 +46,6 @@ public class BotHandlerMethodReturnValueHandlerComposite implements BotHandlerMe
 
     /**
      * Iterate over registered {@link BotHandlerMethodReturnValueHandler}s and invoke the one that supports it.
-     *
-     * @throws IllegalStateException if no suitable {@link BotHandlerMethodReturnValueHandler} is found.
      */
     @Override
     public BaseRequest handleReturnValue(Object returnValue, MethodParameter returnType, TelegramRequest telegramRequest) {

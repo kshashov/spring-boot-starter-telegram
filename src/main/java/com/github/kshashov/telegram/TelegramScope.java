@@ -5,12 +5,12 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import lombok.extern.slf4j.Slf4j;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.ObjectFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.config.Scope;
 import org.springframework.lang.NonNull;
 
+import javax.validation.constraints.NotNull;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
@@ -19,10 +19,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Scope store all beans in the cache by chat id (or user id)
  * <p>The bean lifetime after the last call can be redefined using the property {@code
- * TelegramConfigurationProperties.getSessionSeconds()}</p>
+ * TelegramConfigurationProperties.getSessionSeconds()}.</p>
  *
  * <p><strong>Note: </strong> All {@link TelegramSession} instances have this scope by
- * default
+ * default.
  *
  * @see TelegramScopeException
  */
@@ -35,7 +35,7 @@ public class TelegramScope implements Scope {
     private final LoadingCache<String, ConcurrentHashMap<String, Object>> conversations;
 
     @SuppressWarnings("unchecked")
-    public TelegramScope(@NotNull ConfigurableListableBeanFactory beanFactory, long expireSeconds) {
+    TelegramScope(@NotNull ConfigurableListableBeanFactory beanFactory, long expireSeconds) {
         this.beanFactory = beanFactory;
         conversations = CacheBuilder
                 .newBuilder()
@@ -70,9 +70,9 @@ public class TelegramScope implements Scope {
         beanFactory.destroyBean(bean);
     }
 
-    @NotNull
+    @NonNull
     @Override
-    public Object get(@NotNull String name, @NotNull ObjectFactory<?> objectFactory) throws TelegramScopeException {
+    public Object get(@NonNull String name, @NonNull ObjectFactory<?> objectFactory) throws TelegramScopeException {
         final String sessionId = getConversationId();
         if (sessionId == null) {
             throw new TelegramScopeException("There is no current session");
@@ -87,7 +87,7 @@ public class TelegramScope implements Scope {
     }
 
     @Override
-    public Object remove(@NotNull String name) {
+    public Object remove(@NonNull String name) {
         final String sessionId = getConversationId();
         if (sessionId != null) {
             final Map<String, Object> userBeans = conversations.getIfPresent(sessionId);
@@ -99,11 +99,11 @@ public class TelegramScope implements Scope {
     }
 
     @Override
-    public void registerDestructionCallback(String name, Runnable callback) {
+    public void registerDestructionCallback(@NonNull String name, @NonNull Runnable callback) {
     }
 
     @Override
-    public Object resolveContextualObject(String key) {
+    public Object resolveContextualObject(@NonNull String key) {
         return null;
     }
 

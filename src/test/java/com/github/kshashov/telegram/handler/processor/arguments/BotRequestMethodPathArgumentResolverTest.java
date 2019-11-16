@@ -27,9 +27,9 @@ public class BotRequestMethodPathArgumentResolverTest {
     private TelegramSession telegramSession;
 
     @BeforeEach
-    public void prepare() {
+    void prepare() {
         this.processor = new BotRequestMethodPathArgumentResolver();
-        this.values = Stream.of(TestUtils.findMethod(this, "method").getParameters())
+        this.values = Stream.of(TestUtils.findMethodByTitle(this, "method").getParameters())
                 .map(MethodParameter::forParameter)
                 .toArray(MethodParameter[]::new);
 
@@ -44,7 +44,7 @@ public class BotRequestMethodPathArgumentResolverTest {
     }
 
     @Test
-    public void supportsParameter() {
+    void supportsParameter() {
         assertFalse(processor.supportsParameter(values[0]));
         assertFalse(processor.supportsParameter(values[1]));
         assertFalse(processor.supportsParameter(values[3]));
@@ -62,12 +62,12 @@ public class BotRequestMethodPathArgumentResolverTest {
     }
 
     @Test
-    public void resolveArgument_Strings_ReturnAsIs() {
+    void resolveArgument_Strings_ReturnAsIs() {
         assertEquals("text", processor.resolveArgument(values[5], telegramRequest, telegramSession));
     }
 
     @Test
-    public void resolveArgument_Numbers_ReturnConverted() {
+    void resolveArgument_Numbers_ReturnConverted() {
         assertEquals(12, processor.resolveArgument(values[7], telegramRequest, telegramSession));
         assertEquals(12L, processor.resolveArgument(values[8], telegramRequest, telegramSession));
         assertEquals(new Double(12.12), processor.resolveArgument(values[9], telegramRequest, telegramSession));
@@ -77,27 +77,27 @@ public class BotRequestMethodPathArgumentResolverTest {
     }
 
     @Test
-    public void resolveArgument_UnsupportedTypes_ReturnNull() {
+    void resolveArgument_UnsupportedTypes_ReturnNull() {
         assertNull(processor.resolveArgument(values[0], telegramRequest, telegramSession));
     }
 
     @Test
-    public void resolveArgument_InvalidNumbers_ReturnNull() {
+    void resolveArgument_InvalidNumbers_ReturnNull() {
         assertNull(processor.resolveArgument(values[6], telegramRequest, telegramSession));
     }
 
     @Test
-    public void resolveArgument_DefaultName_ReturnForEmptyString() {
+    void resolveArgument_DefaultName_ReturnForEmptyString() {
         assertEquals("empty", processor.resolveArgument(values[4], telegramRequest, telegramSession));
     }
 
     @Test
-    public void resolveArgument_MissedAnnotation_ReturnNull() {
+    void resolveArgument_MissedAnnotation_ReturnNull() {
         assertNull(processor.resolveArgument(values[1], telegramRequest, telegramSession));
     }
 
     @Test
-    public void resolveArgument_MissedName_ReturnNull() {
+    void resolveArgument_MissedName_ReturnNull() {
         assertNull(processor.resolveArgument(values[3], telegramRequest, telegramSession));
     }
 

@@ -9,7 +9,9 @@ import com.github.kshashov.telegram.handler.HandlerMethodContainer;
 import com.github.kshashov.telegram.handler.TelegramService;
 import com.github.kshashov.telegram.handler.processor.RequestDispatcher;
 import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolver;
+import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolverComposite;
 import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandler;
+import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandlerComposite;
 import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.response.BaseResponse;
@@ -45,14 +47,18 @@ import java.util.stream.Collectors;
 @Configuration
 @Import(MethodProcessorsConfiguration.class)
 @EnableConfigurationProperties(TelegramConfigurationProperties.class)
-public class TelegramConfiguration implements BeanFactoryPostProcessor, EnvironmentAware {
+public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, EnvironmentAware {
+    public static final String METRIC_INVOCATIONS = "telegram.bot.invocations";
+    public static final String METRIC_INVOCATIONS_DESCRIPTION = "Indicates invocation count of the bot methods";
+    public static final String METRIC_INVOCATIONS_BASE_UNIT = "invocation";
+
     private Environment environment;
 
     @Bean
     @Qualifier("telegramServicesList")
-    List<TelegramService> telegramServices(@Qualifier("telegramBotPropertiesList") List<TelegramBotProperties> botProperties, RequestDispatcher requestDispatcher) {
+    List<TelegramService> telegramServices(@Qualifier("telegramBotPropertiesList") List<TelegramBotProperties> botProperties, TelegramBotGlobalProperties globalProperties, RequestDispatcher requestDispatcher) {
         List<TelegramService> services = botProperties.stream()
-                .map(p -> new TelegramService(p, requestDispatcher))
+                .map(p -> new TelegramService(globalProperties, p, requestDispatcher))
                 .collect(Collectors.toList());
 
         if (services.isEmpty()) {
@@ -85,15 +91,19 @@ public class TelegramConfiguration implements BeanFactoryPostProcessor, Environm
             HandlerMethodContainer handlerMethodContainer,
             TelegramSessionResolver sessionResolver,
             TelegramBotGlobalProperties botGlobalProperties) {
-        return new RequestDispatcher(handlerMethodContainer, botGlobalProperties, sessionResolver);
+        BotHandlerMethodArgumentResolverComposite argumentResolver = new BotHandlerMethodArgumentResolverComposite(botGlobalProperties.getArgumentResolvers());
+        BotHandlerMethodReturnValueHandlerComposite returnValueHandler = new BotHandlerMethodReturnValueHandlerComposite(botGlobalProperties.getReturnValueHandlers());
+
+        return new RequestDispatcher(handlerMethodContainer, sessionResolver, argumentResolver, returnValueHandler);
     }
 
     @Bean
     TelegramBotGlobalProperties telegramBotGlobalProperties(
             TelegramBotGlobalPropertiesConfiguration botGlobalPropertiesConfiguration,
             List<BotHandlerMethodArgumentResolver> argumentResolvers,
-            List<BotHandlerMethodReturnValueHandler> returnValueHandlers) {
-        TelegramBotGlobalProperties.Builder defaultBuilder = createDefaultBotGlobalPropertiesBuilder(argumentResolvers, returnValueHandlers);
+            List<BotHandlerMethodReturnValueHandler> returnValueHandlers,
+            TelegramConfigurationProperties properties) {
+        TelegramBotGlobalProperties.Builder defaultBuilder = createDefaultBotGlobalPropertiesBuilder(argumentResolvers, returnValueHandlers, properties);
         botGlobalPropertiesConfiguration.configure(defaultBuilder);
         return defaultBuilder.build();
     }
@@ -132,25 +142,24 @@ public class TelegramConfiguration implements BeanFactoryPostProcessor, Environm
     }
 
     @Bean
-    ApplicationListener<ContextClosedEvent> onContextClosed(RequestDispatcher requestDispatcher) {
+    ApplicationListener<ContextClosedEvent> onContextClosed(TelegramBotGlobalProperties globalProperties) {
         return event -> {
-            if (requestDispatcher.getBotGlobalProperties().getTaskExecutor() != null) {
+            if (globalProperties.getTaskExecutor() != null) {
                 log.info("Shutting down ThreadPoolExecutor");
-                requestDispatcher.getBotGlobalProperties().getTaskExecutor().shutdown();
+                globalProperties.getTaskExecutor().shutdown();
                 log.info("ThreadPoolExecutor has been shut down");
             }
         };
     }
 
-    private TelegramBotGlobalProperties.Builder createDefaultBotGlobalPropertiesBuilder(@NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers, @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers) {
-        return TelegramBotGlobalProperties
-                .builder()
+    private TelegramBotGlobalProperties.Builder createDefaultBotGlobalPropertiesBuilder(
+            @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers,
+            @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers,
+            @NotNull TelegramConfigurationProperties properties) {
+        return TelegramBotGlobalProperties.builder()
                 .argumentResolvers(argumentResolvers)
                 .returnValueHandlers(returnValueHandlers)
-                .taskExecutor(new ThreadPoolExecutor(
-                        environment.getProperty("telegram.bot.core-pool-size", Integer.class, 15),
-                        environment.getProperty("telegram.bot.max-pool-size", Integer.class, 200),
-                        0L, TimeUnit.SECONDS, new SynchronousQueue<>()))
+                .taskExecutor(new ThreadPoolExecutor(properties.getCorePoolSize(), properties.getMaxPoolSize(), 0L, TimeUnit.SECONDS, new SynchronousQueue<>()))
                 .responseCallback(new Callback<BaseRequest, BaseResponse>() {
                     @Override
                     public void onResponse(BaseRequest request, BaseResponse response) {
@@ -163,10 +172,9 @@ public class TelegramConfiguration implements BeanFactoryPostProcessor, Environm
     }
 
     private TelegramBotProperties.Builder createDefaultBotPropertiesBuilder(@NotNull String token, @NotNull TelegramBotGlobalProperties globalProperties) {
-        return TelegramBotProperties
-                .builder(token)
+        return TelegramBotProperties.builder(token)
                 .url("https://api.telegram.org/bot")
-                .listenerSleepMilliseconds(200L)
+                .sleepTimeoutMilliseconds(200L)
                 .okHttpClient(new OkHttpClient.Builder()
                         .dispatcher(new Dispatcher(globalProperties.getTaskExecutor()))
                         .build());

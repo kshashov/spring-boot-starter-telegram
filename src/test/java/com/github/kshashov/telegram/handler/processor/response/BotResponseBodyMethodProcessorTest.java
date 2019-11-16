@@ -24,10 +24,10 @@ public class BotResponseBodyMethodProcessorTest {
     private ConversionService conversionService;
 
     @BeforeEach
-    public void prepare() {
+    void prepare() {
         this.conversionService = mock(ConversionService.class);
         this.processor = new BotResponseBodyMethodProcessor(conversionService);
-        this.values = Stream.of(TestUtils.findMethod(this, "method").getParameters())
+        this.values = Stream.of(TestUtils.findMethodByTitle(this, "method").getParameters())
                 .map(MethodParameter::forParameter)
                 .toArray(MethodParameter[]::new);
 
@@ -38,7 +38,7 @@ public class BotResponseBodyMethodProcessorTest {
     }
 
     @Test
-    public void supportsReturnType() {
+    void supportsReturnType() {
         assertTrue(processor.supportsReturnType(values[0]));
         assertTrue(processor.supportsReturnType(values[1]));
         assertTrue(processor.supportsReturnType(values[2]));
@@ -47,7 +47,7 @@ public class BotResponseBodyMethodProcessorTest {
     }
 
     @Test
-    public void handleReturnValue_UnsupportedTypes_ReturnNull() {
+    void handleReturnValue_UnsupportedTypes_ReturnNull() {
         assertNull(processor.handleReturnValue(5, values[1], telegramRequest));
         assertNull(processor.handleReturnValue(6, values[2], telegramRequest));
         assertNull(processor.handleReturnValue(new SendMessage(12L, "text"), values[3], telegramRequest));
@@ -55,7 +55,7 @@ public class BotResponseBodyMethodProcessorTest {
     }
 
     @Test
-    public void handleReturnValue_WithoutChat_ReturnNull() {
+    void handleReturnValue_WithoutChat_ReturnNull() {
         when(telegramRequest.getChat()).thenReturn(null);
         BaseRequest result = processor.handleReturnValue("text", values[0], telegramRequest);
 
@@ -63,7 +63,7 @@ public class BotResponseBodyMethodProcessorTest {
     }
 
     @Test
-    public void handleReturnValue_TestString() {
+    void handleReturnValue_TestString() {
         BaseRequest result = processor.handleReturnValue("text", values[0], telegramRequest);
 
         assertNotNull(result);
@@ -75,7 +75,7 @@ public class BotResponseBodyMethodProcessorTest {
     }
 
     @Test
-    public void handleReturnValue_CanConvertToString_ReturnConverted() {
+    void handleReturnValue_CanConvertToString_ReturnConverted() {
         when(conversionService.canConvert(eq(SendMessage.class), eq(String.class))).thenReturn(true);
         when(conversionService.convert(any(SendMessage.class), eq(String.class))).thenReturn("converted");
 

@@ -23,8 +23,8 @@ public class BotHandlerMethodReturnValueHandlerCompositeTest {
     private TelegramRequest telegramRequest;
 
     @BeforeEach
-    public void prepare() {
-        this.values = Stream.of(TestUtils.findMethod(this, "method").getParameters())
+    void prepare() {
+        this.values = Stream.of(TestUtils.findMethodByTitle(this, "method").getParameters())
                 .map(MethodParameter::forParameter)
                 .toArray(MethodParameter[]::new);
 
@@ -38,7 +38,7 @@ public class BotHandlerMethodReturnValueHandlerCompositeTest {
     }
 
     @Test
-    public void supportsReturnType_WithoutResolvers_ReturnFalse() {
+    void supportsReturnType_WithoutResolvers_ReturnFalse() {
         BotHandlerMethodReturnValueHandlerComposite processor =
                 new BotHandlerMethodReturnValueHandlerComposite(new ArrayList<>());
 
@@ -50,7 +50,7 @@ public class BotHandlerMethodReturnValueHandlerCompositeTest {
     }
 
     @Test
-    public void supportsReturnType_UnsupportedTypes_ReturnFalse() {
+    void supportsReturnType_UnsupportedTypes_ReturnFalse() {
         BotHandlerMethodReturnValueHandlerComposite processor =
                 new BotHandlerMethodReturnValueHandlerComposite(handlers);
 
@@ -67,7 +67,7 @@ public class BotHandlerMethodReturnValueHandlerCompositeTest {
     }
 
     @Test
-    public void supportsReturnType() {
+    void supportsReturnType() {
         BotHandlerMethodReturnValueHandler handler = mock(BotHandlerMethodReturnValueHandler.class);
         when(handler.supportsReturnType(any(MethodParameter.class))).thenAnswer(any ->
                 BaseRequest.class.isAssignableFrom(any.<MethodParameter>getArgument(0).getParameterType()));
@@ -92,14 +92,14 @@ public class BotHandlerMethodReturnValueHandlerCompositeTest {
     }
 
     @Test
-    public void handleReturnValue_WithoutResolvers_ReturnNull() {
+    void handleReturnValue_WithoutResolvers_ReturnNull() {
         BotHandlerMethodReturnValueHandlerComposite processor =
                 new BotHandlerMethodReturnValueHandlerComposite(new ArrayList<>());
         assertNull(processor.handleReturnValue(new SendMessage(12L, "text"), values[4], telegramRequest));
     }
 
     @Test
-    public void handleReturnValue_UnsupportedTypes_ReturnNull() {
+    void handleReturnValue_UnsupportedTypes_ReturnNull() {
         BotHandlerMethodReturnValueHandlerComposite processor =
                 new BotHandlerMethodReturnValueHandlerComposite(handlers);
 
@@ -107,7 +107,7 @@ public class BotHandlerMethodReturnValueHandlerCompositeTest {
     }
 
     @Test
-    public void testHandleReturnValue() {
+    void testHandleReturnValue() {
         BotHandlerMethodReturnValueHandler handler = mock(BotHandlerMethodReturnValueHandler.class);
         when(handler.supportsReturnType(any(MethodParameter.class))).thenReturn(true);
         when(handler.handleReturnValue(any(), any(), any())).thenReturn(new SendMessage(12L, "text"));

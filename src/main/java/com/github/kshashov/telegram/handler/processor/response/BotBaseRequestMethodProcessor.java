@@ -7,7 +7,7 @@ import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 
 /**
- * Add support for {@link BaseRequest} return type
+ * Add support for {@link BaseRequest} return type.
  */
 @Slf4j
 @Component

@@ -8,7 +8,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 /**
- * Add support for {@link String} return type
+ * Add support for {@link String} return type.
  */
 @Component
 public class BotResponseBodyMethodProcessor implements BotHandlerMethodReturnValueHandler {

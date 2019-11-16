@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 
 import javax.validation.constraints.NotNull;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,12 +23,12 @@ public class BotHandlerMethodArgumentResolverComposite implements BotHandlerMeth
             new ConcurrentHashMap<>(256);
 
     /**
-     * Create the given {@link BotHandlerMethodArgumentResolver}s.
+     * Create a composite resolver for the given {@link BotHandlerMethodArgumentResolver}s.
      *
      * @param resolvers to add.
      */
     public BotHandlerMethodArgumentResolverComposite(@NotNull List<BotHandlerMethodArgumentResolver> resolvers) {
-        argumentResolvers = resolvers;
+        argumentResolvers = new ArrayList<>(resolvers);
     }
 
     @Override

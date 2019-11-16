@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 /**
- * Accumulates all available parameters from the initial telegram request
+ * Accumulates all available parameters from the initial telegram request.
  *
  * @see BaseRequest
  */
@@ -60,7 +60,7 @@ public class TelegramEvent {
     private final String text;
 
     /**
-     * Bot instance that received the current telegram event
+     * Bot instance that received the current telegram event.
      */
 
     private final @NotNull TelegramBot telegramBot;
@@ -72,7 +72,7 @@ public class TelegramEvent {
 
     private final String token;
 
-    TelegramEvent(@NotNull String token, @NotNull Update update, @NotNull TelegramBot telegramBot) {
+    public TelegramEvent(@NotNull String token, @NotNull Update update, @NotNull TelegramBot telegramBot) {
         this.token = token;
         this.telegramBot = telegramBot;
         this.update = update;

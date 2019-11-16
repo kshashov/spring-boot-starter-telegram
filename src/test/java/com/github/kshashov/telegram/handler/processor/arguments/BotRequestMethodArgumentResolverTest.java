@@ -25,9 +25,9 @@ public class BotRequestMethodArgumentResolverTest {
     private Update update;
 
     @BeforeEach
-    public void prepare() {
+    void prepare() {
         this.processor = new BotRequestMethodArgumentResolver();
-        this.values = Stream.of(TestUtils.findMethod(this, "method").getParameters())
+        this.values = Stream.of(TestUtils.findMethodByTitle(this, "method").getParameters())
                 .map(MethodParameter::forParameter)
                 .toArray(MethodParameter[]::new);
 
@@ -50,7 +50,7 @@ public class BotRequestMethodArgumentResolverTest {
     }
 
     @Test
-    public void supportsParameter() {
+    void supportsParameter() {
         assertFalse(processor.supportsParameter(values[0]));
         assertFalse(processor.supportsParameter(values[1]));
 
@@ -71,12 +71,12 @@ public class BotRequestMethodArgumentResolverTest {
     }
 
     @Test
-    public void resolveArgument_UnsupportedTypes_ReturnNull() {
+    void resolveArgument_UnsupportedTypes_ReturnNull() {
         assertNull(processor.resolveArgument(values[0], telegramRequest, telegramSession));
     }
 
     @Test
-    public void resolveArgument_ReturnAsIs() {
+    void resolveArgument_ReturnAsIs() {
         assertEquals(telegramRequest, processor.resolveArgument(values[2], telegramRequest, telegramSession));
         assertEquals(telegramSession, processor.resolveArgument(values[3], telegramRequest, telegramSession));
         assertEquals(telegramRequest.getTelegramBot(), processor.resolveArgument(values[4], telegramRequest, telegramSession));

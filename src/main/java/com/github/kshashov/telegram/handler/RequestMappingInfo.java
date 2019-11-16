@@ -8,7 +8,7 @@ import lombok.Getter;
 import java.util.Set;
 
 /**
- * Stores request mappings for the current bot controller
+ * Stores request mappings for the current bot controller.
  */
 @Getter
 @AllArgsConstructor

@@ -43,21 +43,46 @@ public class TelegramBotGlobalProperties {
             return this;
         }
 
+        /**
+         * Specify callback to process result of the telegram request that was submitted by the handler method.
+         *
+         * @param responseCallback response callback
+         * @return current instance
+         */
         public Builder responseCallback(@NotNull Callback<BaseRequest, BaseResponse> responseCallback) {
             this.responseCallback = responseCallback;
             return this;
         }
 
+        /**
+         * Specify resolvers to process handler method arguments.
+         *
+         * @param argumentResolvers resolvers list
+         * @return current instance
+         */
         public Builder argumentResolvers(@NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers) {
             this.argumentResolvers = argumentResolvers;
             return this;
         }
 
+        /**
+         * Specify handlers to process result value.
+         *
+         * @param returnValueHandlers handlers list
+         * @return current instance
+         */
         public Builder returnValueHandlers(@NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers) {
             this.returnValueHandlers = returnValueHandlers;
             return this;
         }
 
+        /**
+         * Provide configuration for specified bot.
+         *
+         * @param token              bot token
+         * @param propertiesConsumer configuration for specified bot
+         * @return current instance
+         */
         public Builder configureBot(@NotNull String token, @NotNull Consumer<TelegramBotProperties.Builder> propertiesConsumer) {
             botProperties.put(token, propertiesConsumer);
             return this;

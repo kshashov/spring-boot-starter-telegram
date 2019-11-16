@@ -1,42 +1,144 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.github.kshashov</groupId>
     <artifactId>spring-boot-starter-telegram</artifactId>
+    <version>0.18-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>spring-boot-starter-telegram</name>
+    <description>Spring-boot starter for Telegram bots</description>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <guava.version>23.0</guava.version>
+        <telegram-bot-api.version>4.4.0</telegram-bot-api.version>
+    </properties>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.1.9.RELEASE</version>
+        <relativePath/>
+    </parent>
+
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/kshashov/spring-boot-starter-telegram/issues</url>
+    </issueManagement>
+
+    <licenses>
+        <license>
+            <distribution>repo</distribution>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <tag>HEAD</tag>
+        <connection>scm:git:git://github.com/kshashov/spring-boot-starter-telegram.git</connection>
+        <developerConnection>scm:git:git@github.com:kshashov/spring-boot-starter-telegram.git</developerConnection>
+        <url>https://github.com/kshashov/spring-boot-starter-telegram</url>
+    </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+            <exclusions>
+                <!-- Exclude JUnit 4 -->
+                <exclusion>
+                    <artifactId>junit</artifactId>
+                    <groupId>junit</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.pengrad</groupId>
+            <artifactId>java-telegram-bot-api</artifactId>
+            <version>${telegram-bot-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
+    </dependencies>
 
     <build>
         <plugins>
             <plugin>
+                <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.7</version>
+                <extensions>true</extensions>
                 <configuration>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <serverId>ossrh</serverId>
                 </configuration>
-                <extensions>true</extensions>
-                <groupId>org.sonatype.plugins</groupId>
-                <version>1.6.7</version>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
                 <executions>
                     <execution>
+                        <id>default-deploy</id>
+                        <phase>deploy</phase>
                         <goals>
                             <goal>deploy</goal>
                         </goals>
-                        <id>default-deploy</id>
-                        <phase>deploy</phase>
                     </execution>
                 </executions>
-                <version>2.8.2</version>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <useSystemClassLoader>false</useSystemClassLoader>
                 </configuration>
-                <groupId>org.apache.maven.plugins</groupId>
-                <version>2.22.1</version>
             </plugin>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
                     <arguments>-Dgpg.passphrase=${gpg.passphrase}</arguments>
@@ -51,105 +153,33 @@
                         <version>1.9.5</version>
                     </dependency>
                 </dependencies>
-                <groupId>org.apache.maven.plugins</groupId>
-                <version>2.5.3</version>
             </plugin>
             <plugin>
+                <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.4</version>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
-                        <id>prepare-agent</id>
                     </execution>
                     <execution>
-                        <configuration>
-                            <outputDirectory>target/jacoco</outputDirectory>
-                        </configuration>
+                        <id>report</id>
+                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
-                        <id>report</id>
-                        <phase>test</phase>
+                        <configuration>
+                            <outputDirectory>target/jacoco</outputDirectory>
+                        </configuration>
                     </execution>
                 </executions>
-                <groupId>org.jacoco</groupId>
-                <version>0.8.4</version>
             </plugin>
         </plugins>
     </build>
-    <dependencies>
-        <dependency>
-            <artifactId>spring-boot-starter</artifactId>
-            <groupId>org.springframework.boot</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>spring-context</artifactId>
-            <groupId>org.springframework</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>junit</artifactId>
-                    <groupId>junit</groupId>
-                </exclusion>
-            </exclusions>
-            <groupId>org.springframework.boot</groupId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <artifactId>junit-jupiter-api</artifactId>
-            <groupId>org.junit.jupiter</groupId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <groupId>org.junit.jupiter</groupId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <artifactId>spring-web</artifactId>
-            <groupId>org.springframework</groupId>
-        </dependency>
-        <dependency>
-            <artifactId>guava</artifactId>
-            <groupId>com.google.guava</groupId>
-            <version>23.0</version>
-        </dependency>
-        <dependency>
-            <artifactId>java-telegram-bot-api</artifactId>
-            <groupId>com.github.pengrad</groupId>
-            <version>4.4.0</version>
-        </dependency>
-        <dependency>
-            <artifactId>spring-boot-configuration-processor</artifactId>
-            <groupId>org.springframework.boot</groupId>
-            <optional>true</optional>
-        </dependency>
-        <dependency>
-            <artifactId>okhttp</artifactId>
-            <groupId>com.squareup.okhttp3</groupId>
-            <version>4.2.0</version>
-        </dependency>
-        <dependency>
-            <artifactId>lombok</artifactId>
-            <groupId>org.projectlombok</groupId>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <artifactId>junit</artifactId>
-            <groupId>junit</groupId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <artifactId>validation-api</artifactId>
-            <groupId>javax.validation</groupId>
-            <version>2.0.0.Final</version>
-        </dependency>
-    </dependencies>
-    <description>Spring-boot starter for telegram bots</description>
+
     <distributionManagement>
         <repository>
             <id>ossrh</id>
@@ -162,98 +192,58 @@
         </snapshotRepository>
     </distributionManagement>
 
-    <groupId>com.github.kshashov</groupId>
-    <issueManagement>
-        <system>GitHub Issues</system>
-        <url>https://github.com/kshashov/spring-boot-starter-telegram/issues</url>
-    </issueManagement>
-
-    <licenses>
-        <license>
-            <distribution>repo</distribution>
-            <name>MIT License</name>
-            <url>http://www.opensource.org/licenses/mit-license.php</url>
-        </license>
-    </licenses>
-    <modelVersion>4.0.0</modelVersion>
-    <name>spring-boot-starter-telegram</name>
-
-    <packaging>jar</packaging>
-
-    <parent>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <groupId>org.springframework.boot</groupId>
-        <relativePath />
-        <version>2.1.9.RELEASE</version>
-    </parent>
-
     <profiles>
         <profile>
+            <id>release</id>
+
             <activation>
                 <property>
                     <name>performRelease</name>
                     <value>true</value>
                 </property>
             </activation>
-
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
                         <executions>
                             <execution>
+                                <id>attach-sources</id>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
-                                <id>attach-sources</id>
                             </execution>
                         </executions>
-                        <groupId>org.apache.maven.plugins</groupId>
                     </plugin>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <executions>
                             <execution>
+                                <id>attach-javadocs</id>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
-                                <id>attach-javadocs</id>
                             </execution>
                         </executions>
-                        <groupId>org.apache.maven.plugins</groupId>
                     </plugin>
                     <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
                         <executions>
                             <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
                             </execution>
                         </executions>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <version>1.6</version>
                     </plugin>
                 </plugins>
             </build>
-            <id>release</id>
         </profile>
     </profiles>
-    <properties>
-        <java.version>1.8</java.version>
-        <junit-jupiter.version>5.4.0</junit-jupiter.version>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-
-    <scm>
-        <connection>scm:git:git://github.com/kshashov/spring-boot-starter-telegram.git</connection>
-        <developerConnection>scm:git:git@github.com:kshashov/spring-boot-starter-telegram.git</developerConnection>
-        <tag>HEAD</tag>
-        <url>https://github.com/kshashov/spring-boot-starter-telegram</url>
-    </scm>
-    <version>0.18-SNAPSHOT</version>
 </project>

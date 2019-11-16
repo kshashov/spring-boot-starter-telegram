@@ -21,9 +21,9 @@ public class BotBaseRequestMethodProcessorTest {
     private TelegramRequest telegramRequest;
 
     @BeforeEach
-    public void prepare() {
+    void prepare() {
         this.processor = new BotBaseRequestMethodProcessor();
-        this.values = Stream.of(TestUtils.findMethod(this, "method").getParameters())
+        this.values = Stream.of(TestUtils.findMethodByTitle(this, "method").getParameters())
                 .map(MethodParameter::forParameter)
                 .toArray(MethodParameter[]::new);
 
@@ -31,7 +31,7 @@ public class BotBaseRequestMethodProcessorTest {
     }
 
     @Test
-    public void supportsReturnType() {
+    void supportsReturnType() {
         assertFalse(processor.supportsReturnType(values[0]));
         assertFalse(processor.supportsReturnType(values[1]));
         assertFalse(processor.supportsReturnType(values[2]));
@@ -41,7 +41,7 @@ public class BotBaseRequestMethodProcessorTest {
     }
 
     @Test
-    public void handleReturnValue_IllegalValues_ReturnNull() {
+    void handleReturnValue_IllegalValues_ReturnNull() {
         assertNull(processor.handleReturnValue("", values[0], telegramRequest));
         assertNull(processor.handleReturnValue(5, values[1], telegramRequest));
         assertNull(processor.handleReturnValue(6, values[2], telegramRequest));
@@ -49,7 +49,7 @@ public class BotBaseRequestMethodProcessorTest {
     }
 
     @Test
-    public void handleReturnValue_TestSendMessage() {
+    void handleReturnValue_TestSendMessage() {
         BaseRequest result = processor.handleReturnValue(new SendMessage(12L, "text"), values[4], telegramRequest);
 
         assertNotNull(result);

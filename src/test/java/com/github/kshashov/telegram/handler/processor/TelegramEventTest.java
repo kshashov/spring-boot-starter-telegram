@@ -19,7 +19,7 @@ public class TelegramEventTest {
     private String token = "";
 
     @BeforeEach
-    public void init() {
+    void init() {
         bot = mock(TelegramBot.class);
         update = mock(Update.class);
         chat = mock(Chat.class);
@@ -27,7 +27,7 @@ public class TelegramEventTest {
     }
 
     @Test
-    public void unsupported() {
+    void unsupported() {
         TelegramEvent event = new TelegramEvent(token, update, bot);
 
         assertEquals(update, event.getUpdate());
@@ -40,7 +40,7 @@ public class TelegramEventTest {
     }
 
     @Test
-    public void message() {
+    void message() {
         Message message = mock(Message.class);
         when(message.chat()).thenReturn(chat);
         when(message.from()).thenReturn(user);
@@ -59,7 +59,7 @@ public class TelegramEventTest {
     }
 
     @Test
-    public void editedMessage() {
+    void editedMessage() {
         Message message = mock(Message.class);
         when(message.chat()).thenReturn(chat);
         when(message.from()).thenReturn(user);
@@ -78,7 +78,7 @@ public class TelegramEventTest {
     }
 
     @Test
-    public void channelPost() {
+    void channelPost() {
         Message message = mock(Message.class);
         when(message.chat()).thenReturn(chat);
         when(message.from()).thenReturn(user);
@@ -97,7 +97,7 @@ public class TelegramEventTest {
     }
 
     @Test
-    public void editedChannelPost() {
+    void editedChannelPost() {
         Message message = mock(Message.class);
         when(message.chat()).thenReturn(chat);
         when(message.from()).thenReturn(user);
@@ -116,7 +116,7 @@ public class TelegramEventTest {
     }
 
     @Test
-    public void callbackQuery() {
+    void callbackQuery() {
         Message message = mock(Message.class);
         when(message.chat()).thenReturn(chat);
         CallbackQuery callbackQuery = mock(CallbackQuery.class);
@@ -136,7 +136,7 @@ public class TelegramEventTest {
     }
 
     @Test
-    public void inlineQuery() {
+    void inlineQuery() {
         InlineQuery inlineQuery = mock(InlineQuery.class);
         when(inlineQuery.query()).thenReturn("test");
         when(inlineQuery.from()).thenReturn(user);
@@ -153,7 +153,7 @@ public class TelegramEventTest {
     }
 
     @Test
-    public void chosenInlineResult() {
+    void chosenInlineResult() {
         ChosenInlineResult chosenInlineResult = mock(ChosenInlineResult.class);
         when(chosenInlineResult.query()).thenReturn("test");
         when(chosenInlineResult.from()).thenReturn(user);
@@ -170,7 +170,7 @@ public class TelegramEventTest {
     }
 
     @Test
-    public void shippingQuery() {
+    void shippingQuery() {
         ShippingQuery shippingQuery = mock(ShippingQuery.class);
         when(shippingQuery.invoicePayload()).thenReturn("test");
         when(shippingQuery.from()).thenReturn(user);
@@ -187,7 +187,7 @@ public class TelegramEventTest {
     }
 
     @Test
-    public void preCheckoutQuery() {
+    void preCheckoutQuery() {
         PreCheckoutQuery preCheckoutQuery = mock(PreCheckoutQuery.class);
         when(preCheckoutQuery.invoicePayload()).thenReturn("test");
         when(preCheckoutQuery.from()).thenReturn(user);
@@ -204,7 +204,7 @@ public class TelegramEventTest {
     }
 
     @Test
-    public void poll() {
+    void poll() {
         Poll poll = mock(Poll.class);
 
         when(update.poll()).thenReturn(poll);

@@ -25,8 +25,8 @@ public class BotHandlerMethodArgumentResolverCompositeTest {
     private TelegramSession telegramSession;
 
     @BeforeEach
-    public void prepare() {
-        this.values = Stream.of(TestUtils.findMethod(this, "method").getParameters())
+    void prepare() {
+        this.values = Stream.of(TestUtils.findMethodByTitle(this, "method").getParameters())
                 .map(MethodParameter::forParameter)
                 .toArray(MethodParameter[]::new);
 
@@ -41,7 +41,7 @@ public class BotHandlerMethodArgumentResolverCompositeTest {
     }
 
     @Test
-    public void supportsParameter_WithoutResolvers_ReturnFalse() {
+    void supportsParameter_WithoutResolvers_ReturnFalse() {
         BotHandlerMethodArgumentResolverComposite processor =
                 new BotHandlerMethodArgumentResolverComposite(new ArrayList<>());
 
@@ -53,7 +53,7 @@ public class BotHandlerMethodArgumentResolverCompositeTest {
     }
 
     @Test
-    public void supportsParameter_UnsupportedArguments_ReturnFalse() {
+    void supportsParameter_UnsupportedArguments_ReturnFalse() {
         BotHandlerMethodArgumentResolverComposite processor =
                 new BotHandlerMethodArgumentResolverComposite(resolvers);
 
@@ -70,7 +70,7 @@ public class BotHandlerMethodArgumentResolverCompositeTest {
     }
 
     @Test
-    public void supportsParameter() {
+    void supportsParameter() {
         BotHandlerMethodArgumentResolver handler = mock(BotHandlerMethodArgumentResolver.class);
         when(handler.supportsParameter(any(MethodParameter.class))).thenAnswer(any ->
                 SendMessage.class.isAssignableFrom(any.<MethodParameter>getArgument(0).getParameterType()));
@@ -94,7 +94,7 @@ public class BotHandlerMethodArgumentResolverCompositeTest {
     }
 
     @Test
-    public void resolveArgument_WithoutResolvers_ReturnNull() {
+    void resolveArgument_WithoutResolvers_ReturnNull() {
         BotHandlerMethodArgumentResolverComposite processor =
                 new BotHandlerMethodArgumentResolverComposite(new ArrayList<>());
 
@@ -102,7 +102,7 @@ public class BotHandlerMethodArgumentResolverCompositeTest {
     }
 
     @Test
-    public void resolveArgument_UnsupportedArgument_ReturnNull() {
+    void resolveArgument_UnsupportedArgument_ReturnNull() {
         BotHandlerMethodArgumentResolverComposite processor =
                 new BotHandlerMethodArgumentResolverComposite(resolvers);
 
@@ -110,7 +110,7 @@ public class BotHandlerMethodArgumentResolverCompositeTest {
     }
 
     @Test
-    public void resolveArgument() {
+    void resolveArgument() {
         BotHandlerMethodArgumentResolver handler = mock(BotHandlerMethodArgumentResolver.class);
         when(handler.supportsParameter(any(MethodParameter.class))).thenReturn(true);
         when(handler.resolveArgument(any(), any(), any())).thenReturn(new SendMessage(12L, "text"));

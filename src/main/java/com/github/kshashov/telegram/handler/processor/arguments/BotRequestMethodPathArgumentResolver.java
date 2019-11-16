@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * Add support for {@link String} arguments marked by {@link BotPathVariable} annotation
+ * Add support for {@link String} arguments marked by {@link BotPathVariable} annotation.
  */
 @Slf4j
 public class BotRequestMethodPathArgumentResolver implements BotHandlerMethodArgumentResolver {
