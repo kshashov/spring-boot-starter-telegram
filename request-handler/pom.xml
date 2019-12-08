@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>request-handler</artifactId>
+    <packaging>jar</packaging>
+
+    <parent>
+        <artifactId>spring-boot-starter-telegram</artifactId>
+        <groupId>com.github.kshashov</groupId>
+        <version>0.19-SNAPSHOT</version>
+    </parent>
+
+    <dependencies>
+
+    </dependencies>
+</project>
