@@ -4,7 +4,7 @@
 
     <groupId>com.github.kshashov</groupId>
     <artifactId>spring-boot-starter-telegram</artifactId>
-    <version>0.19-SNAPSHOT</version>
+    <version>0.20-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>spring-boot-starter-telegram</name>
@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.9.RELEASE</version>
+        <version>2.2.2.RELEASE</version>
         <relativePath />
     </parent>
 
@@ -60,13 +60,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-            <exclusions>
-                <!-- Exclude JUnit 4 -->
-                <exclusion>
-                    <artifactId>junit</artifactId>
-                    <groupId>junit</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -87,11 +80,6 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>javax.validation</groupId>
