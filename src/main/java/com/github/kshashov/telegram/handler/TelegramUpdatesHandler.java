@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Helper service that processes {@link List<Update>} updates with {@link RequestDispatcher}.
+ * Helper service that processes {@link List} of {@link Update} updates with {@link RequestDispatcher}.
  */
 @Slf4j
 @Component
