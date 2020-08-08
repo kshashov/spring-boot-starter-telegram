@@ -18,6 +18,7 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
     * [Supported return values](#Supported-return-values)
     * [How to support a new one](#How-to-support-a-new-one)
 * [Configurations](#Configurations)
+    * [Webhooks](#Webhooks)
 * [License](#License)
 * [Thanks](#Thanks)
 
@@ -27,19 +28,19 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
 <dependency>
   <groupId>com.github.kshashov</groupId>
   <artifactId>spring-boot-starter-telegram</artifactId>
-  <version>0.18</version>
+  <version>0.21</version>
 </dependency>
 ```
 ### Gradle
 ```groovy
-implementation 'com.github.kshashov:spring-boot-starter-telegram:0.18'
+implementation 'com.github.kshashov:spring-boot-starter-telegram:0.21'
 ```
 
 ## Example
 The only thing you need to do after adding the dependency is to create a bot controller
 ```java
-@SpringBootApplication
 @BotController
+@SpringBootApplication
 public class MyBot implements TelegramMvcController {
 
     @Value("${bot.token}")
@@ -50,18 +51,15 @@ public class MyBot implements TelegramMvcController {
         return token;
     }
 
-    @BotRequest(value = "/click", type = {MessageType.CALLBACK_QUERY, MessageType.MESSAGE})
+    @BotRequest(value = "/hello", type = {MessageType.CALLBACK_QUERY, MessageType.MESSAGE})
     public BaseRequest hello(User user, Chat chat) {
         return new SendMessage(chat.id(), "Hello, " + user.firstName() + "!");
     }
 
-    @MessageRequest(value = "/divide {first:[0-9]} {second:[0-9]}")
-    public BaseRequest divide(
-        @BotPathVariable("first") Double first, 
-        @BotPathVariable("second") Double second
-    ) {
+    @MessageRequest("/hello {name:[\\S]+}")
+    public String helloWithName(@BotPathVariable("name") String userName) {
         // Return a string if you need to reply with a simple message
-        return String.valueOf(first / second);
+        return "Hello, " + userName;
     }
 
     public static void main(String[] args) {
@@ -116,11 +114,13 @@ If you want to add additional arguments or result values types for your controll
 ## Configurations
 By default, you can configure only these properties:
 
-| property | description |
-| -------- | ----------- |
-| telegram.bot.core-pool-size | Core pool size for default pool executor |
-| telegram.bot.max-pool-size | Max pool size for default pool executor |
-| telegram.bot.session-seconds | Cache expiration time for the all beans inside session scope |
+| property | description | default |
+| -------- | ----------- | ------- |
+| telegram.bot.core-pool-size | Core pool size for default pool executor | 15 |
+| telegram.bot.max-pool-size | Max pool size for default pool executor | 50 |
+| telegram.bot.session-seconds | Cache expiration time for the all beans inside session scope | 3600 |
+| telegram.bot.update-listener-sleep | Timeout between requests to Telegrams API if long polling is enabled (ms) | 300 |
+| telegram.bot.server-port | HTTP port that will be used to start embedded web server if webhooks is enabled | 8443 |
 
 If it isn’t enough, you can use Java-based confirations:
 * `TelegramBotGlobalPropertiesConfiguration` to configure global and bot specific settings:
@@ -131,19 +131,38 @@ If it isn’t enough, you can use Java-based confirations:
         
         @Override
         public void configure(TelegramBotGlobalProperties.Builder builder) {
+            OkHttpClient okHttp = new OkHttpClient.Builder()
+                .connectTimeout(12, TimeUnit.SECONDS)
+                .build();
+    
             builder
-                    .argumentResolvers(Lists.newArrayList(new BotRequestMethodArgumentResolver()))
-                    .configureBot(token, botBuilder -> {
-                        botBuilder.okHttpClient(new OkHttpClient.Builder()
-                                .connectTimeout(12, TimeUnit.SECONDS)
-                                .build());
-                    })
-                    .configureBot(token2, botBuilder -> {
-                        botBuilder.sleepTimeoutMilliseconds(123L);
-                    });
+                .configureBot(token, botBuilder -> {
+                    botBuilder
+                        .configure(builder1 -> builder1.okHttpClient(okHttp));
+                        .withWebhook(new SetWebhook().url(url));
+                })
+                .configureBot(token2, botBuilder -> {
+                    botBuilder
+                        .configure(builder1 -> builder1.updateListenerSleep(200L));
+                });
         }
     }
     ```
+
+### Webhooks
+
+If you want to use webhooks instead of long polling, you need to provide webhook url:
+```java
+                //.setWebserverPort(8443) Here you can customize the port
+                .configureBot(token, botBuilder -> {
+                    botBuilder
+                        .withWebhook(new SetWebhook().url(url));
+                })
+```
+In this case the library 
+* starts local [Javalin](https://javalin.io/) server on 8443 (by default) port.
+* registers `{url}/{random_uuid}` webhook via Telegram API
+* adds `/{random_uuid}` endpoint to the local server  
 
 ## License
 ```

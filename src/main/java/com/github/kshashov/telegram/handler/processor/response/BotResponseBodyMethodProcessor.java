@@ -5,12 +5,10 @@ import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.convert.ConversionService;
-import org.springframework.stereotype.Component;
 
 /**
  * Add support for {@link String} return type.
  */
-@Component
 public class BotResponseBodyMethodProcessor implements BotHandlerMethodReturnValueHandler {
     final private ConversionService conversionService;
 

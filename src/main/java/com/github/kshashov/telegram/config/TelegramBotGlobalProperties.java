@@ -21,6 +21,7 @@ import java.util.function.Consumer;
 @Getter
 @AllArgsConstructor
 public class TelegramBotGlobalProperties {
+    private final @NotNull Integer webserverPort;
     private final @NotNull ThreadPoolExecutor taskExecutor;
     private final @NotNull Callback<BaseRequest, BaseResponse> responseCallback;
     private final @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers;
@@ -32,11 +33,12 @@ public class TelegramBotGlobalProperties {
     }
 
     public static class Builder {
+        private final Map<String, Consumer<TelegramBotProperties.Builder>> botProperties = new HashMap<>();
         private ThreadPoolExecutor taskExecutor;
         private Callback<BaseRequest, BaseResponse> responseCallback;
         private List<BotHandlerMethodArgumentResolver> argumentResolvers;
         private List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
-        private Map<String, Consumer<TelegramBotProperties.Builder>> botProperties = new HashMap<>();
+        private int webserverPort;
 
         public Builder taskExecutor(@NotNull ThreadPoolExecutor taskExecutor) {
             this.taskExecutor = taskExecutor;
@@ -88,8 +90,17 @@ public class TelegramBotGlobalProperties {
             return this;
         }
 
+        /**
+         * @param webserverPort HTTP port that will be used to start embedded web server if webhooks is enabled. Default value is 8443.
+         * @return current instance
+         */
+        public Builder setWebserverPort(int webserverPort) {
+            this.webserverPort = webserverPort;
+            return this;
+        }
+
         public TelegramBotGlobalProperties build() {
-            return new TelegramBotGlobalProperties(taskExecutor, responseCallback, argumentResolvers, returnValueHandlers, botProperties);
+            return new TelegramBotGlobalProperties(webserverPort, taskExecutor, responseCallback, argumentResolvers, returnValueHandlers, botProperties);
         }
     }
 }

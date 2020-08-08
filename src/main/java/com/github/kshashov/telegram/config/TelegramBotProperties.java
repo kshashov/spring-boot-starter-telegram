@@ -1,10 +1,12 @@
 package com.github.kshashov.telegram.config;
 
+import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.request.SetWebhook;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import okhttp3.OkHttpClient;
 
 import javax.validation.constraints.NotNull;
+import java.util.function.Consumer;
 
 /**
  * Helper entity used for initialization of the new {@link com.pengrad.telegrambot.TelegramBot} instances.
@@ -13,59 +15,47 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 public class TelegramBotProperties {
     private final @NotNull String token;
-    private final @NotNull OkHttpClient okHttpClient;
-    private final @NotNull String url;
-    private final @NotNull long listenerSleep;
+    private final @NotNull TelegramBot.Builder botBuilder;
+    private final SetWebhook webhook;
 
     public static Builder builder(String token) {
         return new Builder(token);
     }
 
     public static class Builder {
+        private final TelegramBot.Builder botBuilder;
         private final String token;
-        private OkHttpClient okHttpClient;
-        private String url;
-        private long listenerSleep;
+        private SetWebhook webhook;
 
         Builder(@NotNull String token) {
             this.token = token;
+            this.botBuilder = new TelegramBot.Builder(token);
         }
 
         /**
-         * Specify @{@link OkHttpClient} client to be used by the Telegram bot.
+         * Specify additional properties to {@link TelegramBot}.
          *
-         * @param okHttpClient client
+         * @param builderConsumer builder consumer
          * @return current instance
          */
-        public Builder okHttpClient(@NotNull OkHttpClient okHttpClient) {
-            this.okHttpClient = okHttpClient;
+        public Builder configure(Consumer<TelegramBot.Builder> builderConsumer) {
+            builderConsumer.accept(botBuilder);
             return this;
         }
 
         /**
-         * Specify endpoint url for Telegram bot.
+         * Specify webhook that will be used to receive Telegram updates.
          *
-         * @param url url path
+         * @param webhook configured webhook request. See <a href="https://core.telegram.org/bots/faq">https://core.telegram.org/bots/faq</a>
          * @return current instance
          */
-        public Builder url(@NotNull String url) {
-            this.url = url;
-            return this;
-        }
-
-        /**
-         * Specify timeout between requests to Telegrams API.
-         *
-         * @param listenerSleep sleep interval in milliseconds
-         * @return current instance
-         */
-        public Builder sleepTimeoutMilliseconds(long listenerSleep) {
-            this.listenerSleep = listenerSleep;
+        public Builder useWebhook(@NotNull SetWebhook webhook) {
+            this.webhook = webhook;
             return this;
         }
 
         public TelegramBotProperties build() {
-            return new TelegramBotProperties(token, okHttpClient, url, listenerSleep);
+            return new TelegramBotProperties(token, botBuilder, webhook);
         }
     }
 }

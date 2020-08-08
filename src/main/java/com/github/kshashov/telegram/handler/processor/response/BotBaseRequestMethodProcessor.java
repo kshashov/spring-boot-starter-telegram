@@ -4,15 +4,12 @@ import com.github.kshashov.telegram.api.TelegramRequest;
 import com.pengrad.telegrambot.request.BaseRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
-import org.springframework.stereotype.Component;
 
 /**
  * Add support for {@link BaseRequest} return type.
  */
 @Slf4j
-@Component
 public class BotBaseRequestMethodProcessor implements BotHandlerMethodReturnValueHandler {
-
 
     @Override
     public boolean supportsReturnType(MethodParameter returnType) {

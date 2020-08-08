@@ -23,8 +23,7 @@ import java.util.Map;
  * Thread-Unsafe helper entity which is used to accumulate handlers during the {@link TelegramControllerBeanPostProcessor} processing.
  */
 public class HandlerMethodContainer {
-    private final @Getter
-    Map<String, Map<RequestMappingInfo, HandlerMethod>> handlers = new HashMap<>();
+    private final Map<String, Map<RequestMappingInfo, HandlerMethod>> handlers = new HashMap<>();
     private final PathMatcher pathMatcher = new AntPathMatcher();
 
     @NotNull

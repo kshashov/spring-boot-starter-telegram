@@ -17,6 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <guava.version>28.0-jre</guava.version>
+        <javalin.version>3.9.1</javalin.version>
         <telegram-bot-api.version>4.9.0</telegram-bot-api.version>
     </properties>
 
@@ -86,8 +87,9 @@
             <artifactId>validation-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-core</artifactId>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>${javalin.version}</version>
         </dependency>
     </dependencies>
 
