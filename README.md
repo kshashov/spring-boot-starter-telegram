@@ -175,7 +175,7 @@ The library exposes the following metrics via jmx in domain `bot.metrics`:
 | `no.handlers.errors` | A number of updates  for which no suitable handlers were found |
 | `handler.{handler_method_name}.errors` | A number of exceptions thrown during handler method execution |
 | `handler.{handler_method_name}.successes` | A number of successful executions of handler method |
-| `handler.{handler_method_name}.execution.time` | A time spent on handler method execution |
+| `handler.{handler_method_name}.execution.time` | A time spent on successful handler method execution |
 
 ## License
 ```
