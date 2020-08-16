@@ -166,7 +166,7 @@ In this case the library
 * adds `/{random_uuid}` endpoint to the local server  
 
 ## Metrics
-The library exposes the following metrics via jmx in domain `bot.metrics`:
+You can check the following metrics via jmx in the `bot.metrics` domain:
 
 | Metric | Description |
 | ------ | ----------- |
