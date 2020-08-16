@@ -8,6 +8,7 @@ import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethod
 import com.github.kshashov.telegram.handler.processor.arguments.BotRequestMethodArgumentResolver;
 import com.github.kshashov.telegram.handler.processor.response.BotBaseRequestMethodProcessor;
 import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandler;
+import com.github.kshashov.telegram.metrics.MetricsService;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.BaseRequest;
@@ -29,11 +30,13 @@ public class RequestDispatcherTest {
     private TelegramEvent telegramEvent;
     private TelegramSessionResolver.TelegramSessionHolder sessionHolder;
     private SendMessage sendMessage = new SendMessage(12, "text");
+    private MetricsService metricsService;
 
     @BeforeEach
     void init() {
         handlerMethodContainer = mock(HandlerMethodContainer.class);
         sessionResolver = mock(TelegramSessionResolver.class);
+        metricsService = mock(MetricsService.class);
         argumentResolver = new BotRequestMethodArgumentResolver();
         returnValueHandler = new BotBaseRequestMethodProcessor();
 
@@ -110,7 +113,8 @@ public class RequestDispatcherTest {
                 handlerMethodContainer,
                 sessionResolver,
                 argumentResolver,
-                returnValueHandler);
+                returnValueHandler,
+                metricsService);
         return dispatcher.execute(telegramEvent);
     }
 

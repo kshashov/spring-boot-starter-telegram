@@ -19,6 +19,7 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
     * [How to support a new one](#How-to-support-a-new-one)
 * [Configurations](#Configurations)
     * [Webhooks](#Webhooks)
+* [Metrics](#Metrics)
 * [License](#License)
 * [Thanks](#Thanks)
 
@@ -114,7 +115,7 @@ If you want to add additional arguments or result values types for your controll
 ## Configurations
 By default, you can configure only these properties:
 
-| property | description | default |
+| Property | Description | Default value |
 | -------- | ----------- | ------- |
 | telegram.bot.core-pool-size | Core pool size for default pool executor | 15 |
 | telegram.bot.max-pool-size | Max pool size for default pool executor | 50 |
@@ -164,11 +165,23 @@ In this case the library
 * registers `{url}/{random_uuid}` webhook via Telegram API
 * adds `/{random_uuid}` endpoint to the local server  
 
+## Metrics
+The library exposes the following metrics via jmx in domain `bot.metrics`:
+
+| Metric | Description |
+| ------ | ----------- |
+| `updates` | A number of updates received from Telegram |
+| `processing.errors` | A number of exceptions thrown during updates processing |
+| `no.handlers.errors` | A number of updates  for which no suitable handlers were found |
+| `handler.{handler_method_name}.errors` | A number of exceptions thrown during handler method execution |
+| `handler.{handler_method_name}.successes` | A number of successful executions of handler method |
+| `handler.{handler_method_name}.execution.time` | A time spent on handler method execution |
+
 ## License
 ```
 MIT License
 
-Copyright (c) 2019 Kirill Shashov
+Copyright (c) 2020 Kirill Shashov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

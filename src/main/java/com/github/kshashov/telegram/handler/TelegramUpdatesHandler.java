@@ -3,6 +3,7 @@ package com.github.kshashov.telegram.handler;
 import com.github.kshashov.telegram.config.TelegramBotGlobalProperties;
 import com.github.kshashov.telegram.handler.processor.RequestDispatcher;
 import com.github.kshashov.telegram.handler.processor.TelegramEvent;
+import com.github.kshashov.telegram.metrics.MetricsService;
 import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
@@ -24,11 +25,13 @@ import java.util.List;
 public class TelegramUpdatesHandler {
     private final RequestDispatcher botRequestDispatcher;
     private final TelegramBotGlobalProperties globalProperties;
+    private final MetricsService metricsService;
 
     @Autowired
-    public TelegramUpdatesHandler(@NotNull RequestDispatcher botRequestDispatcher, @NotNull TelegramBotGlobalProperties globalProperties) {
+    public TelegramUpdatesHandler(@NotNull RequestDispatcher botRequestDispatcher, @NotNull TelegramBotGlobalProperties globalProperties, @NotNull MetricsService metricsService) {
         this.botRequestDispatcher = botRequestDispatcher;
         this.globalProperties = globalProperties;
+        this.metricsService = metricsService;
     }
 
     /**
@@ -39,11 +42,13 @@ public class TelegramUpdatesHandler {
      * @param updates telegram updates
      */
     public void processUpdates(@NotNull String token, @NotNull TelegramBot bot, @NotNull List<Update> updates) {
+        metricsService.onUpdatesReceived(updates.size());
         try {
             for (Update update : updates) {
                 globalProperties.getTaskExecutor().execute(() -> {
                     try {
                         TelegramEvent event = new TelegramEvent(token, update, bot);
+
                         BaseRequest executionResult = botRequestDispatcher.execute(event);
                         if (executionResult != null) {
                             // Execute telegram request from controller response
@@ -51,6 +56,7 @@ public class TelegramUpdatesHandler {
                             postExecute(executionResult, bot);
                         }
                     } catch (IllegalStateException e) {
+                        metricsService.onUpdateError();
                         log.error("Execution error", e);
                     }
                 });
@@ -72,6 +78,7 @@ public class TelegramUpdatesHandler {
             @Override
             public void onFailure(BaseRequest request, IOException e) {
                 globalProperties.getResponseCallback().onFailure(request, e);
+                metricsService.onUpdateError();
                 log.error(baseRequest + " request was failed", e);
             }
         });

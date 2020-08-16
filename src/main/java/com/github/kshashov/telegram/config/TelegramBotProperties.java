@@ -37,6 +37,7 @@ public class TelegramBotProperties {
          *
          * @param builderConsumer builder consumer
          * @return current instance
+         * @since 0.21
          */
         public Builder configure(Consumer<TelegramBot.Builder> builderConsumer) {
             builderConsumer.accept(botBuilder);
@@ -48,6 +49,8 @@ public class TelegramBotProperties {
          *
          * @param webhook configured webhook request. See <a href="https://core.telegram.org/bots/faq">https://core.telegram.org/bots/faq</a>
          * @return current instance
+         *
+         * @since 0.21
          */
         public Builder useWebhook(@NotNull SetWebhook webhook) {
             this.webhook = webhook;

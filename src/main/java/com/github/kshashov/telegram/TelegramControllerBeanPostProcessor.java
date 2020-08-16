@@ -5,6 +5,8 @@ import com.github.kshashov.telegram.api.bind.annotation.BotController;
 import com.github.kshashov.telegram.api.bind.annotation.BotRequest;
 import com.github.kshashov.telegram.handler.HandlerMethodContainer;
 import com.github.kshashov.telegram.handler.RequestMappingInfo;
+import com.github.kshashov.telegram.handler.processor.HandlerMethod;
+import com.github.kshashov.telegram.metrics.MetricsService;
 import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.support.AopUtils;
@@ -31,12 +33,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, SmartInitializingSingleton {
-    private final Set<Class<?>> nonAnnotatedClasses =
-            Collections.newSetFromMap(new ConcurrentHashMap<>(64));
-    final private HandlerMethodContainer botHandlerMethodContainer;
+    private final Set<Class<?>> nonAnnotatedClasses = Collections.newSetFromMap(new ConcurrentHashMap<>(64));
+    private final HandlerMethodContainer botHandlerMethodContainer;
+    private final MetricsService metricsService;
 
-    public TelegramControllerBeanPostProcessor(@NotNull HandlerMethodContainer botHandlerMethodContainer) {
+    public TelegramControllerBeanPostProcessor(@NotNull HandlerMethodContainer botHandlerMethodContainer, @NotNull MetricsService metricsService) {
         this.botHandlerMethodContainer = botHandlerMethodContainer;
+        this.metricsService = metricsService;
     }
 
     @Override
@@ -62,7 +65,8 @@ public class TelegramControllerBeanPostProcessor implements BeanPostProcessor, S
                     // Non-empty set of methods
                     annotatedMethods.forEach((method, mappingInfo) -> {
                         Method invocableMethod = AopUtils.selectInvocableMethod(method, targetClass);
-                        botHandlerMethodContainer.registerController(bean, invocableMethod, mappingInfo);
+                        HandlerMethod handlerMethod = botHandlerMethodContainer.registerController(bean, invocableMethod, mappingInfo);
+                        metricsService.registerHandlerMethod(handlerMethod);
                     });
                 }
             } else {
