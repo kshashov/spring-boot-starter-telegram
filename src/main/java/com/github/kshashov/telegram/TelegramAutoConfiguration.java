@@ -11,6 +11,8 @@ import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethod
 import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolverComposite;
 import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandler;
 import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandlerComposite;
+import com.github.kshashov.telegram.metrics.MetricsConfiguration;
+import com.github.kshashov.telegram.metrics.MetricsService;
 import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.response.BaseResponse;
@@ -46,7 +48,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Configuration
-@Import(MethodProcessorsConfiguration.class)
+@Import({MethodProcessorsConfiguration.class, MetricsConfiguration.class})
 @EnableConfigurationProperties(TelegramConfigurationProperties.class)
 public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, EnvironmentAware {
     private Environment environment;
@@ -68,8 +70,8 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
 
     @Bean
     @Qualifier("telegramServicesList")
-    List<TelegramService> telegramServices(@Qualifier("telegramBotPropertiesList") List<TelegramBotProperties> botProperties, TelegramBotGlobalProperties globalProperties, RequestDispatcher requestDispatcher, Optional<Javalin> server) {
-        TelegramUpdatesHandler updatesHandler = new TelegramUpdatesHandler(requestDispatcher, globalProperties);
+    List<TelegramService> telegramServices(@Qualifier("telegramBotPropertiesList") List<TelegramBotProperties> botProperties, TelegramBotGlobalProperties globalProperties, RequestDispatcher requestDispatcher, MetricsService metricsService, Optional<Javalin> server) {
+        TelegramUpdatesHandler updatesHandler = new TelegramUpdatesHandler(requestDispatcher, globalProperties, metricsService);
 
         List<TelegramService> services = botProperties.stream()
                 .map(p -> {
@@ -109,11 +111,12 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
     RequestDispatcher requestDispatcher(
             HandlerMethodContainer handlerMethodContainer,
             TelegramSessionResolver sessionResolver,
-            TelegramBotGlobalProperties botGlobalProperties) {
+            TelegramBotGlobalProperties botGlobalProperties,
+            MetricsService metricsService) {
         BotHandlerMethodArgumentResolverComposite argumentResolver = new BotHandlerMethodArgumentResolverComposite(botGlobalProperties.getArgumentResolvers());
         BotHandlerMethodReturnValueHandlerComposite returnValueHandler = new BotHandlerMethodReturnValueHandlerComposite(botGlobalProperties.getReturnValueHandlers());
 
-        return new RequestDispatcher(handlerMethodContainer, sessionResolver, argumentResolver, returnValueHandler);
+        return new RequestDispatcher(handlerMethodContainer, sessionResolver, argumentResolver, returnValueHandler, metricsService);
     }
 
     @Bean
@@ -151,8 +154,8 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
     }
 
     @Bean
-    TelegramControllerBeanPostProcessor telegramControllerBeanPostProcessor(HandlerMethodContainer handlerMethodContainer) {
-        return new TelegramControllerBeanPostProcessor(handlerMethodContainer);
+    TelegramControllerBeanPostProcessor telegramControllerBeanPostProcessor(HandlerMethodContainer handlerMethodContainer, MetricsService metricsService) {
+        return new TelegramControllerBeanPostProcessor(handlerMethodContainer, metricsService);
     }
 
     @Bean

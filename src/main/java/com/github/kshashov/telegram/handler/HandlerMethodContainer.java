@@ -62,10 +62,11 @@ public class HandlerMethodContainer {
         return new HandlerLookupResult();
     }
 
-    public void registerController(@NotNull Object bean, @NotNull Method method, @NotNull RequestMappingInfo mappingInfo) {
+    public HandlerMethod registerController(@NotNull Object bean, @NotNull Method method, @NotNull RequestMappingInfo mappingInfo) {
         HandlerMethod handlerMethod = new HandlerMethod(bean, method);
         Map<RequestMappingInfo, HandlerMethod> botHandlers = handlers.computeIfAbsent(mappingInfo.getToken(), (k) -> new HashMap<>());
         botHandlers.put(mappingInfo, handlerMethod);
+        return handlerMethod;
     }
 
     private List<String> getMatchingPatterns(@NotNull RequestMappingInfo mappingInfo, @NotNull String lookupPath) {
