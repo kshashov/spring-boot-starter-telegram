@@ -3,6 +3,7 @@ package com.github.kshashov.telegram.api.bind.annotation;
 
 import com.github.kshashov.telegram.api.MessageType;
 import com.github.kshashov.telegram.api.bind.annotation.request.*;
+import com.github.kshashov.telegram.handler.DefaultRequestMappingsMatcherStrategy;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.*;
@@ -39,6 +40,7 @@ public @interface BotRequest {
      * The primary mapping expressed by this annotation.
      * <p>This is an alias for {@link #path}. For example
      * {@code @BotRequest("/foo")} is equivalent to {@code @BotRequest(path="/foo")}.
+     *
      * @return Request mapping templates.
      */
     @AliasFor("path")
@@ -46,8 +48,8 @@ public @interface BotRequest {
 
     /**
      * @return Request mapping templates (e.g. "/foo"). Ant-style path patterns are also supported (e.g. "/foo *", "/foo
-     * {param:[0-9]}"). An empty pattern is matched for any request.
-     *
+     * {param:[0-9]}"). An empty patterns list (= any request) has the lowest priority and will be matched only if there
+     * is no match in the other methods. See {@link DefaultRequestMappingsMatcherStrategy} default comparator for route priority details.
      * @see org.springframework.util.AntPathMatcher
      */
     @AliasFor("value")

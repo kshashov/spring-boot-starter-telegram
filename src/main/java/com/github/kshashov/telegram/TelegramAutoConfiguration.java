@@ -143,6 +143,12 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
     }
 
     @Bean
+    @ConditionalOnMissingBean(RequestMappingsMatcherStrategy.class)
+    RequestMappingsMatcherStrategy defaultHandLerMethodsComparator(HandlerMethodContainer handlerMethodContainer) {
+        return new DefaultRequestMappingsMatcherStrategy();
+    }
+
+    @Bean
     @Scope(value = TelegramScope.SCOPE, proxyMode = ScopedProxyMode.TARGET_CLASS)
     TelegramSession telegramSession() {
         return new TelegramSession();
@@ -159,7 +165,8 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
     }
 
     @Bean
-    ApplicationListener<ContextRefreshedEvent> onContextRefreshed(@Qualifier("telegramServicesList") List<TelegramService> telegramServices, TelegramBotGlobalProperties globalProperties) {
+    ApplicationListener<ContextRefreshedEvent> onContextRefreshed(@Qualifier("telegramServicesList") List<TelegramService> telegramServices, TelegramBotGlobalProperties globalProperties, HandlerMethodContainer handlerMethodContainer, RequestMappingsMatcherStrategy mappingsMatcherStrategy) {
+        handlerMethodContainer.setMatcherStrategy(mappingsMatcherStrategy);
         return event -> telegramServices.forEach((s) -> globalProperties.getTaskExecutor().execute(s::start));
     }
 

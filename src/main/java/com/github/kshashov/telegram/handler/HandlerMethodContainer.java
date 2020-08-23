@@ -2,14 +2,12 @@ package com.github.kshashov.telegram.handler;
 
 
 import com.github.kshashov.telegram.TelegramControllerBeanPostProcessor;
-import com.github.kshashov.telegram.api.MessageType;
 import com.github.kshashov.telegram.handler.processor.HandlerMethod;
 import com.github.kshashov.telegram.handler.processor.TelegramEvent;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.util.AntPathMatcher;
-import org.springframework.util.PathMatcher;
+import lombok.Setter;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
@@ -23,61 +21,43 @@ import java.util.Map;
  * Thread-Unsafe helper entity which is used to accumulate handlers during the {@link TelegramControllerBeanPostProcessor} processing.
  */
 public class HandlerMethodContainer {
-    private final Map<String, Map<RequestMappingInfo, HandlerMethod>> handlers = new HashMap<>();
-    private final PathMatcher pathMatcher = new AntPathMatcher();
+    private final Map<String, List<RequestMapping>> handlers = new HashMap<>();
+    private RequestMappingsMatcherStrategy matcherStrategy;
 
     @NotNull
     public HandlerLookupResult lookupHandlerMethod(@NotNull TelegramEvent telegramEvent) {
-        Map<RequestMappingInfo, HandlerMethod> botMethods = handlers.get(telegramEvent.getToken());
+        if (matcherStrategy == null) throw new IllegalStateException("MatcherStrategy is not set");
+
+        List<RequestMapping> botMethods = handlers.get(telegramEvent.getToken());
         if (botMethods != null) {
-            for (Map.Entry<RequestMappingInfo, HandlerMethod> botMappings : botMethods.entrySet()) {
-                RequestMappingInfo mapping = botMappings.getKey();
+            for (RequestMapping botMappings : botMethods) {
+                RequestMappingInfo info = botMappings.getMappingInfo();
                 // Check token
-                if (!mapping.getToken().equals(telegramEvent.getToken())) {
+                if (!info.getToken().equals(telegramEvent.getToken())) {
                     continue;
                 }
-                // Check message type
-                if (!mapping.getMessageTypes().contains(telegramEvent.getMessageType())
-                        && !mapping.getMessageTypes().contains(MessageType.ANY)) {
-                    continue;
-                }
-                // Empty patterns list allows all requests
-                if (mapping.getPatterns().isEmpty()) {
-                    return new HandlerLookupResult(botMappings.getValue(), "", new HashMap<>());
-                }
 
-                String text = telegramEvent.getText();
-                if (text == null) {
-                    text = "";
-                }
-
-                // Check patterns
-                List<String> matches = getMatchingPatterns(mapping, text);
-                if (!matches.isEmpty()) {
-                    Map<String, String> variables = pathMatcher.extractUriTemplateVariables(matches.get(0), text);
-                    return new HandlerLookupResult(botMappings.getValue(), matches.get(0), variables);
+                // Is matched
+                if (matcherStrategy.isMatched(telegramEvent, info)) {
+                    Map<String, String> variables = matcherStrategy.extractPatternVariables(telegramEvent.getText(), info);
+                    return new HandlerLookupResult(botMappings.getHandlerMethod(), info.getPattern(), variables);
                 }
             }
         }
         return new HandlerLookupResult();
     }
 
-    public HandlerMethod registerController(@NotNull Object bean, @NotNull Method method, @NotNull RequestMappingInfo mappingInfo) {
+    public HandlerMethod registerController(@NotNull Object bean, @NotNull Method method, @NotNull List<RequestMappingInfo> mappingInfo) {
+        if (mappingInfo.isEmpty()) return null;
         HandlerMethod handlerMethod = new HandlerMethod(bean, method);
-        Map<RequestMappingInfo, HandlerMethod> botHandlers = handlers.computeIfAbsent(mappingInfo.getToken(), (k) -> new HashMap<>());
-        botHandlers.put(mappingInfo, handlerMethod);
+        List<RequestMapping> botHandlers = handlers.computeIfAbsent(mappingInfo.get(0).getToken(), (k) -> new ArrayList<>());
+        mappingInfo.forEach(info -> botHandlers.add(new RequestMapping(info, handlerMethod)));
         return handlerMethod;
     }
 
-    private List<String> getMatchingPatterns(@NotNull RequestMappingInfo mappingInfo, @NotNull String lookupPath) {
-        List<String> matches = new ArrayList<>();
-        for (String pattern : mappingInfo.getPatterns()) {
-            if (pathMatcher.match(pattern, lookupPath)) {
-                matches.add(pattern);
-            }
-        }
-        matches.sort(pathMatcher.getPatternComparator(lookupPath));
-        return matches;
+    public void setMatcherStrategy(@NotNull RequestMappingsMatcherStrategy matcherStrategy) {
+        this.matcherStrategy = matcherStrategy;
+        handlers.replaceAll((key, value) -> matcherStrategy.postProcess(value));
     }
 
     @Getter
@@ -90,5 +70,13 @@ public class HandlerMethodContainer {
         private String basePattern;
         @Nullable
         private Map<String, String> templateVariables;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    public static class RequestMapping {
+        private RequestMappingInfo mappingInfo;
+        private HandlerMethod handlerMethod;
     }
 }

@@ -2,65 +2,71 @@ package com.github.kshashov.telegram.handler;
 
 import com.github.kshashov.telegram.TestUtils;
 import com.github.kshashov.telegram.api.MessageType;
+import com.github.kshashov.telegram.handler.processor.HandlerMethod;
 import com.github.kshashov.telegram.handler.processor.TelegramEvent;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 public class HandlerMethodContainerTest {
     private Method method;
-    private RequestMappingInfo mappingInfo = new RequestMappingInfo(
-            "",
-            Sets.newHashSet("", ""),
-            Sets.newHashSet(MessageType.MESSAGE, MessageType.CALLBACK_QUERY));
     private HandlerMethodContainer container = new HandlerMethodContainer();
     private String token = "token";
+    private RequestMappingsMatcherStrategy matcherStrategy;
 
     @BeforeEach
     void init() {
+        matcherStrategy = Mockito.mock(RequestMappingsMatcherStrategy.class);
+        when(matcherStrategy.postProcess(any())).thenAnswer((Answer) invocation -> invocation.getArguments()[0]);
         method = TestUtils.findMethodByTitle(this, "method");
     }
 
     @Test
-    void lookupHandlerMethod_MappingHasEmptyPatterns_ReturnMethodWithEmptyPattern() {
-        container.registerController(1, method, new RequestMappingInfo(token, Sets.newHashSet(), Sets.newHashSet(MessageType.MESSAGE)));
-        HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test", MessageType.MESSAGE));
+    void registerController_PatternsIsEmpty_ReturnNull() {
+        HandlerMethod result = container.registerController(1, method, new ArrayList<>());
 
-        assertNotNull(result);
-
-        assertNotNull(result.getHandlerMethod());
-        assertEquals("", result.getBasePattern());
-        assertNotNull(result.getTemplateVariables());
-        assertTrue(result.getTemplateVariables().isEmpty());
-
-        assertEquals(1, result.getHandlerMethod().getBean());
-        assertEquals(method, result.getHandlerMethod().getMethod());
+        assertNull(result);
     }
 
     @Test
-    void lookupHandlerMethod_MappingHasAnyMessageType_ReturnMethod() {
-        container.registerController(1, method, new RequestMappingInfo(token, Sets.newHashSet("test"), Sets.newHashSet(MessageType.MESSAGE, MessageType.ANY)));
-        HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test", MessageType.CALLBACK_QUERY));
+    void registerController() {
+        RequestMappingInfo mapping = new RequestMappingInfo(token, "/", 1, Sets.newHashSet(MessageType.MESSAGE));
+        HandlerMethod result = container.registerController(1, method, Lists.newArrayList(mapping));
 
         assertNotNull(result);
-        assertNotNull(result.getHandlerMethod());
-        assertEquals("test", result.getBasePattern());
-        assertNotNull(result.getTemplateVariables());
-        assertTrue(result.getTemplateVariables().isEmpty());
+        assertEquals(result.getMethod(), method);
+    }
 
-        assertEquals(1, result.getHandlerMethod().getBean());
-        assertEquals(method, result.getHandlerMethod().getMethod());
+    @Test
+    void lookupHandlerMethod_MatcherStrategyIsMissing_ThrowIllegalStateException() {
+        RequestMappingInfo mapping = new RequestMappingInfo(token, "/", 1, Sets.newHashSet(MessageType.MESSAGE));
+        HandlerMethod result = container.registerController(1, method, Lists.newArrayList(mapping));
+
+        assertNotNull(result);
+
+        assertThrows(IllegalStateException.class, () -> {
+            container.lookupHandlerMethod(request("test", MessageType.MESSAGE));
+        });
     }
 
     @Test
     void lookupHandlerMethod_WrongToken_ReturnNullMethod() {
-        container.registerController(1, method, new RequestMappingInfo("incorrect", Sets.newHashSet(), Sets.newHashSet(MessageType.MESSAGE)));
+        container.setMatcherStrategy(matcherStrategy);
+
+        RequestMappingInfo mapping = new RequestMappingInfo("incorrect", "/", 1, Sets.newHashSet(MessageType.MESSAGE));
+        container.registerController(1, method, Lists.newArrayList(mapping));
+
         HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test", MessageType.MESSAGE));
 
         assertNotNull(result);
@@ -68,55 +74,27 @@ public class HandlerMethodContainerTest {
     }
 
     @Test
-    void lookupHandlerMethod_WrongMessageType_ReturnNullMethod() {
-        container.registerController(1, method, new RequestMappingInfo(token, Sets.newHashSet("test"), Sets.newHashSet(MessageType.MESSAGE)));
-        HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test", MessageType.CALLBACK_QUERY));
-
-        assertNotNull(result);
-        assertNull(result.getHandlerMethod());
-    }
-
-    @Test
-    void lookupHandlerMethod_WrongPattern_ReturnNull() {
-        container.registerController(1, method, new RequestMappingInfo(token, Sets.newHashSet("test"), Sets.newHashSet(MessageType.MESSAGE)));
-        HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test1", MessageType.MESSAGE));
-
-        assertNotNull(result);
-        assertNull(result.getHandlerMethod());
-    }
-
-    @Test
-    void lookupHandlerMethod_NullPattern_WorksAsEmptyString() {
-        container.registerController(1, method, new RequestMappingInfo(token, Sets.newHashSet("test"), Sets.newHashSet(MessageType.MESSAGE)));
-        HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request(null, MessageType.MESSAGE));
-
-        assertNotNull(result);
-        assertNull(result.getHandlerMethod());
-
-        container.registerController(1, method, new RequestMappingInfo(token, Sets.newHashSet(""), Sets.newHashSet(MessageType.MESSAGE)));
-        result = container.lookupHandlerMethod(request(null, MessageType.MESSAGE));
-
-        assertNotNull(result);
-        assertNotNull(result.getHandlerMethod());
-        assertEquals("", result.getBasePattern());
-        assertNotNull(result.getTemplateVariables());
-        assertTrue(result.getTemplateVariables().isEmpty());
-
-        assertEquals(1, result.getHandlerMethod().getBean());
-        assertEquals(method, result.getHandlerMethod().getMethod());
-    }
-
-    @Test
     void lookupHandlerMethod() {
-        // check without  registered handler
+        container.setMatcherStrategy(matcherStrategy);
+
+        // check without registered handler
         HandlerMethodContainer.HandlerLookupResult result = container.lookupHandlerMethod(request("test 1", MessageType.CALLBACK_QUERY));
         assertNotNull(result);
         assertNull(result.getHandlerMethod());
 
         // check with registered handler
-        container.registerController(1, method, new RequestMappingInfo(token, Sets.newHashSet("test {var:[0-9]}"), Sets.newHashSet(MessageType.CALLBACK_QUERY)));
-        TelegramEvent test = request("test 1", MessageType.CALLBACK_QUERY);
-        result = container.lookupHandlerMethod(test);
+        when(matcherStrategy.extractPatternVariables(any(), any())).thenReturn(Maps.newHashMap("var", "1"));
+        when(matcherStrategy.isMatched(any(), any())).thenReturn(false);
+        RequestMappingInfo mapping = new RequestMappingInfo(token, "test {var:[0-9]}", 1, Sets.newHashSet(MessageType.CALLBACK_QUERY));
+        container.registerController(1, method, Lists.newArrayList(mapping));
+        result = container.lookupHandlerMethod(request("test 1", MessageType.CALLBACK_QUERY));
+
+        assertNotNull(result);
+        assertNull(result.getHandlerMethod());
+
+        when(matcherStrategy.isMatched(any(), any())).thenReturn(true);
+        container.registerController(1, method, Lists.newArrayList(mapping));
+        result = container.lookupHandlerMethod(request("test 1", MessageType.CALLBACK_QUERY));
 
         assertNotNull(result);
         assertNotNull(result.getHandlerMethod());
