@@ -1,5 +1,6 @@
 package com.github.kshashov.telegram.config;
 
+import com.github.kshashov.telegram.handler.RequestMappingsMatcherStrategy;
 import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolver;
 import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandler;
 import com.pengrad.telegrambot.Callback;
@@ -23,6 +24,7 @@ import java.util.function.Consumer;
 public class TelegramBotGlobalProperties {
     private final @NotNull Integer webserverPort;
     private final @NotNull ThreadPoolExecutor taskExecutor;
+    private final @NotNull RequestMappingsMatcherStrategy matcherStrategy;
     private final @NotNull Callback<BaseRequest, BaseResponse> responseCallback;
     private final @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers;
     private final @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
@@ -35,6 +37,7 @@ public class TelegramBotGlobalProperties {
     public static class Builder {
         private final Map<String, Consumer<TelegramBotProperties.Builder>> botProperties = new HashMap<>();
         private ThreadPoolExecutor taskExecutor;
+        private RequestMappingsMatcherStrategy matcherStrategy;
         private Callback<BaseRequest, BaseResponse> responseCallback;
         private List<BotHandlerMethodArgumentResolver> argumentResolvers;
         private List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
@@ -42,6 +45,17 @@ public class TelegramBotGlobalProperties {
 
         public Builder taskExecutor(@NotNull ThreadPoolExecutor taskExecutor) {
             this.taskExecutor = taskExecutor;
+            return this;
+        }
+
+        /**
+         * Specify custom matcher strategy to override matcher behavior and routes post processing.
+         *
+         * @param matcherStrategy matcher strategy
+         * @return current instance
+         */
+        public Builder matcherStrategy(RequestMappingsMatcherStrategy matcherStrategy) {
+            this.matcherStrategy = matcherStrategy;
             return this;
         }
 
@@ -100,7 +114,7 @@ public class TelegramBotGlobalProperties {
         }
 
         public TelegramBotGlobalProperties build() {
-            return new TelegramBotGlobalProperties(webserverPort, taskExecutor, responseCallback, argumentResolvers, returnValueHandlers, botProperties);
+            return new TelegramBotGlobalProperties(webserverPort, taskExecutor, matcherStrategy, responseCallback, argumentResolvers, returnValueHandlers, botProperties);
         }
     }
 }

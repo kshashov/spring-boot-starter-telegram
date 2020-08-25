@@ -15,6 +15,7 @@ import java.util.Set;
 @EqualsAndHashCode
 public final class RequestMappingInfo {
     private final String token;
-    private final Set<String> patterns;
+    private final String pattern;
+    private final int patternsCount;
     private final Set<MessageType> messageTypes;
 }
