@@ -18,7 +18,9 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
     * [Supported return values](#Supported-return-values)
     * [How to support a new one](#How-to-support-a-new-one)
 * [Configurations](#Configurations)
-    * [Webhooks](#Webhooks)
+    * [Properties](#Properties)
+    * [Java-based configurations](#Java-based-configurations)
+        * [Webhooks](#Webhooks)
 * [Metrics](#Metrics)
 * [License](#License)
 * [Thanks](#Thanks)
@@ -73,10 +75,11 @@ The bot will be registered automatically on startup.
 
 Telegram requests are handled by the controllers that implemented `TelegramMvcController` interface **and** are marked by the `@BotController` annotation.
 It is supposed to use in combination with annotated handler methods based on the `BotRequest` annotation.
+
 ## BotRequest
 ### Request binding
 There are two important parameters here:
-* `value` or `path`: The request mapping templates (e.g. `/foo`). Ant-style path patterns are supported (e.g. `/foo *`, `/foo param:[0-9]`). If the telegram request matched with several patterns at once, the result pattern will be selected randomly. Use `org.springframework.util.AntPathMatcher`. An empty pattern is matched for any request.
+* `value` or `path`: The request mapping templates (e.g. `/foo`). Ant-style path patterns are supported (e.g. `/foo *`, `/foo {param:[0-9]}`).
     * Values of the path variables can be bound to the method arguments by the `@BotPathVariable` annotation.
 * `type`: the telegram request types to map. `MessageType.ANY` by default.
 
@@ -84,6 +87,26 @@ There are two important parameters here:
 
 If you want to handle only one type of telegram request, it is preferred to use one of the telegram method specific variants `@MessageRequest`, `@EditedMessageRequest`, `@ChannelPostRequest`, `@EditedChannelPostRequest`, `@InlineQueryRequest`, `@CallbackQueryRequest`, `@ChosenInlineResultRequest`, `@ShippingQueryRequest`, `@PreCheckoutQueryRequest`, `@PollRequest`.
 
+**Pattern matching**
+
+`org.springframework.util.AntPathMatcher` is used for patterns matching and variables extracting, so any [Ant-style path patterns](https://docs.spring.io/spring/docs/current/javadoc-api/org/springframework/util/AntPathMatcher.html) are supported (e.g. `/foo *`, `/foo {param:[0-9]}`):
+* `?` matches one character
+* `*` matches zero or more characters
+* `**` matches zero or more directories in a path
+* `{spring:[a-z]+}` matches the regexp `[a-z]+` as a path variable named `spring`
+
+An empty patterns list will be replaced with the `**` pattern and matched with any request text.
+
+**Routes sorting**
+
+ If the telegram request matched with the several route mappings at once, the most specific one is selected. By default the routes are sorted by:
+ * pattern complexity
+ * patterns list size. Be aware that empty patterns list (= any pattern) has the minimal priority.
+ * types count. `MessageType.ANY` has the minimal priority.
+
+**Custom behavior**
+
+If you need to override the matcher or process routes in a custom way, you can declare a new `RequestMappingsMatcherStrategy` component or override a [global configuration](#Configurations). You can use `DefaultRequestMappingsMatcherStrategy` as an example.
 
 ### Supported arguments
 
@@ -91,7 +114,7 @@ Some parameters may be nullable because they do not exist for all types of teleg
 * `TelegramRequest` - entity that include all available parameters from the initial request, the path pattern and path variables
 * `TelegramSession` - current session for the current chat (if any) or user
 * `com.pengrad.telegrambot.TelegramBot` - bot instance that received the request
-* **Nullable** `String`, `Integer`, `Long`, `Double`, `Float`, `BigInteger`, `BigDecimal` marked with `BotPathVariable` annotation - value of the template variable from the path pattern
+* **Nullable** `String`, `Integer`, `Long`, `Double`, `Float`, `BigInteger`, `BigDecimal` marked with `BotPathVariable` annotation - a value of the template variable from the path pattern
 * `com.pengrad.telegrambot.model.Update` - the initial user request which is currently being processed
 * **Nullable** `String` - the first non-empty object, if any, among `message.text()`, `inlineQuery.query()`, `chosenInlineResult.query()`, `callbackQuery.data()`, `shippingQuery.invoicePayload()`, `prepreCheckoutQuery.invoicePayload()`
 * **Nullable** `com.pengrad.telegrambot.model.User`
@@ -107,12 +130,14 @@ Some parameters may be nullable because they do not exist for all types of teleg
 ### How to support a new one
 
 If you want to add additional arguments or result values types for your controller methods, you should declare a new component:
-* `BotHandlerMethodArgumentResolver` to support an additional type of method argument 
+* `BotHandlerMethodArgumentResolver` to support an additional type of method argument
 * `BotHandlerMethodReturnValueHandler` to support an additional type of method result
 * `TelegramBotGlobalPropertiesConfiguration` to manually configure all enabled argument resolvers and result value handlers
 
 
 ## Configurations
+
+### Properties
 By default, you can configure only these properties:
 
 | Property | Description | Default value |
@@ -123,19 +148,20 @@ By default, you can configure only these properties:
 | telegram.bot.update-listener-sleep | Timeout between requests to Telegrams API if long polling is enabled (ms) | 300 |
 | telegram.bot.server-port | HTTP port that will be used to start embedded web server if webhooks is enabled | 8443 |
 
-If it isn’t enough, you can use Java-based confirations:
+### Java-based configurations
+If it isn’t enough, you can use Java-based configurations:
 * `TelegramBotGlobalPropertiesConfiguration` to configure global and bot specific settings:
-    ```java    
+    ```java
     @Component
     public class MyBotConfiguration implements TelegramBotGlobalPropertiesConfiguration {
         ...
-        
+
         @Override
         public void configure(TelegramBotGlobalProperties.Builder builder) {
             OkHttpClient okHttp = new OkHttpClient.Builder()
                 .connectTimeout(12, TimeUnit.SECONDS)
                 .build();
-    
+
             builder
                 .configureBot(token, botBuilder -> {
                     botBuilder
@@ -150,8 +176,7 @@ If it isn’t enough, you can use Java-based confirations:
     }
     ```
 
-### Webhooks
-
+#### Webhooks
 If you want to use webhooks instead of long polling, you need to provide webhook url:
 ```java
                 //.setWebserverPort(8443) Here you can customize the port
@@ -160,10 +185,10 @@ If you want to use webhooks instead of long polling, you need to provide webhook
                         .withWebhook(new SetWebhook().url(url));
                 })
 ```
-In this case the library 
+In this case the library
 * starts local [Javalin](https://javalin.io/) server on 8443 (by default) port.
 * registers `{url}/{random_uuid}` webhook via Telegram API
-* adds `/{random_uuid}` endpoint to the local server  
+* adds `/{random_uuid}` endpoint to the local server
 
 ## Metrics
 You can check the following metrics via jmx in the `bot.metrics` domain:

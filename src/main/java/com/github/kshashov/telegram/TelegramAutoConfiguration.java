@@ -122,10 +122,11 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
     @Bean
     TelegramBotGlobalProperties telegramBotGlobalProperties(
             TelegramBotGlobalPropertiesConfiguration botGlobalPropertiesConfiguration,
+            RequestMappingsMatcherStrategy matcherStrategy,
             List<BotHandlerMethodArgumentResolver> argumentResolvers,
             List<BotHandlerMethodReturnValueHandler> returnValueHandlers,
             TelegramConfigurationProperties properties) {
-        TelegramBotGlobalProperties.Builder defaultBuilder = createDefaultBotGlobalPropertiesBuilder(argumentResolvers, returnValueHandlers, properties);
+        TelegramBotGlobalProperties.Builder defaultBuilder = createDefaultBotGlobalPropertiesBuilder(matcherStrategy, argumentResolvers, returnValueHandlers, properties);
         botGlobalPropertiesConfiguration.configure(defaultBuilder);
         return defaultBuilder.build();
     }
@@ -144,7 +145,7 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
 
     @Bean
     @ConditionalOnMissingBean(RequestMappingsMatcherStrategy.class)
-    RequestMappingsMatcherStrategy defaultHandLerMethodsComparator(HandlerMethodContainer handlerMethodContainer) {
+    RequestMappingsMatcherStrategy defaultHandLerMethodsComparator() {
         return new DefaultRequestMappingsMatcherStrategy();
     }
 
@@ -165,8 +166,8 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
     }
 
     @Bean
-    ApplicationListener<ContextRefreshedEvent> onContextRefreshed(@Qualifier("telegramServicesList") List<TelegramService> telegramServices, TelegramBotGlobalProperties globalProperties, HandlerMethodContainer handlerMethodContainer, RequestMappingsMatcherStrategy mappingsMatcherStrategy) {
-        handlerMethodContainer.setMatcherStrategy(mappingsMatcherStrategy);
+    ApplicationListener<ContextRefreshedEvent> onContextRefreshed(@Qualifier("telegramServicesList") List<TelegramService> telegramServices, TelegramBotGlobalProperties globalProperties, HandlerMethodContainer handlerMethodContainer) {
+        handlerMethodContainer.setMatcherStrategy(globalProperties.getMatcherStrategy());
         return event -> telegramServices.forEach((s) -> globalProperties.getTaskExecutor().execute(s::start));
     }
 
@@ -184,10 +185,12 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
     }
 
     private TelegramBotGlobalProperties.Builder createDefaultBotGlobalPropertiesBuilder(
+            @NotNull RequestMappingsMatcherStrategy matcherStrategy,
             @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers,
             @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers,
             @NotNull TelegramConfigurationProperties properties) {
         return TelegramBotGlobalProperties.builder()
+                .matcherStrategy(matcherStrategy)
                 .argumentResolvers(argumentResolvers)
                 .returnValueHandlers(returnValueHandlers)
                 .setWebserverPort(properties.getServerPort())
