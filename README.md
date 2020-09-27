@@ -95,14 +95,22 @@ If you want to handle only one type of telegram request, it is preferred to use 
 * `**` matches zero or more directories in a path
 * `{spring:[a-z]+}` matches the regexp `[a-z]+` as a path variable named `spring`
 
-An empty patterns list will be replaced with the `**` pattern and matched with any request text.
+An empty patterns list will be replaced with the `**` pattern and matched with any requested text.
 
 **Routes sorting**
 
- If the telegram request matched with the several route mappings at once, the most specific one is selected. By default the routes are sorted by:
+ If the telegram request matched with several route mappings at once, the most specific one is selected. By default the routes are sorted by:
  * pattern complexity
- * patterns list size. Be aware that empty patterns list (= any pattern) has the minimal priority.
- * types count. `MessageType.ANY` has the minimal priority.
+ * patterns list size. Be aware that the empty patterns list (= any pattern) has minimal priority.
+ * types count. `MessageType.ANY` has minimal priority.
+
+For example, you can define the default handler in the following way:
+```java
+    @BotRequest(type = {MessageType.ANY})
+    public void default() {
+        log.info("Default handler method");
+    }
+```
 
 **Custom behavior**
 
@@ -197,7 +205,7 @@ You can check the following metrics via jmx in the `bot.metrics` domain:
 | ------ | ----------- |
 | `updates` | A number of updates received from Telegram |
 | `processing.errors` | A number of exceptions thrown during updates processing |
-| `no.handlers.errors` | A number of updates  for which no suitable handlers were found |
+| `no.handlers.errors` | A number of updates for which no suitable handlers were found |
 | `handler.{handler_method_name}.errors` | A number of exceptions thrown during handler method execution |
 | `handler.{handler_method_name}.successes` | A number of successful executions of handler method |
 | `handler.{handler_method_name}.execution.time` | A time spent on successful handler method execution |
