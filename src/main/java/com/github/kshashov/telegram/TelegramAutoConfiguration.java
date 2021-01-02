@@ -69,10 +69,13 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
     }
 
     @Bean
-    @Qualifier("telegramServicesList")
-    List<TelegramService> telegramServices(@Qualifier("telegramBotPropertiesList") List<TelegramBotProperties> botProperties, TelegramBotGlobalProperties globalProperties, RequestDispatcher requestDispatcher, MetricsService metricsService, Optional<Javalin> server) {
-        TelegramUpdatesHandler updatesHandler = new TelegramUpdatesHandler(requestDispatcher, globalProperties, metricsService);
+    TelegramUpdatesHandler telegramUpdatesHandler(TelegramBotGlobalProperties globalProperties, RequestDispatcher requestDispatcher, MetricsService metricsService) {
+        return new DefaultTelegramUpdatesHandler(requestDispatcher, globalProperties, metricsService);
+    }
 
+    @Bean
+    @Qualifier("telegramServicesList")
+    List<TelegramService> telegramServices(@Qualifier("telegramBotPropertiesList") List<TelegramBotProperties> botProperties, TelegramUpdatesHandler updatesHandler, Optional<Javalin> server) {
         List<TelegramService> services = botProperties.stream()
                 .map(p -> {
                     if (p.getWebhook() != null) {
