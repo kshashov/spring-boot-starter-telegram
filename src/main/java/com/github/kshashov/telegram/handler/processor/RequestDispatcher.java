@@ -39,7 +39,7 @@ public class RequestDispatcher {
      * @return invocation result
      * @throws IllegalStateException when it failed to execute the handler method correctly
      */
-    public BaseRequest execute(@NotNull TelegramEvent event) throws IllegalStateException {
+    public ProcessedTelegramCallback execute(@NotNull TelegramEvent event) throws IllegalStateException {
         TelegramSessionResolver.TelegramSessionHolder sessionHolder = null;
 
         HandlerMethodContainer.HandlerLookupResult lookupResult = handlerMethodContainer.lookupHandlerMethod(event);
@@ -56,10 +56,22 @@ public class RequestDispatcher {
 
             // Save execution time to metrics
             Timer.Context timerContext = metricsService.onMethodHandlerStarted(method);
-            BaseRequest result = doExecute(event, lookupResult, sessionHolder.getSession());
+
+            TelegramRequest request = new TelegramRequest(
+                    event.getTelegramBot(),
+                    event.getUpdate(),
+                    event.getMessageType(),
+                    lookupResult.getBasePattern(),
+                    lookupResult.getTemplateVariables(),
+                    event.getMessage(),
+                    event.getText(),
+                    event.getChat(),
+                    event.getUser());
+
+            BaseRequest result = doExecute(request, lookupResult, sessionHolder.getSession());
             metricsService.onUpdateSuccess(method, timerContext);
 
-            return result;
+            return result == null ? null : new ProcessedTelegramCallback(result, request.getCallback());
         } catch (Exception ex) {
             if (method != null) {
                 metricsService.onUpdateError(method);
@@ -71,23 +83,12 @@ public class RequestDispatcher {
         }
     }
 
-    private BaseRequest doExecute(@NotNull TelegramEvent event, @NotNull HandlerMethodContainer.HandlerLookupResult lookupResult, @NotNull TelegramSession session) throws IllegalStateException {
-        TelegramRequest request = new TelegramRequest(
-                event.getTelegramBot(),
-                event.getUpdate(),
-                event.getMessageType(),
-                lookupResult.getBasePattern(),
-                lookupResult.getTemplateVariables(),
-                event.getMessage(),
-                event.getText(),
-                event.getChat(),
-                event.getUser());
-
+    private BaseRequest doExecute(TelegramRequest request, @NotNull HandlerMethodContainer.HandlerLookupResult lookupResult, @NotNull TelegramSession session) throws IllegalStateException {
         BaseRequest result = new TelegramInvocableHandlerMethod(lookupResult.getHandlerMethod(), argumentResolver, returnValueHandler)
                 .invokeAndHandle(request, session);
 
         log.info("{} request has been executed by '{}' handler method with {} result",
-                event.getMessageType(),
+                request.getMessageType(),
                 lookupResult.getHandlerMethod().toString(),
                 result == null ? "null" : result.getClass().getSimpleName());
 

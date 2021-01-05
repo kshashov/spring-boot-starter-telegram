@@ -1,6 +1,7 @@
 package com.github.kshashov.telegram.handler;
 
 import com.github.kshashov.telegram.config.TelegramBotGlobalProperties;
+import com.github.kshashov.telegram.handler.processor.ProcessedTelegramCallback;
 import com.github.kshashov.telegram.handler.processor.RequestDispatcher;
 import com.github.kshashov.telegram.handler.processor.TelegramEvent;
 import com.github.kshashov.telegram.metrics.MetricsService;
@@ -46,8 +47,8 @@ public class DefaultTelegramUpdatesHandler implements TelegramUpdatesHandler {
                     try {
                         TelegramEvent event = new TelegramEvent(token, update, bot);
 
-                        BaseRequest executionResult = botRequestDispatcher.execute(event);
-                        if (executionResult != null) {
+                        ProcessedTelegramCallback executionResult = botRequestDispatcher.execute(event);
+                        if ((executionResult != null) && (executionResult.getRequest() != null)) {
                             // Execute telegram request from controller response
                             log.debug("Controller returned Telegram request {}", executionResult);
                             postExecute(executionResult, bot);
@@ -64,16 +65,18 @@ public class DefaultTelegramUpdatesHandler implements TelegramUpdatesHandler {
     }
 
     @SuppressWarnings("unchecked")
-    private void postExecute(@NotNull BaseRequest baseRequest, @NotNull TelegramBot telegramBot) {
-        telegramBot.execute(baseRequest, new Callback<BaseRequest, BaseResponse>() {
+    private void postExecute(ProcessedTelegramCallback baseRequest, @NotNull TelegramBot telegramBot) {
+        telegramBot.execute(baseRequest.getRequest(), new Callback<BaseRequest, BaseResponse>() {
             @Override
             public void onResponse(BaseRequest request, BaseResponse response) {
+                baseRequest.onResponse(request, response);
                 globalProperties.getResponseCallback().onResponse(request, response);
                 log.debug("{} request was successfully executed", baseRequest);
             }
 
             @Override
             public void onFailure(BaseRequest request, IOException e) {
+                baseRequest.onFailure(request, e);
                 globalProperties.getResponseCallback().onFailure(request, e);
                 metricsService.onUpdateError();
                 log.error(baseRequest + " request was failed", e);

@@ -31,7 +31,7 @@ public class TelegramInvocableHandlerMethod extends HandlerMethod {
     /**
      * Create an instance from a bean instance and a method.
      *
-     * @param handlerMethod       method to invoke
+     * @param handlerMethod      method to invoke
      * @param argumentResolver   resolvers list to resolve arguments
      * @param returnValueHandler handlers list to handle return value
      */

@@ -1,15 +1,19 @@
 package com.github.kshashov.telegram.api;
 
 import com.github.kshashov.telegram.api.bind.annotation.BotRequest;
+import com.pengrad.telegrambot.Callback;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Chat;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.request.BaseRequest;
-import lombok.AllArgsConstructor;
+import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
@@ -18,7 +22,7 @@ import java.util.Map;
  * @see BaseRequest
  */
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TelegramRequest {
     /**
      * Bot instance that received the current telegram event.
@@ -78,6 +82,13 @@ public class TelegramRequest {
      * User instance if it present in the current telegram request.
      */
     private final User user;
+
+    /**
+     * Callback
+     */
+    @Nullable
+    @Setter
+    private Callback<BaseRequest, BaseResponse> callback;
 
     @Override
     public String toString() {
