@@ -54,7 +54,7 @@ public class RequestDispatcherTest {
     @Test
     void execute_HandlerNotFound_ReturnNull() throws Exception {
         when(handlerMethodContainer.lookupHandlerMethod(any())).thenReturn(new HandlerMethodContainer.HandlerLookupResult());
-        ProcessedTelegramCallback result = doExecute();
+        TelegramCallback result = doExecute();
 
         assertNull(result);
         verify(sessionResolver).resolveTelegramSession(any());
@@ -83,7 +83,7 @@ public class RequestDispatcherTest {
                 new HashMap<>()
         );
         when(handlerMethodContainer.lookupHandlerMethod(any())).thenReturn(lookupResult);
-        ProcessedTelegramCallback result = doExecute();
+        TelegramCallback result = doExecute();
 
         assertNull(result);
 
@@ -99,7 +99,7 @@ public class RequestDispatcherTest {
                 new HashMap<>()
         );
         when(handlerMethodContainer.lookupHandlerMethod(any())).thenReturn(lookupResult);
-        ProcessedTelegramCallback result = doExecute();
+        TelegramCallback result = doExecute();
 
         assertNotNull(result);
         assertNotNull(result.getRequest());
@@ -109,7 +109,7 @@ public class RequestDispatcherTest {
         verify(sessionHolder).releaseSessionId();
     }
 
-    ProcessedTelegramCallback doExecute() throws Exception {
+    TelegramCallback doExecute() throws Exception {
         RequestDispatcher dispatcher = new RequestDispatcher(
                 handlerMethodContainer,
                 sessionResolver,

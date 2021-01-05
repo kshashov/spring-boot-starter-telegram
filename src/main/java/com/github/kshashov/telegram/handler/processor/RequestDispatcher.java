@@ -39,7 +39,7 @@ public class RequestDispatcher {
      * @return invocation result
      * @throws IllegalStateException when it failed to execute the handler method correctly
      */
-    public ProcessedTelegramCallback execute(@NotNull TelegramEvent event) throws IllegalStateException {
+    public TelegramCallback execute(@NotNull TelegramEvent event) throws IllegalStateException {
         TelegramSessionResolver.TelegramSessionHolder sessionHolder = null;
 
         HandlerMethodContainer.HandlerLookupResult lookupResult = handlerMethodContainer.lookupHandlerMethod(event);
@@ -71,7 +71,7 @@ public class RequestDispatcher {
             BaseRequest result = doExecute(request, lookupResult, sessionHolder.getSession());
             metricsService.onUpdateSuccess(method, timerContext);
 
-            return result == null ? null : new ProcessedTelegramCallback(result, request.getCallback());
+            return result == null ? null : new TelegramCallback(result, request.getCallback());
         } catch (Exception ex) {
             if (method != null) {
                 metricsService.onUpdateError(method);

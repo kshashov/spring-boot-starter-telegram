@@ -1,8 +1,8 @@
 package com.github.kshashov.telegram.handler;
 
 import com.github.kshashov.telegram.config.TelegramBotGlobalProperties;
-import com.github.kshashov.telegram.handler.processor.ProcessedTelegramCallback;
 import com.github.kshashov.telegram.handler.processor.RequestDispatcher;
+import com.github.kshashov.telegram.handler.processor.TelegramCallback;
 import com.github.kshashov.telegram.handler.processor.TelegramEvent;
 import com.github.kshashov.telegram.metrics.MetricsService;
 import com.pengrad.telegrambot.Callback;
@@ -47,7 +47,7 @@ public class DefaultTelegramUpdatesHandler implements TelegramUpdatesHandler {
                     try {
                         TelegramEvent event = new TelegramEvent(token, update, bot);
 
-                        ProcessedTelegramCallback executionResult = botRequestDispatcher.execute(event);
+                        TelegramCallback executionResult = botRequestDispatcher.execute(event);
                         if ((executionResult != null) && (executionResult.getRequest() != null)) {
                             // Execute telegram request from controller response
                             log.debug("Controller returned Telegram request {}", executionResult);
@@ -65,7 +65,7 @@ public class DefaultTelegramUpdatesHandler implements TelegramUpdatesHandler {
     }
 
     @SuppressWarnings("unchecked")
-    private void postExecute(ProcessedTelegramCallback baseRequest, @NotNull TelegramBot telegramBot) {
+    private void postExecute(TelegramCallback baseRequest, @NotNull TelegramBot telegramBot) {
         telegramBot.execute(baseRequest.getRequest(), new Callback<BaseRequest, BaseResponse>() {
             @Override
             public void onResponse(BaseRequest request, BaseResponse response) {
