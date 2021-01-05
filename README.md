@@ -31,12 +31,12 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
 <dependency>
   <groupId>com.github.kshashov</groupId>
   <artifactId>spring-boot-starter-telegram</artifactId>
-  <version>0.21</version>
+  <version>0.23</version>
 </dependency>
 ```
 ### Gradle
 ```groovy
-implementation 'com.github.kshashov:spring-boot-starter-telegram:0.21'
+implementation 'com.github.kshashov:spring-boot-starter-telegram:0.23'
 ```
 
 ## Example
@@ -63,6 +63,22 @@ public class MyBot implements TelegramMvcController {
     public String helloWithName(@BotPathVariable("name") String userName) {
         // Return a string if you need to reply with a simple message
         return "Hello, " + userName;
+    }
+
+    @MessageRequest("/helloCallback")
+    public String helloWithCustomCallback(TelegramRequest request, User user) {
+        request.setCallback(new Callback<BaseRequest, BaseResponse>() {
+            @Override
+            public void onResponse(BaseRequest request, BaseResponse response) {
+                // TODO
+            }
+
+            @Override
+            public void onFailure(BaseRequest request, IOException e) {
+                // TODO
+            }
+        });
+        return "Hello, " + user.firstName() + "!";
     }
 
     public static void main(String[] args) {
@@ -119,7 +135,7 @@ If you need to override the matcher or process routes in a custom way, you can d
 ### Supported arguments
 
 Some parameters may be nullable because they do not exist for all types of telegram requests
-* `TelegramRequest` - entity that include all available parameters from the initial request, the path pattern and path variables
+* `TelegramRequest` - entity that include all available parameters from the initial request, the path pattern and path variables. Provides an ability to set a custom callback
 * `TelegramSession` - current session for the current chat (if any) or user
 * `com.pengrad.telegrambot.TelegramBot` - bot instance that received the request
 * **Nullable** `String`, `Integer`, `Long`, `Double`, `Float`, `BigInteger`, `BigDecimal` marked with `BotPathVariable` annotation - a value of the template variable from the path pattern
