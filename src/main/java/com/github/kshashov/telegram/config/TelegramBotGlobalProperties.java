@@ -4,8 +4,6 @@ import com.github.kshashov.telegram.handler.RequestMappingsMatcherStrategy;
 import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolver;
 import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandler;
 import com.pengrad.telegrambot.Callback;
-import com.pengrad.telegrambot.request.BaseRequest;
-import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -25,7 +23,7 @@ public class TelegramBotGlobalProperties {
     private final @NotNull Integer webserverPort;
     private final @NotNull ThreadPoolExecutor taskExecutor;
     private final @NotNull RequestMappingsMatcherStrategy matcherStrategy;
-    private final @NotNull Callback<BaseRequest, BaseResponse> responseCallback;
+    private final @NotNull Callback responseCallback;
     private final @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers;
     private final @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
     private final @NotNull Map<String, Consumer<TelegramBotProperties.Builder>> botProperties;
@@ -38,7 +36,7 @@ public class TelegramBotGlobalProperties {
         private final Map<String, Consumer<TelegramBotProperties.Builder>> botProperties = new HashMap<>();
         private ThreadPoolExecutor taskExecutor;
         private RequestMappingsMatcherStrategy matcherStrategy;
-        private Callback<BaseRequest, BaseResponse> responseCallback;
+        private Callback responseCallback;
         private List<BotHandlerMethodArgumentResolver> argumentResolvers;
         private List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
         private int webserverPort;
@@ -65,7 +63,7 @@ public class TelegramBotGlobalProperties {
          * @param responseCallback response callback
          * @return current instance
          */
-        public Builder responseCallback(@NotNull Callback<BaseRequest, BaseResponse> responseCallback) {
+        public Builder responseCallback(@NotNull Callback responseCallback) {
             this.responseCallback = responseCallback;
             return this;
         }

@@ -11,11 +11,11 @@ import java.io.IOException;
 /**
  * Result of the Telegram request processing. Includes callback methods to handle Telegram response.
  */
-public class TelegramCallback implements Callback<BaseRequest, BaseResponse> {
+public class TelegramCallback implements Callback {
     private final BaseRequest request;
-    private final Callback<BaseRequest, BaseResponse> nestedCallback;
+    private final Callback nestedCallback;
 
-    public TelegramCallback(@NotNull BaseRequest request, @Nullable Callback<BaseRequest, BaseResponse> nestedCallback) {
+    public TelegramCallback(@NotNull BaseRequest request, @Nullable Callback nestedCallback) {
         this.request = request;
         this.nestedCallback = nestedCallback;
     }

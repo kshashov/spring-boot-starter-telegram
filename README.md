@@ -67,7 +67,7 @@ public class MyBot implements TelegramMvcController {
 
     @MessageRequest("/helloCallback")
     public String helloWithCustomCallback(TelegramRequest request, User user) {
-        request.setCallback(new Callback<BaseRequest, BaseResponse>() {
+        request.setCallback(new Callback() {
             @Override
             public void onResponse(BaseRequest request, BaseResponse response) {
                 // TODO

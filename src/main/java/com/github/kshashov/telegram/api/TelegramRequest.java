@@ -8,7 +8,6 @@ import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.request.BaseRequest;
-import com.pengrad.telegrambot.response.BaseResponse;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -88,7 +87,7 @@ public class TelegramRequest {
      */
     @Nullable
     @Setter
-    private Callback<BaseRequest, BaseResponse> callback;
+    private Callback callback;
 
     @Override
     public String toString() {

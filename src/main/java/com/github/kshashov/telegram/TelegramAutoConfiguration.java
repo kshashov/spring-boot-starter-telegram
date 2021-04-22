@@ -198,7 +198,7 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
                 .returnValueHandlers(returnValueHandlers)
                 .setWebserverPort(properties.getServerPort())
                 .taskExecutor(new ThreadPoolExecutor(properties.getCorePoolSize(), properties.getMaxPoolSize(), 0L, TimeUnit.SECONDS, new SynchronousQueue<>()))
-                .responseCallback(new Callback<BaseRequest, BaseResponse>() {
+                .responseCallback(new Callback() {
                     @Override
                     public void onResponse(BaseRequest request, BaseResponse response) {
                     }

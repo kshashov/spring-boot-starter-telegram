@@ -66,7 +66,7 @@ public class DefaultTelegramUpdatesHandler implements TelegramUpdatesHandler {
 
     @SuppressWarnings("unchecked")
     private void postExecute(TelegramCallback baseRequest, @NotNull TelegramBot telegramBot) {
-        telegramBot.execute(baseRequest.getRequest(), new Callback<BaseRequest, BaseResponse>() {
+        telegramBot.execute(baseRequest.getRequest(), new Callback() {
             @Override
             public void onResponse(BaseRequest request, BaseResponse response) {
                 baseRequest.onResponse(request, response);
