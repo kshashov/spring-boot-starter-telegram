@@ -4,7 +4,7 @@
 
     <groupId>com.github.kshashov</groupId>
     <artifactId>spring-boot-starter-telegram</artifactId>
-    <version>0.25</version>
+    <version>0.26-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>spring-boot-starter-telegram</name>
@@ -42,7 +42,7 @@
     </licenses>
 
     <scm>
-        <tag>spring-boot-starter-telegram-0.25</tag>
+        <tag>HEAD</tag>
         <connection>scm:git:git://github.com/kshashov/spring-boot-starter-telegram.git</connection>
         <developerConnection>scm:git:git@github.com:kshashov/spring-boot-starter-telegram.git</developerConnection>
         <url>https://github.com/kshashov/spring-boot-starter-telegram</url>
