@@ -130,7 +130,7 @@ For example, you can define the default handler in the following way:
 
 **Custom behavior**
 
-If you need to override the matcher or process routes in a custom way, you can declare a new `RequestMappingsMatcherStrategy` component or override a [global configuration](#Configurations). You can use `DefaultRequestMappingsMatcherStrategy` as an example.
+You could override the matcher or process routes in a custom way, you can declare a new `RequestMappingsMatcherStrategy` component or override a [global configuration](#Configurations). You can use `DefaultRequestMappingsMatcherStrategy` as an example.
 
 ### Supported arguments
 
@@ -164,16 +164,16 @@ If you want to add additional arguments or result values types for your controll
 ### Properties
 By default, you can configure only these properties:
 
-| Property | Description | Default value |
-| -------- | ----------- | ------- |
-| telegram.bot.core-pool-size | Core pool size for default pool executor | 15 |
-| telegram.bot.max-pool-size | Max pool size for default pool executor | 50 |
-| telegram.bot.session-seconds | Cache expiration time for the all beans inside session scope | 3600 |
-| telegram.bot.update-listener-sleep | Timeout between requests to Telegrams API if long polling is enabled (ms) | 300 |
-| telegram.bot.server-port | HTTP port that will be used to start embedded web server if webhooks is enabled | 8443 |
+| Property                           | Description                                                               | Default value |
+| ---------------------------------- | ------------------------------------------------------------------------- | ------------- |
+| telegram.bot.core-pool-size        | Core pool size for default pool executor                                  | 15            |
+| telegram.bot.max-pool-size         | Max pool size for default pool executor                                   | 50            |
+| telegram.bot.session-seconds       | Cache expiration time for the all beans inside session scope              | 3600          |
+| telegram.bot.update-listener-sleep | Timeout between requests to Telegrams API if long polling is enabled (ms) | 300           |
+| telegram.bot.server-port           | HTTP port for embedded web server if webhooks are enabled                 | 8443          |
 
 ### Java-based configurations
-If it isn’t enough, you can use Java-based configurations:
+You can use Java-based configurations for customization:
 * `TelegramBotGlobalPropertiesConfiguration` to configure global and bot specific settings:
     ```java
     @Component
@@ -217,13 +217,13 @@ In this case the library
 ## Metrics
 You can check the following metrics via jmx in the `bot.metrics` domain:
 
-| Metric | Description |
-| ------ | ----------- |
-| `updates` | A number of updates received from Telegram |
-| `processing.errors` | A number of exceptions thrown during updates processing |
-| `no.handlers.errors` | A number of updates for which no suitable handlers were found |
-| `handler.{handler_method_name}.errors` | A number of exceptions thrown during handler method execution |
-| `handler.{handler_method_name}.successes` | A number of successful executions of handler method |
+| Metric                                         | Description |
+| ---------------------------------------------- | ----------- |
+| `updates`                                      | A number of updates received from Telegram |
+| `processing.errors`                            | A number of exceptions thrown during updates processing |
+| `no.handlers.errors`                           | A number of updates for which no suitable handlers were found |
+| `handler.{handler_method_name}.errors`         | A number of exceptions thrown during handler method execution |
+| `handler.{handler_method_name}.successes`      | A number of successful executions of handler method |
 | `handler.{handler_method_name}.execution.time` | A time spent on successful handler method execution |
 
 ## License
@@ -252,4 +252,4 @@ SOFTWARE.
 ```
 
 ## Thanks
-* @OlegNyr for his [java-telegram-bot-mvc](https://github.com/OlegNyr/java-telegram-bot-mvc) repo
+* @OlegNyr for his [java-telegram-bot-mvc](https://github.com/OlegNyr/java-telegram-bot-mvc) repository
