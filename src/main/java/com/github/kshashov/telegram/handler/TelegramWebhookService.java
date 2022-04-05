@@ -27,11 +27,11 @@ public class TelegramWebhookService implements TelegramService {
     private final TelegramUpdatesHandler updatesHandler;
     private final Javalin server;
 
-    public TelegramWebhookService(@NotNull TelegramBotProperties botProperties, @NotNull TelegramUpdatesHandler updatesHandler, @NotNull Javalin server) {
+    public TelegramWebhookService(@NotNull TelegramBotProperties botProperties, TelegramBot bot, @NotNull TelegramUpdatesHandler updatesHandler, @NotNull Javalin server) {
         this.botProperties = botProperties;
         this.updatesHandler = updatesHandler;
         this.server = server;
-        this.telegramBot = botProperties.getBotBuilder().build();
+        this.telegramBot = bot;
     }
 
     /**

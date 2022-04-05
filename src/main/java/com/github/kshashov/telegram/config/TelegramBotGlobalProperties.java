@@ -4,6 +4,7 @@ import com.github.kshashov.telegram.handler.RequestMappingsMatcherStrategy;
 import com.github.kshashov.telegram.handler.processor.arguments.BotHandlerMethodArgumentResolver;
 import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodReturnValueHandler;
 import com.pengrad.telegrambot.Callback;
+import com.pengrad.telegrambot.TelegramBot;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -27,6 +28,7 @@ public class TelegramBotGlobalProperties {
     private final @NotNull List<BotHandlerMethodArgumentResolver> argumentResolvers;
     private final @NotNull List<BotHandlerMethodReturnValueHandler> returnValueHandlers;
     private final @NotNull Map<String, Consumer<TelegramBotProperties.Builder>> botProperties;
+    private final @NotNull Map<String, Consumer<TelegramBot>> botProcessors;
 
     public static Builder builder() {
         return new Builder();
@@ -34,6 +36,7 @@ public class TelegramBotGlobalProperties {
 
     public static class Builder {
         private final Map<String, Consumer<TelegramBotProperties.Builder>> botProperties = new HashMap<>();
+        private final Map<String, Consumer<TelegramBot>> botProcessors = new HashMap<>();
         private ThreadPoolExecutor taskExecutor;
         private RequestMappingsMatcherStrategy matcherStrategy;
         private Callback responseCallback;
@@ -103,6 +106,18 @@ public class TelegramBotGlobalProperties {
         }
 
         /**
+         * Process {@link TelegramBot} instance for specified bot.
+         *
+         * @param token       bot token
+         * @param botConsumer {@link TelegramBot} instance for specified bot
+         * @return current instance
+         */
+        public Builder processBot(@NotNull String token, @NotNull Consumer<TelegramBot> botConsumer) {
+            botProcessors.put(token, botConsumer);
+            return this;
+        }
+
+        /**
          * @param webserverPort HTTP port that will be used to start embedded web server if webhooks is enabled. Default value is 8443.
          * @return current instance
          */
@@ -112,7 +127,7 @@ public class TelegramBotGlobalProperties {
         }
 
         public TelegramBotGlobalProperties build() {
-            return new TelegramBotGlobalProperties(webserverPort, taskExecutor, matcherStrategy, responseCallback, argumentResolvers, returnValueHandlers, botProperties);
+            return new TelegramBotGlobalProperties(webserverPort, taskExecutor, matcherStrategy, responseCallback, argumentResolvers, returnValueHandlers, botProperties, botProcessors);
         }
     }
 }

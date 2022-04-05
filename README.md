@@ -31,7 +31,7 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
 <dependency>
   <groupId>com.github.kshashov</groupId>
   <artifactId>spring-boot-starter-telegram</artifactId>
-  <version>0.23</version>
+  <version>0.26</version>
 </dependency>
 ```
 ### Gradle
@@ -192,6 +192,9 @@ You can use Java-based configurations for customization:
                         .configure(builder1 -> builder1.okHttpClient(okHttp));
                         .withWebhook(new SetWebhook().url(url));
                 })
+                .processBot(token, bot -> {
+                    bot.execute(new SendMessage(myChat, "test"));
+                });
                 .configureBot(token2, botBuilder -> {
                     botBuilder
                         .configure(builder1 -> builder1.updateListenerSleep(200L));

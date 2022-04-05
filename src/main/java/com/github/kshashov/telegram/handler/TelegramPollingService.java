@@ -19,10 +19,10 @@ public class TelegramPollingService implements TelegramService {
     private final TelegramBotProperties botProperties;
     private final TelegramUpdatesHandler updatesHandler;
 
-    public TelegramPollingService(@NotNull TelegramBotProperties botProperties, @NotNull TelegramUpdatesHandler updatesHandler) {
+    public TelegramPollingService(@NotNull TelegramBotProperties botProperties, TelegramBot bot, @NotNull TelegramUpdatesHandler updatesHandler) {
         this.botProperties = botProperties;
         this.updatesHandler = updatesHandler;
-        this.telegramBot = botProperties.getBotBuilder().build();
+        this.telegramBot = bot;
     }
 
     /**

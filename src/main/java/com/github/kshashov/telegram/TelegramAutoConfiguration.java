@@ -14,6 +14,7 @@ import com.github.kshashov.telegram.handler.processor.response.BotHandlerMethodR
 import com.github.kshashov.telegram.metrics.MetricsConfiguration;
 import com.github.kshashov.telegram.metrics.MetricsService;
 import com.pengrad.telegrambot.Callback;
+import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.response.BaseResponse;
 import io.javalin.Javalin;
@@ -75,13 +76,22 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
 
     @Bean
     @Qualifier("telegramServicesList")
-    List<TelegramService> telegramServices(@Qualifier("telegramBotPropertiesList") List<TelegramBotProperties> botProperties, TelegramUpdatesHandler updatesHandler, Optional<Javalin> server) {
+    List<TelegramService> telegramServices(@Qualifier("telegramBotPropertiesList") List<TelegramBotProperties> botProperties, TelegramUpdatesHandler updatesHandler, TelegramBotGlobalProperties globalProperties, Optional<Javalin> server) {
         List<TelegramService> services = botProperties.stream()
                 .map(p -> {
+                    // Register TelegramBot bean
+                    TelegramBot bot = p.getBotBuilder().build();
+
+                    // Let user process bot instance
+                    if (globalProperties.getBotProcessors().containsKey(p.getToken())) {
+                        globalProperties.getBotProcessors().get(p.getToken()).accept(bot);
+                    }
+
+                    // Create bot service
                     if (p.getWebhook() != null) {
-                        return new TelegramWebhookService(p, updatesHandler, server.get());
+                        return new TelegramWebhookService(p, bot, updatesHandler, server.get());
                     } else {
-                        return new TelegramPollingService(p, updatesHandler);
+                        return new TelegramPollingService(p, bot, updatesHandler);
                     }
                 }).collect(Collectors.toList());
 
