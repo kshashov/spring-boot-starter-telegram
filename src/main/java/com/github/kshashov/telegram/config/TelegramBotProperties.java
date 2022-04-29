@@ -37,6 +37,7 @@ public class TelegramBotProperties {
          *
          * @param builderConsumer builder consumer
          * @return current instance
+         *
          * @since 0.21
          */
         public Builder configure(Consumer<TelegramBot.Builder> builderConsumer) {

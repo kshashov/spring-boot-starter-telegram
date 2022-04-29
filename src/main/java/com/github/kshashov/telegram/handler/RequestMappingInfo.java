@@ -8,12 +8,12 @@ import lombok.Getter;
 import java.util.Set;
 
 /**
- * Stores request mappings for the current bot controller.
+ * Stores request mappings for the current bot handler.
  */
 @Getter
 @AllArgsConstructor
 @EqualsAndHashCode
-public final class RequestMappingInfo {
+public class RequestMappingInfo {
     private final String token;
     private final String pattern;
     private final int patternsCount;

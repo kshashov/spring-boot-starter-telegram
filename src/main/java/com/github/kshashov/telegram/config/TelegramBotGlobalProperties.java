@@ -111,6 +111,7 @@ public class TelegramBotGlobalProperties {
          * @param token       bot token
          * @param botConsumer {@link TelegramBot} instance for specified bot
          * @return current instance
+         * @since 0.26
          */
         public Builder processBot(@NotNull String token, @NotNull Consumer<TelegramBot> botConsumer) {
             botProcessors.put(token, botConsumer);

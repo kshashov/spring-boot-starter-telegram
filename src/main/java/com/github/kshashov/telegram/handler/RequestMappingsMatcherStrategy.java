@@ -11,7 +11,8 @@ import java.util.Map;
  */
 public interface RequestMappingsMatcherStrategy {
     /**
-     * Will be invoked after all mappings is discovered.
+     * Override mappings of bot handlers.
+     * Will be invoked after all mappings are discovered.
      *
      * @param mappings all discovered mappings
      * @return processed discovered mappings

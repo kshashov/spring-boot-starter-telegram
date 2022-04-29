@@ -31,12 +31,12 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
 <dependency>
   <groupId>com.github.kshashov</groupId>
   <artifactId>spring-boot-starter-telegram</artifactId>
-  <version>0.26</version>
+  <version>0.27</version>
 </dependency>
 ```
 ### Gradle
 ```groovy
-implementation 'com.github.kshashov:spring-boot-starter-telegram:0.23'
+implementation 'com.github.kshashov:spring-boot-starter-telegram:0.27'
 ```
 
 ## Example
