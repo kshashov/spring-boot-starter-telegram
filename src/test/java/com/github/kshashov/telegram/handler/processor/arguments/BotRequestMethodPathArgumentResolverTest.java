@@ -7,6 +7,7 @@ import com.github.kshashov.telegram.api.bind.annotation.BotPathVariable;
 import com.pengrad.telegrambot.request.BaseRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.core.MethodParameter;
 
 import java.math.BigDecimal;
@@ -25,18 +26,24 @@ public class BotRequestMethodPathArgumentResolverTest {
     private TelegramRequest telegramRequest;
     private HashMap<String, String> variables = new HashMap<>();
     private TelegramSession telegramSession;
+    private DefaultParameterNameDiscoverer parameterNameDiscoverer = new DefaultParameterNameDiscoverer();
+
 
     @BeforeEach
     void prepare() {
         this.processor = new BotRequestMethodPathArgumentResolver();
         this.values = Stream.of(TestUtils.findMethodByTitle(this, "method").getParameters())
-                .map(MethodParameter::forParameter)
+                .map(parameter -> {
+                    MethodParameter p = MethodParameter.forParameter(parameter);
+                    p.initParameterNameDiscovery(parameterNameDiscoverer);
+                    return p;
+                })
                 .toArray(MethodParameter[]::new);
 
         this.telegramSession = mock(TelegramSession.class);
         this.telegramRequest = mock(TelegramRequest.class);
         this.variables = new HashMap<>();
-        variables.put("", "empty");
+        variables.put("empty", "emptyText");
         variables.put("text", "text");
         variables.put("int", "12");
         variables.put("double", "12.12");
@@ -88,7 +95,7 @@ public class BotRequestMethodPathArgumentResolverTest {
 
     @Test
     void resolveArgument_DefaultName_ReturnForEmptyString() {
-        assertEquals("empty", processor.resolveArgument(values[4], telegramRequest, telegramSession));
+        assertEquals("emptyText", processor.resolveArgument(values[4], telegramRequest, telegramSession));
     }
 
     @Test
@@ -107,7 +114,7 @@ public class BotRequestMethodPathArgumentResolverTest {
             @BotPathVariable("missed") String missed,
             @BotPathVariable("int") int primitive,
 
-            @BotPathVariable() String empty,
+            @BotPathVariable String empty,
             @BotPathVariable("text") String text,
             @BotPathVariable("text") Integer incorrectInt,
             @BotPathVariable("int") Integer integer,

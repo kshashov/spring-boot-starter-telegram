@@ -37,7 +37,13 @@ public class BotRequestMethodPathArgumentResolver implements BotHandlerMethodArg
             return null;
         }
 
-        String value = telegramRequest.getTemplateVariables().get(annotation.value());
+        String value;
+        if (annotation.value().isEmpty()) {
+            value = telegramRequest.getTemplateVariables().get(parameter.getParameterName());
+        } else {
+            value = telegramRequest.getTemplateVariables().get(annotation.value());
+        }
+
         if (value == null) {
             return null;
         }
