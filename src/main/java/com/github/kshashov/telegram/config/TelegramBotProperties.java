@@ -17,6 +17,7 @@ public class TelegramBotProperties {
     private final @NotNull String token;
     private final @NotNull TelegramBot.Builder botBuilder;
     private final SetWebhook webhook;
+    private final boolean keepWebhookRegistration;
 
     public static Builder builder(String token) {
         return new Builder(token);
@@ -26,6 +27,7 @@ public class TelegramBotProperties {
         private final TelegramBot.Builder botBuilder;
         private final String token;
         private SetWebhook webhook;
+        private boolean keepWebhookRegistration;
 
         Builder(@NotNull String token) {
             this.token = token;
@@ -37,7 +39,6 @@ public class TelegramBotProperties {
          *
          * @param builderConsumer builder consumer
          * @return current instance
-         *
          * @since 0.21
          */
         public Builder configure(Consumer<TelegramBot.Builder> builderConsumer) {
@@ -46,20 +47,32 @@ public class TelegramBotProperties {
         }
 
         /**
-         * Specify webhook that will be used to receive Telegram updates.
+         * Specify webhook that will be used to receive Telegram updates. Webhook will be removed when the bot is shut down.
          *
          * @param webhook configured webhook request. See <a href="https://core.telegram.org/bots/faq">https://core.telegram.org/bots/faq</a>
          * @return current instance
-         *
          * @since 0.21
          */
         public Builder useWebhook(@NotNull SetWebhook webhook) {
+            return useWebhook(webhook, false);
+        }
+
+        /**
+         * Specify webhook that will be used to receive Telegram updates.
+         *
+         * @param webhook                 configured webhook request. See <a href="https://core.telegram.org/bots/faq">https://core.telegram.org/bots/faq</a>
+         * @param keepWebhookRegistration true if the webhook should not be removed when the bot is shut down. Сan be useful when using app hostings like heroku
+         * @return current instance
+         * @since 0.28
+         */
+        public Builder useWebhook(@NotNull SetWebhook webhook, boolean keepWebhookRegistration) {
             this.webhook = webhook;
+            this.keepWebhookRegistration = keepWebhookRegistration;
             return this;
         }
 
         public TelegramBotProperties build() {
-            return new TelegramBotProperties(token, botBuilder, webhook);
+            return new TelegramBotProperties(token, botBuilder, webhook, keepWebhookRegistration);
         }
     }
 }
