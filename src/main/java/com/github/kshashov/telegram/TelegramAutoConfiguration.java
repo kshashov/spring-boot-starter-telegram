@@ -60,7 +60,8 @@ public class TelegramAutoConfiguration implements BeanFactoryPostProcessor, Envi
         if (!hasWebhook) return null;
 
         try {
-            Javalin server = Javalin.create().start(globalProperties.getWebserverPort());
+            Javalin server = Javalin.create(options -> {
+            }).start("0.0.0.0", globalProperties.getWebserverPort());
             log.info("Javalin server has been started on {} port", globalProperties.getWebserverPort());
             return server;
         } catch (Exception ex) {
