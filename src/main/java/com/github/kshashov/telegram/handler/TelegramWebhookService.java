@@ -62,6 +62,8 @@ public class TelegramWebhookService implements TelegramService {
 
     private void registerEndpoint(String endpoint) {
         server.post(endpoint, context -> {
+            log.info("endpoint triggered:");
+            log.info(context.body());
             List<Update> updates = null;
             try {
                 Update update = BotUtils.parseUpdate(context.body());
