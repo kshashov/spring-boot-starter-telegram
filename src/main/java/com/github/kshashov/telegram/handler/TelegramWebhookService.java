@@ -99,7 +99,9 @@ public class TelegramWebhookService implements TelegramService {
      */
     @Override
     public void stop() {
-        log.info("Webhook has been deleted");
-        telegramBot.execute(new DeleteWebhook());
+        if (!botProperties.isKeepWebhookRegistration()) {
+            log.info("Webhook has been deleted");
+            telegramBot.execute(new DeleteWebhook());
+        }
     }
 }
