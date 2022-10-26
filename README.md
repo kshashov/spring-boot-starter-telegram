@@ -207,17 +207,23 @@ You can use Java-based configurations for customization:
 If you want to use webhooks instead of long polling, you need to provide webhook url:
 ```java
                 //.setWebserverPort(8443) Here you can customize the port
-                .configureBot(token, botBuilder -> {
-                    botBuilder
-                        .withWebhook(new SetWebhook().url(url));
-                })
+                .configureBot(token,botBuilder->{
+                        botBuilder
+                        .useWebhook(new SetWebhook().url(url));
+                        })
 ```
+
 In this case the library
+
 * starts local [Javalin](https://javalin.io/) server on 8443 (by default) port.
 * registers `{url}/{random_uuid}` webhook via Telegram API
 * adds `/{random_uuid}` endpoint to the local server
 
+By default, the webhook is removed when the application is shut down. To prevent it, you can pass an additinal boolean
+value as the second argument. Сan be useful when using app hostings like Heroku.
+
 ## Metrics
+
 You can check the following metrics via jmx in the `bot.metrics` domain:
 
 | Metric                                         | Description |
