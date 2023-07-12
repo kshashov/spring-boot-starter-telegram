@@ -18,25 +18,31 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
     * [Supported return values](#Supported-return-values)
     * [How to support a new one](#How-to-support-a-new-one)
 * [Configurations](#Configurations)
-    * [Properties](#Properties)
-    * [Java-based configurations](#Java-based-configurations)
-        * [Webhooks](#Webhooks)
+  * [Properties](#Properties)
+  * [Java-based configurations](#Java-based-configurations)
+    * [Webhooks](#Webhooks)
 * [Metrics](#Metrics)
 * [License](#License)
 * [Thanks](#Thanks)
 
 ## Download
+
+Starting from spring 2.7.7 you should use starter version 0.29 and above
+
 ### Maven
+
 ```xml
+
 <dependency>
   <groupId>com.github.kshashov</groupId>
   <artifactId>spring-boot-starter-telegram</artifactId>
-  <version>0.27</version>
+  <version>0.29</version>
 </dependency>
 ```
+
 ### Gradle
 ```groovy
-implementation 'com.github.kshashov:spring-boot-starter-telegram:0.27'
+implementation 'com.github.kshashov:spring-boot-starter-telegram:0.29'
 ```
 
 ## Example
