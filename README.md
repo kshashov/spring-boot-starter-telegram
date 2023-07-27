@@ -22,6 +22,7 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
     * [Java-based configurations](#Java-based-configurations)
         * [Webhooks](#Webhooks)
 * [Metrics](#Metrics)
+* [FAQ](#FAQ)
 * [License](#License)
 * [Thanks](#Thanks)
 
@@ -235,7 +236,50 @@ You can check the following metrics via jmx in the `bot.metrics` domain:
 | `handler.{handler_method_name}.successes`      | A number of successful executions of handler method |
 | `handler.{handler_method_name}.execution.time` | A time spent on successful handler method execution |
 
+## FAQ
+
+* **None of my bots were found**
+
+  If no exceptions were thrown, make sure you use the correct Spring version.
+* **Is Spring 3 supported?**
+
+  You can use Spring 3 with 0.29+ plugin version.
+* **How can I use `{any}` telegram feature?**
+
+  This library uses https://github.com/pengrad/java-telegram-bot-api/
+
+  You can find any information you need there. Also pay attention to `BaseRequest` implementations.
+* **How can I deploy my bot on Heroku?**
+
+  Just configure webhook usage (url and port number) and deploy your app as a regular Spring Boot application.
+* **How to get TelegramBot instance to use it outside?**
+
+  Configure the bot to store `TelegramBot` instance as a static variable:
+     ```java 
+     @Component
+     public class BotConfig implements TelegramBotGlobalPropertiesConfiguration {
+       @Getter
+       @Value("${bot.token}")
+       private String token;
+
+       public static TelegramBot telegramBot;
+
+       @Override
+       public void configure(TelegramBotGlobalProperties.Builder builder) {
+         builder.processBot(token, bot -> {
+           telegramBot = bot;
+         });
+       }
+     } 
+  ```
+  And use it wherever you want:
+  ```java
+  TelegramBot bot = BotConfig.telegramBot;
+  bot.execute(new SendMessage(chatId, "message"));
+  ```
+
 ## License
+
 ```
 MIT License
 
