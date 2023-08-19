@@ -14,22 +14,24 @@ This is a spring boot starter for [Telegram Bot API](https://github.com/pengrad/
 * [@BotController](#BotController)
 * [@BotRequest](#BotRequest)
     * [Request binding](#Request-binding)
-    * [Supported arguments](#Supported-arguments)
-    * [Supported return values](#Supported-return-values)
-    * [How to support a new one](#How-to-support-a-new-one)
-* [Configurations](#Configurations)
-  * [Properties](#Properties)
-  * [Java-based configurations](#Java-based-configurations)
-    * [Webhooks](#Webhooks)
-* [Metrics](#Metrics)
-* [FAQ](#FAQ)
-* [License](#License)
-* [Thanks](#Thanks)
+    * [Supported arguments](#Supported-arguments) 
+    * [Supported return values](#Supported-return-values) 
+    * [How to support a new one](#How-to-support-a-new-one) 
+* [Configurations](#Configurations) 
+  * [Properties](#Properties) <a id="Properties"></a>
+  * [Java-based configurations](#Java-based-configurations) 
+    * [Webhooks](#Webhooks) 
+* [Metrics](#Metrics) 
+* [FAQ](#FAQ) 
+* [License](#License) 
+* [Thanks](#Thanks) 
 
+<a id="Download"></a>
 ## Download
 
 Starting from spring 2.7.7 you should use starter version 0.29 and above
 
+<a id="Maven"></a>
 ### Maven
 
 ```xml
@@ -41,11 +43,13 @@ Starting from spring 2.7.7 you should use starter version 0.29 and above
 </dependency>
 ```
 
+<a id="Gradle"></a>
 ### Gradle
 ```groovy
 implementation 'com.github.kshashov:spring-boot-starter-telegram:0.29'
 ```
 
+<a id="Example"></a>
 ## Example
 The only thing you need to do after adding the dependency is to create a bot controller
 ```java
@@ -94,12 +98,16 @@ public class MyBot implements TelegramMvcController {
 }
 ```
 The bot will be registered automatically on startup.
+
+<a id="BotController"></a>
 ## BotController
 
 Telegram requests are handled by the controllers that implemented `TelegramMvcController` interface **and** are marked by the `@BotController` annotation.
 It is supposed to use in combination with annotated handler methods based on the `BotRequest` annotation.
 
+<a id="BotRequest"></a>
 ## BotRequest
+<a id="Request-binding"></a>
 ### Request binding
 There are two important parameters here:
 * `value` or `path`: The request mapping templates (e.g. `/foo`). Ant-style path patterns are supported (e.g. `/foo *`, `/foo {param:[0-9]}`).
@@ -139,6 +147,7 @@ For example, you can define the default handler in the following way:
 
 You could override the matcher or process routes in a custom way, you can declare a new `RequestMappingsMatcherStrategy` component or override a [global configuration](#Configurations). You can use `DefaultRequestMappingsMatcherStrategy` as an example.
 
+<a id="Supported-arguments"></a>
 ### Supported arguments
 
 Some parameters may be nullable because they do not exist for all types of telegram requests
@@ -153,11 +162,13 @@ Some parameters may be nullable because they do not exist for all types of teleg
 * **Nullable** `com.pengrad.telegrambot.model.Message` - the first non-empty object, if any, among `update.message()`, `update.editedMessage()`, `update.channelPost()`, `update.editedChannelPost()`
 * **Nullable** `com.pengrad.telegrambot.model.InlineQuery`, `com.pengrad.telegrambot.model.ChosenInlineResult`, `com.pengrad.telegrambot.model.CallbackQuery`, `com.pengrad.telegrambot.model.ShippingQuery`, `com.pengrad.telegrambot.model.PreCheckoutQuery`, `com.pengrad.telegrambot.model.Poll`
 
+<a id="Supported-return-values"></a>
 ### Supported return values
 * `String` - automatically converted into `com.pengrad.telegrambot.request.SendMessage`. Use only if the chat value is not null for the current telegram request
 * `com.pengrad.telegrambot.request.BaseRequest`
 * `void`
 
+<a id="How-to-support-a-new-one"></a>
 ### How to support a new one
 
 If you want to add additional arguments or result values types for your controller methods, you should declare a new component:
@@ -165,7 +176,7 @@ If you want to add additional arguments or result values types for your controll
 * `BotHandlerMethodReturnValueHandler` to support an additional type of method result
 * `TelegramBotGlobalPropertiesConfiguration` to manually configure all enabled argument resolvers and result value handlers
 
-
+<a id="Configurations"></a>
 ## Configurations
 
 ### Properties
@@ -179,6 +190,7 @@ By default, you can configure only these properties:
 | telegram.bot.update-listener-sleep | Timeout between requests to Telegrams API if long polling is enabled (ms) | 300           |
 | telegram.bot.server-port           | HTTP port for embedded web server if webhooks are enabled                 | 8443          |
 
+<a id="Java-based-configurations"></a>
 ### Java-based configurations
 You can use Java-based configurations for customization:
 * `TelegramBotGlobalPropertiesConfiguration` to configure global and bot specific settings:
@@ -210,6 +222,7 @@ You can use Java-based configurations for customization:
     }
     ```
 
+<a id="Webhooks"></a>
 #### Webhooks
 If you want to use webhooks instead of long polling, you need to provide webhook url:
 ```java
@@ -229,6 +242,7 @@ In this case the library
 By default, the webhook is removed when the application is shut down. To prevent it, you can pass an additinal boolean
 value as the second argument. Сan be useful when using app hostings like Heroku.
 
+<a id="Metrics"></a>
 ## Metrics
 
 You can check the following metrics via jmx in the `bot.metrics` domain:
@@ -242,6 +256,7 @@ You can check the following metrics via jmx in the `bot.metrics` domain:
 | `handler.{handler_method_name}.successes`      | A number of successful executions of handler method |
 | `handler.{handler_method_name}.execution.time` | A time spent on successful handler method execution |
 
+<a id="FAQ"></a>
 ## FAQ
 
 * **None of my bots were found**
@@ -284,6 +299,7 @@ You can check the following metrics via jmx in the `bot.metrics` domain:
   bot.execute(new SendMessage(chatId, "message"));
   ```
 
+<a id="License"></a>
 ## License
 
 ```
@@ -310,5 +326,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
 
+<a id="Thanks"></a>
 ## Thanks
 * @OlegNyr for his [java-telegram-bot-mvc](https://github.com/OlegNyr/java-telegram-bot-mvc) repository
