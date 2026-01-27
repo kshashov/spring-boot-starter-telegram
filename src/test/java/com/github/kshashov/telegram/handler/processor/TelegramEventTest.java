@@ -3,6 +3,7 @@ package com.github.kshashov.telegram.handler.processor;
 import com.github.kshashov.telegram.api.MessageType;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.*;
+import com.pengrad.telegrambot.model.message.MaybeInaccessibleMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -117,10 +118,10 @@ public class TelegramEventTest {
 
     @Test
     void callbackQuery() {
-        Message message = mock(Message.class);
+        MaybeInaccessibleMessage message = mock(MaybeInaccessibleMessage.class);
         when(message.chat()).thenReturn(chat);
         CallbackQuery callbackQuery = mock(CallbackQuery.class);
-        when(callbackQuery.message()).thenReturn(message);
+        when(callbackQuery.maybeInaccessibleMessage()).thenReturn(message);
         when(callbackQuery.from()).thenReturn(user);
         when(callbackQuery.data()).thenReturn("test");
 

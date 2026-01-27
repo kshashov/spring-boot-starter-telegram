@@ -2,7 +2,7 @@ package com.github.kshashov.telegram.handler;
 
 
 import com.github.kshashov.telegram.config.TelegramBotProperties;
-import com.pengrad.telegrambot.BotUtils;
+import com.pengrad.telegrambot.utility.BotUtils;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.request.DeleteWebhook;

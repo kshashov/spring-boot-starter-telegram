@@ -3,6 +3,10 @@ package com.github.kshashov.telegram.handler.processor;
 import com.github.kshashov.telegram.api.MessageType;
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.model.*;
+import com.pengrad.telegrambot.model.message.origin.MessageOrigin;
+import com.pengrad.telegrambot.model.message.origin.MessageOriginChannel;
+import com.pengrad.telegrambot.model.message.origin.MessageOriginChat;
+import com.pengrad.telegrambot.model.message.origin.MessageOriginUser;
 import com.pengrad.telegrambot.request.BaseRequest;
 import lombok.Getter;
 
@@ -82,8 +86,8 @@ public class TelegramEvent {
                 update.editedChannelPost());
 
         if (message != null) {
-            this.user = firstNonNull(message.from(), message.leftChatMember(), message.forwardFrom());
-            this.chat = firstNonNull(message.chat(), message.forwardFromChat());
+            this.user = firstNonNull(message.from(), message.leftChatMember(), extractUserFromForwardOrigin(message.forwardOrigin()));
+            this.chat = firstNonNull(message.chat(), extractChatFromForwardOrigin(message.forwardOrigin()));
             this.text = message.text();
             if (update.editedMessage() != null) {
                 this.messageType = MessageType.EDITED_MESSAGE;
@@ -110,7 +114,7 @@ public class TelegramEvent {
             CallbackQuery callbackQuery = update.callbackQuery();
             this.user = callbackQuery.from();
             this.text = callbackQuery.data();
-            this.chat = callbackQuery.message().chat();
+            this.chat = callbackQuery.maybeInaccessibleMessage().chat();
             this.messageType = MessageType.CALLBACK_QUERY;
         } else if (update.shippingQuery() != null) {
             ShippingQuery shippingQuery = update.shippingQuery();
@@ -143,6 +147,24 @@ public class TelegramEvent {
             if (message != null) {
                 return message;
             }
+        }
+        return null;
+    }
+
+    @Nullable
+    private static User extractUserFromForwardOrigin(@Nullable MessageOrigin origin) {
+        if (origin instanceof MessageOriginUser) {
+            return ((MessageOriginUser) origin).senderUser();
+        }
+        return null;
+    }
+
+    @Nullable
+    private static Chat extractChatFromForwardOrigin(@Nullable MessageOrigin origin) {
+        if (origin instanceof MessageOriginChannel) {
+            return ((MessageOriginChannel) origin).chat();
+        } else if (origin instanceof MessageOriginChat) {
+            return ((MessageOriginChat) origin).senderChat();
         }
         return null;
     }

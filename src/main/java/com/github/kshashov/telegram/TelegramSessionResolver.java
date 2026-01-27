@@ -25,7 +25,7 @@ public class TelegramSessionResolver {
         if (telegramEvent.getChat() != null) {
             return telegramEvent.getChat().id();
         } else if (telegramEvent.getUser() != null) {
-            return Long.valueOf(telegramEvent.getUser().id());
+            return telegramEvent.getUser().id();
         }
 
         // We are sure that update object could not be null
